@@ -167,9 +167,19 @@ class CaptionGenerator(object):
 
         return self.generate_from_img_feature(img_feature)
     
-    def generate(self, img_path):
+    def generate_tokens(self, img_path):
         img = self.img_proc.load_img(img_path)
         return self.generate_from_img(img)
+
+    def generate_sentences(self, img_path):
+        img = self.img_proc.load_img(img_path)
+        captions = self.generate_from_img(img)
+        for cap in captions:
+            cap['sentence'] = ''.join(cap['sentence'][1:-1])
+
+        return captions
+            
+        
 
 if __name__ == "__main__":
 
@@ -197,7 +207,7 @@ if __name__ == "__main__":
             gpu_id = args.gpu,
         )
 
-    captions = caption_generator.generate(args.img)
+    captions = caption_generator.generate_sentences(args.img)
     for i, caption in enumerate(captions):
         print('caption{0}: {1}'.format(i, caption['sentence']))
-        print('log: ', caption['log_likelihood'])
+        #print('log: ', caption['log_likelihood'])
