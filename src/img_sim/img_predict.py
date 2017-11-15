@@ -92,7 +92,8 @@ class img_sim(object):
                 words.append(sim_word)
         else:
             for i in np.argsort(pred)[0][-1::-1][:num]:
-                sim_word = self.synsets_jp[i][10:].split(',')[0]
+                sim_words = self.synsets_jp[i].split()[1]
+                sim_word = sim_words.split(',')[0]
                 words.append(sim_word)
 
         return words
