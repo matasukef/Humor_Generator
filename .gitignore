@@ -111,4 +111,4 @@ venv.bak/
 *.npy
 
 #db
-*.db
+wnjpn.db
