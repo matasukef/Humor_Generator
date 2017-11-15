@@ -1,5 +1,7 @@
 import os
 
+#alexnet and vgg16 are not prepared yet.
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 #model path
@@ -11,6 +13,9 @@ MODEL_ALEXNET = os.path.join(current_dir, '..', 'data', 'models', 'cnn', 'AlexNe
 WORDS_RESNET = os.path.join(current_dir, '..', 'data', 'vocab', 'resnet_synsets.txt')
 WORDS_VGG16 = os.path.join(current_dir, '..', 'data', 'vocab', 'vgg16_synsets.txt')
 WORDS_ALEXNET = os.path.join(current_dir, '..', 'data', 'vocab', 'alexnet_synsets.txt')
+WORDS_RESNET_JP = os.path.join(current_dir, '..', 'data', 'vocab', 'resnet_synsets_japanese_translated.txt')
+WORDS_VGG16_JP = os.path.join(current_dir, '..', 'data', 'vocab', 'vgg16_synsets_japanese_translated.txt')
+WORDS_ALEXNET_JP = os.path.join(current_dir, '..', 'data', 'vocab', 'alexnet_synsets_japanese_translated.txt')
 
 #caption vocab
 CAP_VOCAB_JP = os.path.join(current_dir, '..', 'data', 'vocab_dict', 'dict_STAIR_jp_train.pkl')

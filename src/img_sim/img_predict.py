@@ -17,23 +17,26 @@ class img_sim(object):
         
         if model == 'ResNet':
             from CNN.ResNet50 import ResNet
-            from ENV import MODEL_RESNET, WORDS_RESNET
+            from ENV import MODEL_RESNET, WORDS_RESNET, WORDS_RESNET_JP
             self.MODEL_TYPE = MODEL_RESNET
             self.WORDS_DICT = WORDS_RESNET
+            self.WORDS_DICT_JP = WORDS_RESNET_JP
             self.model = ResNet()
         
         elif model == 'VGG16':
             from CNN.VGG16 import VGG16
-            from ENV import MODEL_VGG16, WORDS_VGG16
+            from ENV import MODEL_VGG16, WORDS_VGG16, WORDS_VGG16_JP
             self.MODEL_TYPE = MODEL_VGG16
             self.WORDS_DICT = WORDS_VGG16
+            self.WORDS_DICT_JP = WORDS_VGG16_JP
             self.model = VGG16()
        
         elif model == 'AlexNet':
             from CNN.AlexNet import AlexNet
-            from ENV import MODEL_ALEXNET, WORDS_ALEXNET
+            from ENV import MODEL_ALEXNET, WORDS_ALEXNET, WORDS_ALEXNET_JP
             self.MODEL_TYPE = MODEL_ALEXNET
             self.WORDS_DICT = WORDS_ALEXNET
+            self.WORDS_DICT_JP = WORDS_ALEXNET_JP
             self.model == AlexNet()
         
         serializers.load_hdf5(self.MODEL_TYPE, self.model)
@@ -41,10 +44,13 @@ class img_sim(object):
         with open(self.WORDS_DICT, 'r') as f:
             self.synsets = f.read().split('\n')[:-1]
         
+        
+        with open(self.WORDS_DICT_JP, 'r') as f:
+            self.synsets_jp = f.read().split('\n')[:-1]
         self.gpu_id = gpu_id
         
 
-    def similarity(self, img, num=5):
+    def similarity(self, img, num=5, lang='en'):
         img_arr = self.img_proc.load_img(img)
 
         if self.gpu_id >= 0:
@@ -58,10 +64,14 @@ class img_sim(object):
         if self.gpu_id >= 0:
             pred = cuda.to_cpu(pred)
 
-        for i in np.argsort(pred)[0][-1::-1][:num]:
-            print(self.synsets[i], pred[0][i])
+        if lang == 'en':
+            for i in np.argsort(pred)[0][-1::-1][:num]:
+                print(self.synsets[i], pred[0][i])
+        else:
+            for i in np.argsort(pred)[0][-1::-1][:num]:
+                print(self.synsets_jp[i], pred[0][i])
 
-    def get_words(self, img, num):
+    def get_words(self, img, num, lang='en'):
         words = []
         img_arr = self.img_proc.load_img(img)
 
@@ -76,9 +86,14 @@ class img_sim(object):
         if self.gpu_id >= 0:
             pred = cuda.to_cpu(pred)
 
-        for i in np.argsort(pred)[0][-1::-1][:num]:
-            sim_word = self.synsets[i][10:].split(',')[0]
-            words.append(sim_word)
+        if lang == 'en':
+            for i in np.argsort(pred)[0][-1::-1][:num]:
+                sim_word = self.synsets[i][10:].split(',')[0]
+                words.append(sim_word)
+        else:
+            for i in np.argsort(pred)[0][-1::-1][:num]:
+                sim_word = self.synsets_jp[i][10:].split(',')[0]
+                words.append(sim_word)
 
         return words
 
