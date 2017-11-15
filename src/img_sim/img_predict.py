@@ -6,37 +6,43 @@ import chainer
 import chainer.functions as F
 from chainer import cuda
 from chainer import serializers
+sys.path.append('..')
 from img_proc import Img_proc
-from ENV import (
-        MODEL_RESNET,
-        MODEL_VGG16,
-        MODEL_ALEXNET,
-        VOCAB_RESNET,
-        VOCAB_VGG16,
-        VOCAB_ALEXNET
-        )
-    
 
 class img_sim(object):
+    __slots__ = ['img_proc', 'MODEL_TYPE', 'WORDS_DICT', 'model', 'synsets', 'gpu_id']
+
     def __init__(self, model='ResNet', gpu_id=-1):
         self.img_proc = Img_proc("imagenet")
-        if model == "ResNet":
+        
+        if model == 'ResNet':
             from CNN.ResNet50 import ResNet
+            from ENV import MODEL_RESNET, WORDS_RESNET
+            self.MODEL_TYPE = MODEL_RESNET
+            self.WORDS_DICT = WORDS_RESNET
             self.model = ResNet()
-            serializers.load_hdf5(MODEL_RESNET, self.model)
+        
         elif model == 'VGG16':
             from CNN.VGG16 import VGG16
+            from ENV import MODEL_VGG16, WORDS_VGG16
+            self.MODEL_TYPE = MODEL_VGG16
+            self.WORDS_DICT = WORDS_VGG16
             self.model = VGG16()
-            serializers.load_hdf5(MODEL_VGG16, self.model)
+       
         elif model == 'AlexNet':
             from CNN.AlexNet import AlexNet
+            from ENV import MODEL_ALEXNET, WORDS_ALEXNET
+            self.MODEL_TYPE = MODEL_ALEXNET
+            self.WORDS_DICT = WORDS_ALEXNET
             self.model == AlexNet()
-            serializers.load_hdf5(MODEL_ALEXNET, self.model)
+        
+        serializers.load_hdf5(self.MODEL_TYPE, self.model)
+        
+        with open(self.WORDS_DICT, 'r') as f:
+            self.synsets = f.read().split('\n')[:-1]
         
         self.gpu_id = gpu_id
         
-        with open(VOCAB_RESNET, 'r') as f:
-            self.synsets = f.read().split('\n')[:-1]
 
     def similarity(self, img, num=5):
         img_arr = self.img_proc.load_img(img)
