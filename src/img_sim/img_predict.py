@@ -10,7 +10,7 @@ sys.path.append('..')
 from img_proc import Img_proc
 
 class img_sim(object):
-    __slots__ = ['img_proc', 'MODEL_TYPE', 'WORDS_DICT', 'model', 'synsets', 'gpu_id']
+    __slots__ = ['img_proc', 'MODEL_TYPE', 'WORDS_DICT', 'WORDS_DICT_JP', 'model', 'synsets', 'synsets_jp', 'gpu_id']
 
     def __init__(self, model='ResNet', gpu_id=-1):
         self.img_proc = Img_proc("imagenet")
@@ -100,7 +100,7 @@ class img_sim(object):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--img', '-i', type=str, default=os.path.join('..', 'sample_imgs', 'test.jpg'),
+    parser.add_argument('--img', '-i', type=str, default=os.path.join('..', '..', 'sample_imgs', 'test.jpg'),
                         help="image you want to predict")
     parser.add_argument('--gpu', '-g', type=int, default=-1,
                         help="GPU ID(put -1 if you don't use gpu)")
@@ -108,6 +108,9 @@ if __name__ == '__main__':
 
     img_model = img_sim(model='ResNet', gpu_id=args.gpu)
     img_model.similarity(args.img, 5)
-    results = img_model.get_words(args.img, 5)
+    img_model.similarity(args.img, 5, lang='jp')
+    results1 = img_model.get_words(args.img, 5)
+    results2 = img_model.get_words(args.img, 5, lang='jp')
 
-    print(results)
+    print(results1)
+    print(results2)
