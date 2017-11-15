@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import random
 
 from extract_subject import extract_subject
 
@@ -12,17 +13,17 @@ from image_caption.CaptionGenerator import CaptionGenerator
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--img', '-i', type=str, defalut=os.path.join('..', '..', 'sample_imgs', 'test.jpg'),
+    parser.add_argument('--img', '-i', type=str, default=os.path.join('..', '..', 'sample_imgs', 'test.jpg'),
                         help="input image")
-    parser.add_argument('--lang', 'l', type=str, defalut='jp', choices = ['jp', 'en', 'ch'],
+    parser.add_argument('--lang', '-l', type=str, default='jp', choices = ['jp', 'en', 'ch'],
                         help="choose language to generate captions")
     parser.add_argument('--cnn_model_type', '-ct', type=str, choices=['ResNet', 'VGG16', 'AlexNet'],
                         help="CNN model type")
-    parser.add_argument('beamsize', '-b', type=int, defalut=3,
+    parser.add_argument('--beamsize', '-b', type=int, default=3,
                         help="beamsize")
-    parser.add_argument('--depth_limit', '-dl', type=int, defalut=50, 
+    parser.add_argument('--depth_limit', '-dl', type=int, default=50, 
                         help="max limit of generating tokens when constructing captions")
-    parser.add_argument('--gpu', '-g', type=int, defalut=-1,
+    parser.add_argument('--gpu', '-g', type=int, default=-1,
                         help="GPU ID (put -1 if you don't use gpu)")
     
     args = parser.parse_args()
@@ -43,7 +44,10 @@ if __name__ == '__main__':
 
     captions = caption_generator.generate_sentences(args.img)
     predict = img_model.get_words(args.img, num=5, lang=args.lang)
-    
+
     for cap in captions:
         sub = extract_subject(cap['sentence'])
-    
+        objs = random.choice(predict)
+        cap['sentence'].replace(sub, random.choice(objs))
+
+    print(captions)

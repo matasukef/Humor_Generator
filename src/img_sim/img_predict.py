@@ -10,7 +10,15 @@ sys.path.append('..')
 from img_proc import Img_proc
 
 class img_sim(object):
-    __slots__ = ['img_proc', 'MODEL_TYPE', 'WORDS_DICT', 'WORDS_DICT_JP', 'model', 'synsets', 'synsets_jp', 'gpu_id']
+    __slots__ = ['img_proc',
+                'MODEL_PATH',
+                'WORDS_DICT', 
+                'WORDS_DICT_JP',
+                'model',
+                'synsets',
+                'synsets_jp',
+                'gpu_id'
+            ]
 
     def __init__(self, model='ResNet', gpu_id=-1):
         self.img_proc = Img_proc("imagenet")
@@ -18,7 +26,8 @@ class img_sim(object):
         if model == 'ResNet':
             from CNN.ResNet50 import ResNet
             from ENV import MODEL_RESNET, WORDS_RESNET, WORDS_RESNET_JP
-            self.MODEL_TYPE = MODEL_RESNET
+            self.MODEL_PATH = MODEL_RESNET
+            print(self.MODEL_PATH)
             self.WORDS_DICT = WORDS_RESNET
             self.WORDS_DICT_JP = WORDS_RESNET_JP
             self.model = ResNet()
@@ -26,7 +35,7 @@ class img_sim(object):
         elif model == 'VGG16':
             from CNN.VGG16 import VGG16
             from ENV import MODEL_VGG16, WORDS_VGG16, WORDS_VGG16_JP
-            self.MODEL_TYPE = MODEL_VGG16
+            self.MODEL_PATH = MODEL_VGG16
             self.WORDS_DICT = WORDS_VGG16
             self.WORDS_DICT_JP = WORDS_VGG16_JP
             self.model = VGG16()
@@ -34,12 +43,13 @@ class img_sim(object):
         elif model == 'AlexNet':
             from CNN.AlexNet import AlexNet
             from ENV import MODEL_ALEXNET, WORDS_ALEXNET, WORDS_ALEXNET_JP
-            self.MODEL_TYPE = MODEL_ALEXNET
+            self.MODEL_PATH = MODEL_ALEXNET
             self.WORDS_DICT = WORDS_ALEXNET
             self.WORDS_DICT_JP = WORDS_ALEXNET_JP
             self.model == AlexNet()
-        
-        serializers.load_hdf5(self.MODEL_TYPE, self.model)
+
+        print(self.WORDS_DICT)
+        serializers.load_hdf5(self.MODEL_PATH, self.model)
         
         with open(self.WORDS_DICT, 'r') as f:
             self.synsets = f.read().split('\n')[:-1]
@@ -90,13 +100,11 @@ class img_sim(object):
             for i in np.argsort(pred)[0][-1::-1][:num]:
                 sim_word = self.synsets[i][10:].split(',')[0]
                 words.append(sim_word)
-        else:
+        elif lang == 'jp':
             for i in np.argsort(pred)[0][-1::-1][:num]:
                 sim_pair = self.synsets_jp[i].split()
-                sim_id = sim_pair[0]
-                sim_words = sim_pair[1].split(',')
-                sim_word = {sim_id: sim_words}
-                words.append(sim_word)
+                sim_words = sim_pair[1:]
+                words.append(sim_words)
 
         return words
 
@@ -110,10 +118,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     img_model = img_sim(model='ResNet', gpu_id=args.gpu)
-    img_model.similarity(args.img, 5)
-    img_model.similarity(args.img, 5, lang='jp')
+    #img_model.similarity(args.img, 5)
+    #img_model.similarity(args.img, 5, lang='jp')
     results1 = img_model.get_words(args.img, 5)
     results2 = img_model.get_words(args.img, 5, lang='jp')
 
-    print(results1)
+    #print(results1)
     print(results2)

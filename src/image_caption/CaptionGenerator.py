@@ -12,7 +12,7 @@ from chainer import serializers
 
 sys.path.append('..')
 from img_proc import Img_proc
-from Image2CaptionDecoder import Image2CaptionDecoder
+from .Image2CaptionDecoder import Image2CaptionDecoder
 
 sys.path.append('../CNN')
 
