@@ -18,15 +18,14 @@ def split_synset(obj_list):
         synset_id = [obj.split()[0] for obj in synset]
     
     synset_obj = [obj.split()[1].split(',')[0] for obj in synset]
-    synset_id_connect = [obj.split()[0] for obj in synset ]
-    
-    return synset_id, synset_obj, synset_id_connect
+
+    return synset_id, synset_obj
 
 def make_hype_list(obj_list, db, lang):
     result = ''
     conn = sqlite3.connect(db)
 
-    synset_id, synset_obj, synset_id_connect = split_synset(obj_list)
+    synset_id, synset_obj = split_synset(obj_list)
 
     for word_id, word_obj in tqdm(zip(synset_id, synset_obj)):
         sql = 'select synset2, lemma from synlink, sense, word where link ="hype" and synset1 = ? and synset2 = synset and sense.wordid = word.wordid and word.lang= ?'
@@ -43,24 +42,23 @@ def translate_to_japanese(obj_list, db):
     result = ''
     conn = sqlite3.connect(db)
 
-    synset_id, synset_obj, synset_id_connect = split_synset(obj_list)
+    synset_id, synset_obj = split_synset(obj_list)
     
-    for word_id, word_obj, word_connect in tqdm(zip(synset_id, synset_obj, synset_id_connect)):
+    for word_id, word_obj in tqdm(zip(synset_id, synset_obj)):
         sql = 'select lemma from sense, word where synset = ? and sense.wordid = word.wordid and word.lang="jpn"'
         synset = (word_id[1:] + '-n', )
         cur = conn.execute(sql, synset)
         row = cur.fetchall()
 
-        #get more hype word recursively
         if not row:
+            word_id = word_id[1:] + '-n'
             while not row:
                 hype_word_id = get_hype(word_id, conn)
                 row = get_translated(hype_word_id, conn)
                 if not row:
-                    word_id = 'n' + hype_word_id[:-2]
-                    word_connect = word_connect +  '->' + word_id
+                    word_id = hype_word_id
         
-        result += word_connect + ' '
+        result += word_id + ' '
         for r in row:
             if r != row[-1]:
                 result += r[0] + ', '
@@ -69,9 +67,36 @@ def translate_to_japanese(obj_list, db):
 
     return result
         
+''' 
+        if row:
+            result += word_id + ' '
+            for r in row:
+                if r != row[-1]:
+                    result += r[0] + ', '
+                else:
+                    result += r[0] + '\n'
+
+        else:
+            word_id = word_id[1:] + '-n'
+            while not row:
+                hype_word_id = get_hype(word_id, conn)
+                row = get_translated(hype_word_id, conn)
+                word_id = hype_word_id
+            
+            result += word_id + ' '
+            for r in row:
+                if r != row[-1]:
+                    result += r[0] + ', '
+                else:
+                    result += r[0] + '\n'
+            #result += word_id + ' ' + word_obj + '\n'
+
+    return result
+'''
+
 def get_hype(synset_id, conn):
     sql = 'select synset2 from synlink, sense, word where link="hype" and synset1 = ? and synset2 = synset and sense.wordid = word.wordid and word.lang="eng"'
-    synset = (synset_id[1:] + '-n', )
+    synset = (synset_id, )
     cur = conn.execute(sql, synset)
     row = cur.fetchone()
 
