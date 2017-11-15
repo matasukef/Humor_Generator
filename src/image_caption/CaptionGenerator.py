@@ -18,18 +18,6 @@ sys.path.append('../CNN')
 
 import heapq
 
-from ENV import (
-        MODEL_RESNET,
-        MODEL_VGG16,
-        MODEL_ALEXNET,
-        CAP_VOCAB_JP,
-        CAP_VOCAB_EN,
-        CAP_VOCAB_CH,
-        CAP_RNN_MODEL_JP,
-        CAP_RNN_MODEL_EN,
-        CAP_RNN_MODEL_CH
-        )
-
 class CaptionGenerator(object):
     def __init__(self, lang='jp', cnn_model_type="ResNet", beamsize=3, depth_limit=50, gpu_id=-1):
         self.gpu_id = gpu_id
@@ -40,31 +28,48 @@ class CaptionGenerator(object):
 
         if cnn_model_type == 'ResNet':
             from CNN.ResNet50 import ResNet
+            from ENV import MODEL_RESNET
+            
             self.cnn_model = ResNet()
             serializers.load_hdf5(MODEL_RESNET, self.cnn_model)
+        
         elif cnn_model_type == 'VGG16':
             from CNN.VGG16 import VGG16
+            from ENV import MODEL_VGG16
+            
             self.cnn_model = VGG16()
             serializers.load_hdf5(MODEL_VGG16, self.cnn_model)
+       
         elif cnn_model_type == 'AlexNet':
             from CNN.AlexNet import AlexNet
+            from ENV import MODEL_ALEXNET
+            
             self.cnn_model = AlexNet()
             serializers.load_hdf5(MODEL_ALEXNET, self.cnn_model)
 
+       
         if lang == 'jp':
-            serializers.load_hdf5(CAP_RNN_MODEL_JP, self.rnn_model)
+            from ENV import CAP_VOCAB_JP, CAP_RNN_MODEL_JP
+            
             self.index2token = self.parse_dic(CAP_VOCAB_JP)
+            self.CAP_RNN_MODEL = CAP_RNN_MODEL_JP
+        
         elif lang == 'en':
-            serializers.load_hdf5(CAP_RNN_MODEL_EN, self.rnn_model)
+            from ENV import CAP_VOCAB_EN, CAP_RNN_MODEL_EN
+            
             self.index2token = self.parse_dic(CAP_VOCAB_EN)
+            self.CAP_RNN_MODEL = CAP_RNN_MODEL_EN
+        
         elif lang == 'ch':
-            serializers.load_hdf5(CAP_RNN_MODEL_CH, self.rnn_model)
+            from ENV import CAP_VOCAB_CH, CAP_RNN_MODEL_CH
+            
             self.index2token = self.parse_dic(CAP_VOCAB_CH)
+            self.CAP_RNN_MODEL = CAP_RNN_MODEL_CH
 
         self.rnn_model = Image2CaptionDecoder(len(self.token2index), hidden_dim=512)
+        serializers.load_hdf5(self.CAP_RNN_MODEL, self.rnn_model)
         
         #Gpu configuration
-        #self.xp
         global xp
         if self.gpu_id >= 0:
             xp = cuda.cupy
