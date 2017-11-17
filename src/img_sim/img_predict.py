@@ -6,7 +6,7 @@ import chainer
 import chainer.functions as F
 from chainer import cuda
 from chainer import serializers
-sys.path.append('..')
+sys.path.append('../common')
 from img_proc import Img_proc
 
 class img_sim(object):
@@ -27,7 +27,6 @@ class img_sim(object):
             from CNN.ResNet50 import ResNet
             from ENV import MODEL_RESNET, WORDS_RESNET, WORDS_RESNET_JP
             self.MODEL_PATH = MODEL_RESNET
-            print(self.MODEL_PATH)
             self.WORDS_DICT = WORDS_RESNET
             self.WORDS_DICT_JP = WORDS_RESNET_JP
             self.model = ResNet()
@@ -48,7 +47,6 @@ class img_sim(object):
             self.WORDS_DICT_JP = WORDS_ALEXNET_JP
             self.model == AlexNet()
 
-        print(self.WORDS_DICT)
         serializers.load_hdf5(self.MODEL_PATH, self.model)
         
         with open(self.WORDS_DICT, 'r') as f:
@@ -113,7 +111,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--img', '-i', type=str, default=os.path.join('..', '..', 'sample_imgs', 'test.jpg'),
                         help="image you want to predict")
-    parser.add_argument('--gpu', '-g', type=int, default=-1,
+    parser.add_argument('--gpu', '-g', type=int, default=0,
                         help="GPU ID(put -1 if you don't use gpu)")
     args = parser.parse_args()
 

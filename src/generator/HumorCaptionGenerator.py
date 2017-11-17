@@ -17,7 +17,7 @@ if __name__ == '__main__':
                         help="input image")
     parser.add_argument('--lang', '-l', type=str, default='jp', choices = ['jp', 'en', 'ch'],
                         help="choose language to generate captions")
-    parser.add_argument('--cnn_model_type', '-ct', type=str, choices=['ResNet', 'VGG16', 'AlexNet'],
+    parser.add_argument('--cnn_model_type', '-ct', type=str, default='ResNet', choices=['ResNet', 'VGG16', 'AlexNet'],
                         help="CNN model type")
     parser.add_argument('--beamsize', '-b', type=int, default=3,
                         help="beamsize")
@@ -39,15 +39,18 @@ if __name__ == '__main__':
     
     img_model = img_sim(
                 model=args.cnn_model_type,
-                gpu_id=args.gpu
+                gpu_id = args.gpu
             )
 
     captions = caption_generator.generate_sentences(args.img)
     predict = img_model.get_words(args.img, num=5, lang=args.lang)
 
+    humor_captions = []
     for cap in captions:
         sub = extract_subject(cap['sentence'])
         objs = random.choice(predict)
-        cap['sentence'].replace(sub, random.choice(objs))
+        humor_cap = cap['sentence'].replace(sub, random.choice(objs))
+        humor_captions.append(humor_cap)
 
-    print(captions)
+    for cap in humor_captions:
+        print(cap)

@@ -29,3 +29,5 @@ CAP_RNN_MODEL_CH = os.path.join(current_dir,  '..', 'data', 'models', 'rnn', 'MS
 
 #wordnet database
 WORDNET_DATABASE = os.path.join(current_dir, '..', 'data', 'vocab', 'wnjpn.db')
+
+#dataset for word2vec
