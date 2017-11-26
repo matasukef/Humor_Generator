@@ -112,3 +112,8 @@ venv.bak/
 
 #db
 wnjpn.db
+
+#word2vcc
+*.bz2
+*.bz
+entity_vector/
