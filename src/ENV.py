@@ -28,7 +28,7 @@ CAP_RNN_MODEL_EN = os.path.join(current_dir, '..', 'data', 'models', 'rnn', 'MSC
 CAP_RNN_MODEL_CH = os.path.join(current_dir,  '..', 'data', 'models', 'rnn', 'MSCOCO_ch_mt_256_Adam.model')
 
 #wordnet database
-WORDNET_DATABASE = os.path.join(current_dir, '..', 'data', 'vocab', 'wnjpn.db')
+WORDNET_DATABASE = os.path.join(current_dir, '..', 'data', 'wordnet', 'wnjpn.db')
 
 #dataset for word2vec
 NEOLOG_DIC = os.path.join('/', 'usr', 'lib', 'mecab', 'dic', 'mecab-ipadic-neologd')
