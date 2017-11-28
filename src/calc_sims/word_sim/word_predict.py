@@ -33,7 +33,7 @@ class word_sim(object):
                     continue
 
             if res is not None:
-                sims.append(round(float(res), 5))
+                sims.append(round(float(res), 3))
 
         for i in np.argsort(sims):
             sorted_sims.append(sims[i])
@@ -50,11 +50,14 @@ class word_sim(object):
             num = len(img_sim_words)
 
         if sim_type == 'high':
-            return sims[:num], words[:num]
+            return sims[::-1][:num], words[::-1][:num]
         elif sim_type == 'low':
-            return sims[-num:], words[-num:]
+            return sims[:num], words[:num]
         elif sim_type == 'rand':
-            return list(np.random.choice(sims), num), list(np.random.coice(words), num)
+            pair = list(zip(sims, words,))
+            np.random.shuffle(pair)
+            sims, words = zip(*pair)
+            return sims[:num], words[:num]
         else:
             raise TypeError('Variable of sim_type is not one of these (high, low, rand)')
 
@@ -69,7 +72,7 @@ if __name__ == '__main__':
                         help="proper norms to compare with subject")
     parser.add_argument('--num', '-n', type=int, default=5,
                         help="the number of output")
-    parser.add_argument('--sim_type', '-st', type=str, default="high", choices=['high', 'low', 'rand'],
+    parser.add_argument('--sim_type', '-st', type=str, default="low", choices=['high', 'low', 'rand'],
                         help="sim type")
     args = parser.parse_args()
     
