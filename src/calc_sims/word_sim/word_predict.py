@@ -33,30 +33,30 @@ class word_sim(object):
                     continue
 
             if res is not None:
-                sims.append(round(float(res), 3))
+                sims.append(round(float(res), 5))
 
         for i in np.argsort(sims):
             sorted_sims.append(sims[i])
             sorted_words.append(img_sim_words[i])
 
-        return sorted_sims, worted_words
+        return sorted_sims, sorted_words
                 
     def get_words(self, subject, img_sim_words, num=5, sim_type='high'):
 
-        sims, words= __calc_sims(subject, img_sim_words)
+        sims, words= self.__calc_sims(subject, img_sim_words)
         
         #fix output num to length of img_sim_words if exceeds.
-        if len(img_sim_words) > num:
+        if len(img_sim_words) < num:
             num = len(img_sim_words)
 
-        if sim_tpye == 'high':
-            return sims[:num], words[num]
+        if sim_type == 'high':
+            return sims[:num], words[:num]
         elif sim_type == 'low':
             return sims[-num:], words[-num:]
         elif sim_type == 'rand':
             return list(np.random.choice(sims), num), list(np.random.coice(words), num)
         else:
-            return False
+            raise TypeError('Variable of sim_type is not one of these (high, low, rand)')
 
 if __name__ == '__main__':
 
@@ -65,7 +65,7 @@ if __name__ == '__main__':
                         help="type of dictionary")
     parser.add_argument('--subject', '-s', type=str, default="男性",
                         help="Subject to compare with proper norms")
-    parser.add_argument('--norms', '-nor', type=str, default=[['イヌ', '犬', 'ドッグ', 'tmp_word4except'], ['カンガルー'], ['カカシ', 'tmp_word4test_except2' 'かかし'], ['tmp_word4test_except3', 'サボテン', 'カクタス']],
+    parser.add_argument('--norms', '-nor', type=str, default=[['イヌ', '犬', 'ドッグ', 'tmp_word4except'], ['カンガルー'], ['カカシ', 'tmp_word4test_except2', 'かかし'], ['tmp_word4test_except3', 'サボテン', 'カクタス']],
                         help="proper norms to compare with subject")
     parser.add_argument('--num', '-n', type=int, default=5,
                         help="the number of output")
