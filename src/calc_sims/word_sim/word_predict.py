@@ -9,9 +9,9 @@ class word_sim(object):
                  'model'
             ]
 
-    def __init__(self, word_dict='wikipedia'):
+    def __init__(self, word_dict='jp_wiki'):
         self.word_dict = word_dict
-        if self.word_dict == 'wikipedia':
+        if self.word_dict == 'jp_wiki':
             sys.path.append('../..')
             from ENV import W2V_WIKIPEDIA
             self.model = KeyedVectors.load_word2vec_format(W2V_WIKIPEDIA, binary=True)
@@ -61,7 +61,7 @@ class word_sim(object):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--word_dict', '-d', type=str, default="wikipedia",
+    parser.add_argument('--word_dict', '-d', type=str, default="jp_wiki",
                         help="type of dictionary")
     parser.add_argument('--subject', '-s', type=str, default="男性",
                         help="Subject to compare with proper norms")
