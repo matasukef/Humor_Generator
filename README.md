@@ -1,8 +1,10 @@
 # Humor Generator
 
 ## to do 
-- fix word_sim to calculate word sims based on keyword
-- prepare experiment environment
-- create calc sim class
-- fix tables for image classification
-
+- 実験環境の作成
+- 画像間類似度を計算する際のテーブルを修正
+    + オブジェクト候補をどのように選定すべきか？
+    + 主観である程度抽象度の高い対象をピックアップしてよいか？
+- 画像間類似度を計算する際，上位n個の対象を除外する．
+    + 同一のオブジェクトである可能性があるため
+- 単語間類似度の計算時に，-の値を考慮せず，昇順にソートしているため，絶対値に変換する．
