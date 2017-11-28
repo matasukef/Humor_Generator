@@ -17,29 +17,41 @@ class word_sim(object):
             self.model = KeyedVectors.load_word2vec_format(W2V_WIKIPEDIA, binary=True)
 
     def __calc_sims(self, subject, img_sim_words):
-        sims_dict = {}
         sims = []
         words = []
+        sorted_sims = []
+        sorted_words = []
         
         for norms in img_sim_words:
+            res = None
             for norm in norms:
                 #try to check norm is exist in word2vec dict and calc sim
                 try:
-                    sim = self.model.wv.similarity(subject, norm)
-                    sims_dict[sim] = norms
+                    #res = self.model.wv.similarity(subject, norm)
+                    sims.append(self.model.wv.similarity(subject, norm))
+                    words.append(norms)
                     break
                 #raise except and not to add norm to dict if doensn't exist
                 except KeyError:
+                    print('Undefined word:', norm)
                     continue
 
-        sims_dict = sorted(sims_dict.items(), key=lambda x: x[0])
+            #if res is not None:
+            #    print('found:', norm)
+            #    print('res', res)
+            #    sims.append(round(float(res), 3))
 
-        #sort words based on sims
-        for sim, word in sims_dict:
-            sims.append(sim)
-            words.append(word)
+        #for i in np.argsort(sims):
+        #    sorted_sims.append(sims[i])
+        #    sorted_words.append(img_sim_words[i])
 
-        return sims, words
+        for i in np.argsort(np.argsort(sims)):
+            sorted_sims.append(sims[i])
+            sorted_words.append(words[i])
+        
+        print('return: ', sorted_words)
+
+        return sorted_sims, sorted_words
                 
     def get_norms(self, subject, img_sim_words, num=5, sim_type='high'):
 

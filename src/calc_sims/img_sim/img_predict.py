@@ -15,22 +15,26 @@ class img_sim(object):
                 'WORDS_DICT', 
                 'model',
                 'synsets',
+                'feature',
                 'gpu_id'
             ]
 
-    def __init__(self, model='ResNet', lang="jp", gpu_id=-1):
+    def __init__(self, model='ResNet', lang="jp", feature=False, gpu_id=-1):
         self.img_proc = Img_proc("imagenet")
+        #use features to predict output class
+        self.feature = feature
         
-        self.MODEL_PATH, self.model = self.__choose_model(model)    
-        self.WORDS_DICT = self.__choose_lang(lang)
+        if not self.feature:
+            self.MODEL_PATH, self.model = self.__choose_model(model)    
+            self.WORDS_DICT = self.__choose_lang(lang)
 
-        serializers.load_hdf5(self.MODEL_PATH, self.model)
+            serializers.load_hdf5(self.MODEL_PATH, self.model)
 
-        with open(self.WORDS_DICT, 'r') as f:
-            self.synsets = f.read().split('\n')[:-1]
-        
-        self.gpu_id = gpu_id
-        
+            with open(self.WORDS_DICT, 'r') as f:
+                self.synsets = f.read().split('\n')[:-1]
+            
+            self.gpu_id = gpu_id
+            
     def __choose_model(self, model_type):
 
         if model_type == 'ResNet':
@@ -45,7 +49,7 @@ class img_sim(object):
             MODEL_PATH = MODEL_VGG16
             model = VGG16()
        
-        elif model_tpye == 'AlexNet':
+        elif model_type == 'AlexNet':
             from CNN.AlexNet import AlexNet
             from ENV import MODEL_ALEXNET
             MODEL_PATH = MODEL_ALEXNET
@@ -60,7 +64,7 @@ class img_sim(object):
             WORDS_DICT = NORM_LIST_JP
         elif lang == 'en':
             from ENV import NORM_LIST_EN
-            WORDS_DICT = MODEL_LIST_EN
+            WORDS_DICT = NORM_LIST_EN
 
         return WORDS_DICT
 
@@ -81,25 +85,27 @@ class img_sim(object):
 
         return pred
 
-    def get_words(self, img, num=5, sim_type='high'):
+    def get_norms(self, img, num=5, sim_type='high'):
         sims = []
         words = []
 
-        pred = self.__calc_pred(img)
+        if self.feature:
+            pred = self.feature
+        else:
+            pred = self.__calc_pred(img)
         
         if sim_type == 'high':
             for i in np.argsort(pred)[0][::-1][:num]:
                 sims.append(pred[0][i])
-                words.append(list(self.synsets[i].split(' ', 1)[1:]))
+                words.append(self.synsets[i].split(' ', 1)[1].split(','))
         elif sim_type == 'low':
             for i in np.argsort(pred)[0][::-1][-num:]:
                 sims.append(pred[0][i])
-                words.append(list(self.synsets[i].split(' ', 1)[1:]))
+                words.append(self.synsets[i].split(' ', 1)[1].split(','))
         elif sim_type == 'rand':
-            #for i in np.random.choice(pred[0], num):
             for i in np.random.choice(np.argsort(pred)[0][::-1], num):
                 sims.append(pred[0][i])
-                words.append(list(self.synsets[i].split(' ', 1)[1:]))
+                words.append(self.synsets[i].split(' ', 1)[1].split(','))
         
         return sims, words
 
@@ -118,9 +124,12 @@ if __name__ == '__main__':
                         help="the number of output")
     parser.add_argument('--sim', type=str, default='high', choices=['high', 'low', 'rand'],
                         help="output sim type")
+    parser.add_argument('--feature', '-f', action='store_true',
+                        help="use features to output class")
     args = parser.parse_args()
 
-    img_model = img_sim(model=args.model_type, lang=args.lang, gpu_id=args.gpu)
-    sims, words = img_model.get_words(args.img, num=args.num, sim_type=args.sim)
+    img_model = img_sim(model=args.model_type, lang=args.lang, gpu_id=args.gpu, feature=args.feature)
+    sims, words = img_model.get_norms(args.img, num=args.num, sim_type=args.sim)
 
-    print(sims, words)
+    for sim, word in zip(sims, words):
+        print(sim, word)
