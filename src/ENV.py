@@ -10,12 +10,8 @@ MODEL_VGG16 = os.path.join(current_dir, '..', 'data', 'models', 'cnn', 'VGG16.mo
 MODEL_ALEXNET = os.path.join(current_dir, '..', 'data', 'models', 'cnn', 'AlexNet.model')
 
 #vocab path
-WORDS_RESNET = os.path.join(current_dir, '..', 'data', 'wordnet', 'resnet_synsets.txt')
-WORDS_VGG16 = os.path.join(current_dir, '..', 'data', 'wordnet', 'vgg16_synsets.txt')
-WORDS_ALEXNET = os.path.join(current_dir, '..', 'data', 'wordnet', 'alexnet_synsets.txt')
-WORDS_RESNET_JP = os.path.join(current_dir, '..', 'data', 'wordnet', 'resnet_synsets_jp.txt')
-WORDS_VGG16_JP = os.path.join(current_dir, '..', 'data', 'wordnet', 'vgg16_synsets_jp.txt')
-WORDS_ALEXNET_JP = os.path.join(current_dir, '..', 'data', 'wordnet', 'alexnet_synsets_jp.txt')
+NORM_LIST_EN = os.path.join(current_dir, '..', 'data', 'wordnet', 'resnet_synsets.txt')
+NORM_LIST_JP = os.path.join(current_dir, '..', 'data', 'wordnet', 'resnet_synsets_jp.txt')
 
 #caption vocab
 CAP_VOCAB_JP = os.path.join(current_dir, '..', 'data', 'nic_dict', 'dict_STAIR_jp_train.pkl')

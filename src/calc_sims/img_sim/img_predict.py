@@ -6,61 +6,66 @@ import chainer
 import chainer.functions as F
 from chainer import cuda
 from chainer import serializers
-sys.path.append('../common')
-from img_proc import Img_proc
+sys.path.append('../..')
+from common.img_proc import Img_proc
 
 class img_sim(object):
     __slots__ = ['img_proc',
                 'MODEL_PATH',
                 'WORDS_DICT', 
-                'WORDS_DICT_JP',
                 'model',
                 'synsets',
-                'synsets_jp',
                 'gpu_id'
             ]
 
-    def __init__(self, model='ResNet', gpu_id=-1):
+    def __init__(self, model='ResNet', lang="jp", gpu_id=-1):
         self.img_proc = Img_proc("imagenet")
         
-        if model == 'ResNet':
-            from CNN.ResNet50 import ResNet
-            from ENV import MODEL_RESNET, WORDS_RESNET, WORDS_RESNET_JP
-            self.MODEL_PATH = MODEL_RESNET
-            self.WORDS_DICT = WORDS_RESNET
-            self.WORDS_DICT_JP = WORDS_RESNET_JP
-            self.model = ResNet()
-        
-        elif model == 'VGG16':
-            from CNN.VGG16 import VGG16
-            from ENV import MODEL_VGG16, WORDS_VGG16, WORDS_VGG16_JP
-            self.MODEL_PATH = MODEL_VGG16
-            self.WORDS_DICT = WORDS_VGG16
-            self.WORDS_DICT_JP = WORDS_VGG16_JP
-            self.model = VGG16()
-       
-        elif model == 'AlexNet':
-            from CNN.AlexNet import AlexNet
-            from ENV import MODEL_ALEXNET, WORDS_ALEXNET, WORDS_ALEXNET_JP
-            self.MODEL_PATH = MODEL_ALEXNET
-            self.WORDS_DICT = WORDS_ALEXNET
-            self.WORDS_DICT_JP = WORDS_ALEXNET_JP
-            self.model == AlexNet()
+        self.MODEL_PATH, self.model = self.__choose_model(model)    
+        self.WORDS_DICT = self.__choose_lang(lang)
 
         serializers.load_hdf5(self.MODEL_PATH, self.model)
 
-#merge synset to load once
-# set path to synset and set init 
         with open(self.WORDS_DICT, 'r') as f:
             self.synsets = f.read().split('\n')[:-1]
         
-        
-        with open(self.WORDS_DICT_JP, 'r') as f:
-            self.synsets_jp = f.read().split('\n')[:-1]
         self.gpu_id = gpu_id
         
+    def __choose_model(self, model_type):
 
-    def similarity(self, img, num=5, lang='en'):
+        if model_type == 'ResNet':
+            from CNN.ResNet50 import ResNet
+            from ENV import MODEL_RESNET
+            MODEL_PATH = MODEL_RESNET
+            model = ResNet()
+        
+        elif model_type == 'VGG16':
+            from CNN.VGG16 import VGG16
+            from ENV import MODEL_VGG16
+            MODEL_PATH = MODEL_VGG16
+            model = VGG16()
+       
+        elif model_tpye == 'AlexNet':
+            from CNN.AlexNet import AlexNet
+            from ENV import MODEL_ALEXNET
+            MODEL_PATH = MODEL_ALEXNET
+            model = AlexNet()
+
+        return MODEL_PATH, model
+
+
+    def __choose_lang(self, lang='jp'):
+        if lang == 'jp':
+            from ENV import NORM_LIST_JP
+            WORDS_DICT = NORM_LIST_JP
+        elif lang == 'en':
+            from ENV import NORM_LIST_EN
+            WORDS_DICT = MODEL_LIST_EN
+
+        return WORDS_DICT
+
+    def __calc_pred(self, img):
+
         img_arr = self.img_proc.load_img(img)
 
         if self.gpu_id >= 0:
@@ -70,58 +75,52 @@ class img_sim(object):
 
         with chainer.using_config('train', False):
             pred = self.model(img_arr, None).data
-        
+
         if self.gpu_id >= 0:
             pred = cuda.to_cpu(pred)
 
-        if lang == 'en':
-            for i in np.argsort(pred)[0][-1::-1][:num]:
-                print(self.synsets[i], pred[0][i])
-        else:
-            for i in np.argsort(pred)[0][-1::-1][:num]:
-                print(self.synsets_jp[i], pred[0][i])
+        return pred
 
-    def get_words(self, img, num, lang='en', sim='high'):
+    def get_words(self, img, num=5, sim_type='high'):
+        sims = []
         words = []
-        img_arr = self.img_proc.load_img(img)
 
-        if self.gpu_id >= 0:
-            cuda.get_device(args.gpu).use()
-            self.model.to_gpu()
-            img_arr = cuda.to_gpu(img_arr, device=args.gpu)
-
-        with chainer.using_config('train', False):
-            pred = self.model(img_arr, None).data
+        pred = self.__calc_pred(img)
         
-        if self.gpu_id >= 0:
-            pred = cuda.to_cpu(pred)
-
-        if lang == 'en':
-            for i in np.argsort(pred)[0][-1::-1][:num]:
-                sim_word = self.synsets[i][10:].split(',')[0]
-                words.append(sim_word)
-        elif lang == 'jp':
-            for i in np.argsort(pred)[0][-1::-1][:num]:
-                sim_pair = self.synsets_jp[i].split()
-                sim_words = sim_pair[1:]
-                words.append(sim_words)
-
-        return words
+        if sim_type == 'high':
+            for i in np.argsort(pred)[0][::-1][:num]:
+                sims.append(pred[0][i])
+                words.append(list(self.synsets[i].split(' ', 1)[1:]))
+        elif sim_type == 'low':
+            for i in np.argsort(pred)[0][::-1][-num:]:
+                sims.append(pred[0][i])
+                words.append(list(self.synsets[i].split(' ', 1)[1:]))
+        elif sim_type == 'rand':
+            #for i in np.random.choice(pred[0], num):
+            for i in np.random.choice(np.argsort(pred)[0][::-1], num):
+                sims.append(pred[0][i])
+                words.append(list(self.synsets[i].split(' ', 1)[1:]))
+        
+        return sims, words
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--img', '-i', type=str, default=os.path.join('..', '..', 'sample_imgs', 'test.jpg'),
+    parser.add_argument('--img', '-i', type=str, default=os.path.join('..', '..', '..', 'sample_imgs', 'test.jpg'),
                         help="image you want to predict")
-    parser.add_argument('--gpu', '-g', type=int, default=0,
+    parser.add_argument('--gpu', '-g', type=int, default=-1,
                         help="GPU ID(put -1 if you don't use gpu)")
+    parser.add_argument('--lang', '-l', type=str, default='jp',
+                        help="language to output")
+    parser.add_argument('--model_type', type=str, default='ResNet', choices=['ResNet', 'VGG16', 'AlexNet'],
+                        help="model type")
+    parser.add_argument('--num', '-n', type=int, default=5, 
+                        help="the number of output")
+    parser.add_argument('--sim', type=str, default='high', choices=['high', 'low', 'rand'],
+                        help="output sim type")
     args = parser.parse_args()
 
-    img_model = img_sim(model='ResNet', gpu_id=args.gpu)
-    #img_model.similarity(args.img, 5)
-    #img_model.similarity(args.img, 5, lang='jp')
-    results1 = img_model.get_words(args.img, 5)
-    results2 = img_model.get_words(args.img, 5, lang='jp')
+    img_model = img_sim(model=args.model_type, lang=args.lang, gpu_id=args.gpu)
+    sims, words = img_model.get_words(args.img, num=args.num, sim_type=args.sim)
 
-    #print(results1)
-    print(results2)
+    print(sims, words)
