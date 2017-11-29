@@ -115,6 +115,7 @@ if __name__ == '__main__':
     humor_scores, img_word_norms = img_word_model.get_img_word_sim_norms(img=args.img,
                                                                         subject=args.subject,
                                                                         num=args.num,
+                                                                        cutoff=args.img_cutoff,
                                                                         img_sim=args.img_sim,
                                                                         word_sim=args.word_sim
                                                                     )
