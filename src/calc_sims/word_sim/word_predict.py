@@ -14,7 +14,8 @@ class word_sim(object):
         if self.word_dict == 'jp_wiki':
             sys.path.append('../..')
             from ENV import W2V_WIKIPEDIA
-            self.model = KeyedVectors.load_word2vec_format(W2V_WIKIPEDIA, binary=True)
+            self.model = KeyedVectors.load(W2V_WIKIPEDIA)
+            #self.model = KeyedVectors.load_word2vec_format(W2V_WIKIPEDIA, binary=True)
 
     def __calc_sims(self, subject, img_sim_words):
         sims_dict = {}

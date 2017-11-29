@@ -5,10 +5,7 @@
 - 画像間類似度を計算する際のテーブルを修正
     + オブジェクト候補をどのように選定すべきか？
     + 主観である程度抽象度の高い対象をピックアップしてよいか？
-- 単語間類似度の計算時に，-の値を考慮せず，昇順にソートしているため，絶対値に変換する．
-- word2vecの学習
-    + 日本語wikipediaデータの前処理
-    + gensimでの学習
+- word2vecのtrainをsave__word2vec_format(fname, binary=~True)に変更
 - resnetのfine tuning用スクリプト作成
 - humor_generatorの修正
     + 使用するキャプションの個数はどうするか？
@@ -29,6 +26,3 @@
             * final_score = img_sim * (1 - word_sim)
         - システムによって対話継続欲求が向上するかどうか
 
-# done
-
-- 画像間類似度を計算する際，上位n個の対象を除外

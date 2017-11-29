@@ -30,4 +30,5 @@ WORDNET_DATABASE = os.path.join(current_dir, '..', 'data', 'wordnet', 'wnjpn.db'
 NEOLOG_DIC = os.path.join('/', 'usr', 'lib', 'mecab', 'dic', 'mecab-ipadic-neologd')
 
 #word2vec
-W2V_WIKIPEDIA = os.path.join(current_dir, '..', 'data', 'word2vec_dict', 'entity_vector', 'entity_vector.model.bin')
+#W2V_WIKIPEDIA = os.path.join(current_dir, '..', 'data', 'word2vec', 'entity_vector', 'entity_vector.model.bin')
+W2V_WIKIPEDIA = os.path.join(current_dir, '..', 'data', 'word2vec', 'models', 'ja_wikipedia.model')
