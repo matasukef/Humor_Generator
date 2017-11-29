@@ -20,14 +20,14 @@ class img_word_sim(object):
         
         self.word_model = word_sim(word_dict=word_dict)
 
-    def get_img_sim_norms(self, img, num=5, sim_type='high'):
-        return self.img_model.get_norms(img, num, sim_type)
+    def get_img_sim_norms(self, img, num=5, cutoff=0, sim_type='high'):
+        return self.img_model.get_norms(img, num, cutoff, sim_type)
 
     def get_word_sim_norms(self, subject, img_sim_words, num=5, sim_type='low'):
         return self.word_model.get_norms(subject, img_sim_words, num, sim_type)
         
-    def get_img_word_sim_norms(self, img, subject, num=5, img_sim='high', word_sim='low'):
-        img_sims, img_norms = self.img_model.get_norms(img, num, img_sim)
+    def get_img_word_sim_norms(self, img, subject, num=5, cutoff=0, img_sim='high', word_sim='low'):
+        img_sims, img_norms = self.img_model.get_norms(img, num, cutoff, img_sim)
         word_sims, word_norms = self.word_model.get_norms(subject, img_norms, num, word_sim)
 
         humor_scores, img_word_norms = self.__calc_score(img_sims, img_norms, word_sims, word_norms)
@@ -69,6 +69,8 @@ if __name__ == '__main__':
                         help="proper norms to compare with subject")
     parser.add_argument('--num', '-n', type=int, default=5,
                         help="the number of output")
+    parser.add_argument('--img_cutoff', '-ic', type=int, default=1,
+                        help="the number of cutoff for top n sim image")
     parser.add_argument('--img_sim', '-is', type=str, default="high", choices=['high', 'low', 'rand'],
                         help="output img sim type")
     parser.add_argument('--word_sim', '-ws', type=str, default="low", choices=['high', 'low', 'rand'],
@@ -88,6 +90,7 @@ if __name__ == '__main__':
 
     img_sims, img_norms = img_word_model.get_img_sim_norms(img=args.img,
                                                        num=args.num,
+                                                       cutoff=args.img_cutoff,
                                                        sim_type=args.img_sim
                                                     )
 
