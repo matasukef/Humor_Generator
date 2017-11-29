@@ -85,7 +85,7 @@ class img_sim(object):
 
         return pred
 
-    def get_norms(self, img, num=5, sim_type='high'):
+    def get_norms(self, img, num=5, cutoff=0, sim_type='high'):
         sims = []
         words = []
 
@@ -95,7 +95,7 @@ class img_sim(object):
             pred = self.__calc_pred(img)
         
         if sim_type == 'high':
-            for i in np.argsort(pred)[0][::-1][:num]:
+            for i in np.argsort(pred)[0][::-1][cutoff:num+cutoff]:
                 sims.append(pred[0][i])
                 words.append(self.synsets[i].split(' ', 1)[1].split(','))
         elif sim_type == 'low':
@@ -124,12 +124,15 @@ if __name__ == '__main__':
                         help="the number of output")
     parser.add_argument('--sim', type=str, default='high', choices=['high', 'low', 'rand'],
                         help="output sim type")
+    parser.add_argument('--cutoff', '-c', type=int, default=0, 
+                        help="the number of ignoring top n similar class.\
+                                This option is valid only when sim is high.")
     parser.add_argument('--feature', '-f', action='store_true',
                         help="use features to output class")
     args = parser.parse_args()
 
     img_model = img_sim(model=args.model_type, lang=args.lang, gpu_id=args.gpu, feature=args.feature)
-    sims, words = img_model.get_norms(args.img, num=args.num, sim_type=args.sim)
+    sims, words = img_model.get_norms(args.img, num=args.num, cutoff=args.cutoff, sim_type=args.sim)
 
     for sim, word in zip(sims, words):
         print(sim, word)
