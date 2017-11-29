@@ -31,4 +31,6 @@ NEOLOG_DIC = os.path.join('/', 'usr', 'lib', 'mecab', 'dic', 'mecab-ipadic-neolo
 
 #word2vec
 #W2V_WIKIPEDIA = os.path.join(current_dir, '..', 'data', 'word2vec', 'entity_vector', 'entity_vector.model.bin')
-W2V_WIKIPEDIA = os.path.join(current_dir, '..', 'data', 'word2vec', 'models', 'ja_wikipedia.model')
+W2V_WIKIPEDIA_IPADIC = os.path.join(current_dir, '..', 'data', 'word2vec', 'models', 'ja_wikipedia.model')
+W2V_WIKIPEDIA_NEOLOG = os.path.join(current_dir, '..', 'data', 'word2vec', 'models', 'ja_wikipedia_neolog.model')
+

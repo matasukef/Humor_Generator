@@ -9,13 +9,18 @@ class word_sim(object):
                  'model'
             ]
 
-    def __init__(self, word_dict='jp_wiki'):
+    def __init__(self, word_dict='jp_wiki_ipadic'):
         self.word_dict = word_dict
-        if self.word_dict == 'jp_wiki':
+        if self.word_dict == 'jp_wiki_ipadic':
             sys.path.append('../..')
-            from ENV import W2V_WIKIPEDIA
-            self.model = KeyedVectors.load(W2V_WIKIPEDIA)
+            from ENV import W2V_WIKIPEDIA_IPADIC
+            self.model = KeyedVectors.load(W2V_WIKIPEDIA_IPADIC)
             #self.model = KeyedVectors.load_word2vec_format(W2V_WIKIPEDIA, binary=True)
+        elif self.word_dict == 'jp_wiki_neologd':
+            sys.path.append('../..')
+            from ENV import W2V_WIKIPEDIA_NEOLOG
+            self.model = KeyedVectors.load(W2V_WIKIPEDIA_NEOLOG)
+
 
     def __calc_sims(self, subject, img_sim_words):
         sims_dict = {}
@@ -65,7 +70,7 @@ class word_sim(object):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--word_dict', '-d', type=str, default="jp_wiki",
+    parser.add_argument('--word_dict', '-d', type=str, default="jp_wiki_ipadic", choices=['jp_wiki_ipadic', 'jp_wiki_neolog'],
                         help="type of dictionary")
     parser.add_argument('--subject', '-s', type=str, default="男性",
                         help="Subject to compare with proper norms")

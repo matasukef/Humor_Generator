@@ -62,7 +62,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_dir', '-i', default=os.path.join('..', '..', '..', '..', 'data', 'word2vec', 'train_data', 'processed', 'wikipedia', 'ja_wikipedia'),
             help="input wikipedia dir")
-    parser.add_argument('--output_dir', '-o', default=os.path.join('..', '..', '..', '..', 'data', 'word2vec', 'train_data', 'converted', 'wikipedia', 'ja_wikipedia'),
+    parser.add_argument('--output_dir', '-o', default=os.path.join('..', '..', '..', '..', 'data', 'word2vec', 'train_data', 'converted', 'wikipedia', 'ja_wikipedia_ipadic'),
             help="output wikipedia dir")
     parser.add_argument('--no_end', action='store_false',
             help="output file don't contain dots")

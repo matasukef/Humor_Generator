@@ -27,12 +27,15 @@ class img_word_sim(object):
         return self.word_model.get_norms(subject, img_sim_words, num, sim_type)
         
     def get_img_word_sim_norms(self, img, subject, num=5, cutoff=0, img_sim='high', word_sim='low'):
+        
         img_sims, img_norms = self.img_model.get_norms(img, num, cutoff, img_sim)
         word_sims, word_norms = self.word_model.get_norms(subject, img_norms, num, word_sim)
 
         humor_scores, img_word_norms = self.__calc_score(img_sims, img_norms, word_sims, word_norms)
 
-        return humor_scores, img_word_norms
+        result_norms = {'img_word_norms': img_word_norms, 'humor_scores': humor_scores, 'img_norms': img_norms, 'img_sims': img_sims, 'word_norms': word_norms, 'word_sims': word_sims}
+
+        return result_norms
 
     def __calc_score(self, img_sims, img_norms, word_sims, word_norms):
         sims_dict = {}
@@ -61,7 +64,7 @@ if __name__ == '__main__':
                         help="CNN model type")
     parser.add_argument('--lang', '-l', type=str, default='jp',
                         help="language to output class")
-    parser.add_argument('--word_dict', '-d', type=str, default='jp_wiki',
+    parser.add_argument('--word_dict', '-d', type=str, default='jp_wiki_ipadic', choices=['jp_wiki_ipadic', 'jp_wiki_neolog'],
                         help="type of dictionary for word2vec")
     parser.add_argument('--subject', '-s', type=str, default='男性',
                         help="subject to compare with proper norms")
@@ -112,19 +115,20 @@ if __name__ == '__main__':
     for sim, norm in zip(word_sims, word_norms):
         print(round(sim, 5), '\t', norm)
     
-    humor_scores, img_word_norms = img_word_model.get_img_word_sim_norms(img=args.img,
-                                                                        subject=args.subject,
-                                                                        num=args.num,
-                                                                        cutoff=args.img_cutoff,
-                                                                        img_sim=args.img_sim,
-                                                                        word_sim=args.word_sim
-                                                                    )
-    
+    result_norms = img_word_model.get_img_word_sim_norms(img=args.img,
+                                                        subject=args.subject,
+                                                        num=args.num,
+                                                        cutoff=args.img_cutoff,
+                                                        img_sim=args.img_sim,
+                                                        word_sim=args.word_sim
+                                                    )
+
     print('')
     print('img word sim result\n')
     print('compare with ', args.subject)
     print('img_sim: ', args.img_sim)
     print('word_sim: ', args.word_sim)
     print('sim\t\tnorm')
-    for score, norm in zip(humor_scores, img_word_norms):
+
+    for score, norm in zip(result_norms['humor_scores'], result_norms['img_word_norms']):
         print(round(score, 5), '\t', norm)
