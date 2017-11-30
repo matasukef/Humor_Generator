@@ -16,10 +16,12 @@ class word_sim(object):
             from ENV import W2V_WIKIPEDIA_IPADIC
             self.model = KeyedVectors.load(W2V_WIKIPEDIA_IPADIC)
             #self.model = KeyedVectors.load_word2vec_format(W2V_WIKIPEDIA, binary=True)
-        elif self.word_dict == 'jp_wiki_neologd':
+        elif self.word_dict == 'jp_wiki_neolog':
             sys.path.append('../..')
             from ENV import W2V_WIKIPEDIA_NEOLOG
             self.model = KeyedVectors.load(W2V_WIKIPEDIA_NEOLOG)
+        else:
+            raise NameError('name ' + self.word_dict + ' is not defined in dict type')
 
 
     def __calc_sims(self, subject, img_sim_words):

@@ -11,8 +11,8 @@ from chainer import cuda
 from chainer import serializers
 
 sys.path.append('..')
-from img_proc import Img_proc
-from .Image2CaptionDecoder import Image2CaptionDecoder
+from common.img_proc import Img_proc
+from Image2CaptionDecoder import Image2CaptionDecoder
 
 sys.path.append('../CNN')
 
@@ -165,7 +165,7 @@ class CaptionGenerator(object):
         with chainer.using_config('train', False):
             img_feature = self.cnn_model(img_array, 'feature').data.reshape(1, 1, 2048)
 
-        return self.generate_from_img_feature(img_feature)
+        return self.generate_from_img_feature(img_feature), img_feature
     
     def generate_tokens(self, img_path):
         img = self.img_proc.load_img(img_path)
@@ -173,11 +173,11 @@ class CaptionGenerator(object):
 
     def generate_sentences(self, img_path):
         img = self.img_proc.load_img(img_path)
-        captions = self.generate_from_img(img)
+        captions, img_feature = self.generate_from_img(img)
         for cap in captions:
             cap['sentence'] = ''.join(cap['sentence'][1:-1])
 
-        return captions
+        return captions, img_feature
             
         
 
@@ -207,7 +207,7 @@ if __name__ == "__main__":
             gpu_id = args.gpu,
         )
 
-    captions = caption_generator.generate_sentences(args.img)
+    captions, _ = caption_generator.generate_sentences(args.img)
     for i, caption in enumerate(captions):
         print('caption{0}: {1}'.format(i, caption['sentence']))
-        #print('log: ', caption['log_likelihood'])
+        print('log: ', caption['log_likelihood'])

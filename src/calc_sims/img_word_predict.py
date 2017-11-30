@@ -3,8 +3,12 @@ import sys
 import argparse
 
 sys.path.append('..')
-from img_sim.img_predict import img_sim
-from word_sim.word_predict import word_sim
+sys.path.append('img_sim')
+sys.path.append('word_sim')
+from img_predict import img_sim
+from word_predict import word_sim
+#from img_sim.img_predict import img_sim
+#from word_sim.word_predict import word_sim
 
 class img_word_sim(object):
     __slots__ = ['img_model',

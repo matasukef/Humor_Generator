@@ -107,3 +107,6 @@ class ResNet(chainer.Chain):
             return self.loss
         else:
             return F.softmax(h)
+
+    def pred_from_feature(self, feature):
+        return F.softmax(self.fc(feature))

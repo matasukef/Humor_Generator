@@ -24,16 +24,16 @@ class img_sim(object):
         #use features to predict output class
         self.feature = feature
         
-        if not self.feature:
-            self.MODEL_PATH, self.model = self.__choose_model(model)    
-            self.WORDS_DICT = self.__choose_lang(lang)
+        #can change it to use caption generator cnn
+        self.MODEL_PATH, self.model = self.__choose_model(model)    
+        self.WORDS_DICT = self.__choose_lang(lang)
 
-            serializers.load_hdf5(self.MODEL_PATH, self.model)
+        serializers.load_hdf5(self.MODEL_PATH, self.model)
 
-            with open(self.WORDS_DICT, 'r') as f:
-                self.synsets = f.read().split('\n')[:-1]
-            
-            self.gpu_id = gpu_id
+        with open(self.WORDS_DICT, 'r') as f:
+            self.synsets = f.read().split('\n')[:-1]
+        
+        self.gpu_id = gpu_id
             
     def __choose_model(self, model_type):
 
@@ -69,31 +69,31 @@ class img_sim(object):
         return WORDS_DICT
 
     def __calc_pred(self, img):
+        if self.feature:
+            with chainer.using_config('train', False):
+                pred = self.model.pred_from_feature(img).data
+        else:
+            img_arr = self.img_proc.load_img(img)
 
-        img_arr = self.img_proc.load_img(img)
+            if self.gpu_id >= 0:
+                cuda.get_device(args.gpu).use()
+                self.model.to_gpu()
+                img_arr = cuda.to_gpu(img_arr, device=args.gpu)
 
-        if self.gpu_id >= 0:
-            cuda.get_device(args.gpu).use()
-            self.model.to_gpu()
-            img_arr = cuda.to_gpu(img_arr, device=args.gpu)
+            with chainer.using_config('train', False):
+                pred = self.model(img_arr, None).data
 
-        with chainer.using_config('train', False):
-            pred = self.model(img_arr, None).data
-
-        if self.gpu_id >= 0:
-            pred = cuda.to_cpu(pred)
-
+            if self.gpu_id >= 0:
+                pred = cuda.to_cpu(pred)
+            
         return pred
 
     def get_norms(self, img, num=5, cutoff=0, sim_type='high'):
         sims = []
         words = []
 
-        if self.feature:
-            pred = self.feature
-        else:
-            pred = self.__calc_pred(img)
-        
+        pred = self.__calc_pred(img)
+
         if sim_type == 'high':
             for i in np.argsort(pred)[0][::-1][cutoff:num+cutoff]:
                 sims.append(pred[0][i])
