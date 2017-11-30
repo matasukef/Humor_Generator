@@ -167,7 +167,7 @@ class HumorCaptionGenerator(object):
                 word_prop_sims = prop_norms['word_sims']
                 humor_caps = [cap.replace(subject, random.choice(random.choices(norm))).replace(' ', '') for norm in norms ]
                 #humor_cap = cap.replace(subject, random.choice(norms))
-                humor_captions.append({'humor_caption': humor_caps, 'img_word_norm': norms, 'score': score, 'img_norm': img_prop, 'img_sim': img_prop_sims, 'word_norm': word_prop, 'word_sim': word_prop_sims})
+                humor_captions.append({'humor_caption': humor_caps, 'img_word_norm': norms, 'score': score, 'img_norm': img_prop, 'img_sim': img_prop_sims, 'word_norm': word_prop, 'word_sim': word_prop_sims, 'normal_caption': cap, 'subject': subject})
 
         return humor_captions
 
@@ -223,19 +223,31 @@ if __name__ == '__main__':
     
 
     print('caption results\n')
-    for cap in humor_captions:
+    for i, cap in enumerate(humor_captions):
         captions = cap['humor_caption']
+        scores = cap['score']
         img_word_norms = cap['img_word_norm']
         img_norms = cap['img_norm']
         word_norms = cap['word_norm']
-        scores = cap['score']
         img_sim = cap['img_sim']
         word_sim = cap['word_sim']
 
-        print(captions)
-        print(img_word_norms)
-        print(img_norms)
-        print(word_norms)
-        print(scores)
-        print(img_sim)
-        print(word_sim)
+        print('caption ', i)
+        print('Original Caption:', cap['normal_caption'])
+        print('replaced with ', cap['subject'])
+
+        print('\nHumor Captions')
+        for cap in captions:
+            print(cap)
+
+        print('\nhumor score')
+        for i_w_n, score in zip(img_word_norms, scores):
+            print(score, i_w_n)
+
+        print('\nimage sim')
+        for i_n, i_s in zip(img_norms, img_sim):
+            print(i_s, i_n)
+
+        print('\nword sim')
+        for w_n, w_s in zip(word_norms, word_sim):
+            print(w_s, w_n)
