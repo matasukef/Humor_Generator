@@ -1,0 +1,11 @@
+th, td{
+    text-align: center;
+}
+
+.lang{
+    font-weight: bold;
+}
+
+#captions, #configuration{
+    margin-top: 3%;
+}
