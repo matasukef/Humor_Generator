@@ -68,6 +68,14 @@ class img_sim(object):
 
         return WORDS_DICT
 
+    def __getMedianIndex(self, pred_list):
+        #get nearest value with num in list
+        
+        med_value = np.median(pred_list)
+        min_idx = np.abs(np.asarray(pred_list) - med_value).argmin()
+        
+        return min_idx
+
     def __calc_pred(self, img):
         if self.feature:
             with chainer.using_config('train', False):
@@ -86,7 +94,7 @@ class img_sim(object):
             if self.gpu_id >= 0:
                 pred = cuda.to_cpu(pred)
             
-        return pred
+        return pred[0]
 
     def get_norms(self, img, num=5, cutoff=0, sim_type='high'):
         sims = []
@@ -94,17 +102,30 @@ class img_sim(object):
 
         pred = self.__calc_pred(img)
 
+        #sorted pred index
+        sorted_pred_index = np.argsort(pred)[::-1]
+        
         if sim_type == 'high':
-            for i in np.argsort(pred)[0][::-1][cutoff:num+cutoff]:
-                sims.append(pred[0][i])
+            for i in sorted_pred_index[cutoff:num+cutoff]:
+                sims.append(pred[i])
                 words.append(self.synsets[i].split(' ', 1)[1].split(','))
+        
+        elif sim_type == 'mid':
+            med_index = self.__getMedianIndex(pred)
+            half_num, even = divmod(num, 2)
+            for i in sorted_pred_index[med_index-half_num : med_index + half_num + even]:
+                sims.append(pred[i])
+                words.append(self.synsets[i].split(' ', 1)[1].split(','))
+       
         elif sim_type == 'low':
-            for i in np.argsort(pred)[0][::-1][-num:]:
-                sims.append(pred[0][i])
+            cutoff = len(pred) if cutoff == 0 else cutoff
+            for i in sorted_pred_index[-num:]:
+                sims.append(pred[i])
                 words.append(self.synsets[i].split(' ', 1)[1].split(','))
+        
         elif sim_type == 'rand':
-            for i in np.random.choice(np.argsort(pred)[0][::-1], num):
-                sims.append(pred[0][i])
+            for i in np.random.choice(sorted_pred_index, num):
+                sims.append(pred[i])
                 words.append(self.synsets[i].split(' ', 1)[1].split(','))
         
         return sims, words
@@ -122,7 +143,7 @@ if __name__ == '__main__':
                         help="model type")
     parser.add_argument('--num', '-n', type=int, default=5, 
                         help="the number of output")
-    parser.add_argument('--sim', type=str, default='high', choices=['high', 'low', 'rand'],
+    parser.add_argument('--sim', type=str, default='high', choices=['high', 'low', 'mid', 'rand'],
                         help="output sim type")
     parser.add_argument('--cutoff', '-c', type=int, default=0, 
                         help="the number of ignoring top n similar class.\
