@@ -97,8 +97,7 @@ class img_sim(object):
         return pred[0]
 
     def get_norms(self, img, num=5, cutoff=0, sim_type='high'):
-        sims = []
-        words = []
+        sim_words = []
 
         pred = self.__calc_pred(img)
 
@@ -106,29 +105,33 @@ class img_sim(object):
         sorted_pred_index = np.argsort(pred)[::-1]
         
         if sim_type == 'high':
-            for i in sorted_pred_index[cutoff:num+cutoff]:
-                sims.append(pred[i])
-                words.append(self.synsets[i].split(' ', 1)[1].split(','))
+            for i in sorted_pred_index[cutoff : num+cutoff]:
+                norm = self.synsets[i].split(' ', 1)[1].split(',')
+                sim_words.append( {'norm': norm, 'sim': pred[i]} )
         
         elif sim_type == 'mid':
             med_index = self.__getMedianIndex(pred)
-            half_num, even = divmod(num, 2)
-            for i in sorted_pred_index[med_index-half_num : med_index + half_num + even]:
-                sims.append(pred[i])
-                words.append(self.synsets[i].split(' ', 1)[1].split(','))
+            half_num, even = divmod(num, 2) 
+            start_idx = med_index - half_num + cutoff
+            end_idx = med_index + half_num + even + cutoff
+
+            for i in sorted_pred_index[start_idx : end_idx]:
+                norm = self.synsets[i].split(' ', 1)[1].split(',')
+                sim_words.append( {'norm': norm, 'sim': pred[i]} )
        
         elif sim_type == 'low':
-            cutoff = len(pred) if cutoff == 0 else cutoff
-            for i in sorted_pred_index[-num:]:
-                sims.append(pred[i])
-                words.append(self.synsets[i].split(' ', 1)[1].split(','))
+            start_idx = -num - cutoff
+            end_idx = -cutoff if cutoff != 0 else len(pred)
+            for i in sorted_pred_index[start_idx : end_idx][::-1]:
+                norm = self.synsets[i].split(' ', 1)[1].split(',')
+                sim_words.append( {'norm': norm, 'sim': pred[i]} )
         
         elif sim_type == 'rand':
             for i in np.random.choice(sorted_pred_index, num):
-                sims.append(pred[i])
-                words.append(self.synsets[i].split(' ', 1)[1].split(','))
+                norm = self.synsets[i].split(' ', 1)[1].split(',')
+                sim_words.append( {'norm': norm, 'sim': pred[i]} )
         
-        return sims, words
+        return sim_words
 
 if __name__ == '__main__':
 
@@ -153,7 +156,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     img_model = img_sim(model=args.model_type, lang=args.lang, gpu_id=args.gpu, feature=args.feature)
-    sims, words = img_model.get_norms(args.img, num=args.num, cutoff=args.cutoff, sim_type=args.sim)
+    sim_words = img_model.get_norms(args.img, num=args.num, cutoff=args.cutoff, sim_type=args.sim)
 
-    for sim, word in zip(sims, words):
-        print(sim, word)
+    print(sim_words)
+    for sim_word in sim_words:
+        print(sim_word['sim'], sim_word['norm'])

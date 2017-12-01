@@ -75,30 +75,31 @@ class HumorCaptionGenerator(object):
 
 
     def _calc_img_sim(self, img, num=5, cutoff=1, sim_type='high'):
-        img_sims, img_norms = self.img_word_model.get_img_sim_norms(
+        img_sim_words = self.img_word_model.get_img_sim_norms(
                                                             img=img,
                                                             num=num,
                                                             cutoff=cutoff,
                                                             sim_type=sim_type
                                                         )
 
-        return img_sims, img_norms
+        return img_sim_words
 
     def _calc_word_sim(self, subject, img_sim_words, num=5, sim_type='low'):
-        word_sims, word_norms =  self.img_word_model.get_word_sim_norms(
+        word_sim_words = self.img_word_model.get_word_sim_norms(
                                                             subject=subject,
                                                             img_sim_words=img_sim_words,
                                                             num=num,
                                                             sim_type=sim_type
                                                         )
         
-        return word_sims, word_norms
+        return word_sim_words
 
-    def _calc_img_word_sim(self, img, subject, num=5, cutoff=0, img_sim='high', word_sim='low'):
+    def _calc_img_word_sim(self, img, subject, multiple = 5, num=5, cutoff=0, img_sim='high', word_sim='low'):
         #change it to get dict of humor_scores and img_word_norms
-        sim_words = self.img_word_model.get_img_word_sim_norms(
+        result_norms = self.img_word_model.get_img_word_sim_norms(
                                                         img=img,
                                                         subject=subject,
+                                                        multiple=multiple,
                                                         num=num,
                                                         cutoff=cutoff,
                                                         img_sim=img_sim,
@@ -107,7 +108,7 @@ class HumorCaptionGenerator(object):
 
 
 
-        return sim_words
+        return result_norms
 
     def __get_subject(self, captions):
         norm = ''
@@ -130,7 +131,7 @@ class HumorCaptionGenerator(object):
 
         return norms
 
-    def generate(self, img, num=5, cutoff=1, img_sim='high', word_sim='low'):
+    def generate(self, img, num=5, multiple = 5, cutoff=1, img_sim='high', word_sim='low'):
         sim_dict = []
         humor_captions = []
 
@@ -144,31 +145,29 @@ class HumorCaptionGenerator(object):
 
         #tempolary use subjects[0] not subjects
         for subject in subjects[0]:
-            sim_words= self._calc_img_word_sim(
+            result_norms = self._calc_img_word_sim(
                                         img=img,
                                         subject=subject,
+                                        multiple=multiple,
                                         num=num,
                                         cutoff=cutoff,
                                         img_sim=img_sim,
                                         word_sim=word_sim
                                     )
 
-            sim_dict.append(sim_words)
+            sim_dict.append(result_norms)
         
         for caption, subject in zip(captions, subjects):
             cap = caption['sentence']
 
             for prop_norms in sim_dict:
-                norms = prop_norms['img_word_norms']
-                score = prop_norms['humor_scores']
-                img_prop = prop_norms['img_norms']
-                img_prop_sims = prop_norms['img_sims']
-                word_prop = prop_norms['word_norms']
-                word_prop_sims = prop_norms['word_sims']
-                humor_caps = [cap.replace(subject, random.choice(random.choices(norm))).replace(' ', '') for norm in norms ]
-                #humor_cap = cap.replace(subject, random.choice(norms))
-                humor_captions.append({'humor_caption': humor_caps, 'img_word_norm': norms, 'score': score, 'img_norm': img_prop, 'img_sim': img_prop_sims, 'word_norm': word_prop, 'word_sim': word_prop_sims, 'normal_caption': cap, 'subject': subject})
 
+                humor_caps = [cap.replace(subject, random.choice(random.choices(norm['norm']))).replace(' ', '') for norm in prop_norms['img_word_sim_words'] ]
+                prop_norms['caption'] = caption
+                prop_norms['humor_captions'] = humor_caps
+                prop_norms['subject'] = subject
+                humor_captions.append(prop_norms)
+        
         return humor_captions
 
 if __name__ == '__main__':
@@ -180,7 +179,7 @@ if __name__ == '__main__':
                         help="choose language to generate captions")
     parser.add_argument('--cnn_model_type', '-ct', type=str, default='ResNet', choices=['ResNet', 'VGG16', 'AlexNet'],
                         help="CNN model type")
-    parser.add_argument('--beamsize', '-b', type=int, default=3,
+    parser.add_argument('--beamsize', '-b', type=int, default=1,
                         help="beamsize of neural image caption")
     parser.add_argument('--depth_limit', '-dl', type=int, default=50, 
                         help="max limit of generating tokens when constructing captions")
@@ -188,6 +187,8 @@ if __name__ == '__main__':
                         help="word2vce dictionary")
     parser.add_argument('--img_sim_limit', '-isl', type=int, default=5,
                         help="max output size of words by calculating image sim")
+    parser.add_argument('--img_multiply', '-mt', type=int, default=5,
+                        help="multiply by num size of image classes is generated")
     parser.add_argument('--output_size', type=int, default=5,
                         help="output size")
     parser.add_argument('--cutoff', '-c',type=int, default=1,
@@ -216,24 +217,37 @@ if __name__ == '__main__':
 
     humor_captions = model.generate(
                             img=args.img,
-                           num=args.output_size,
-                           cutoff=args.cutoff,
-                           img_sim=args.img_sim,
-                           word_sim=args.word_sim)
+                            multiple=args.img_multiply,
+                            num=args.output_size,
+                            cutoff=args.cutoff,
+                            img_sim=args.img_sim,
+                            word_sim=args.word_sim)
     
 
+    print(humor_captions)
     print('caption results\n')
     for i, cap in enumerate(humor_captions):
-        captions = cap['humor_caption']
-        scores = cap['score']
-        img_word_norms = cap['img_word_norm']
-        img_norms = cap['img_norm']
-        word_norms = cap['word_norm']
-        img_sim = cap['img_sim']
-        word_sim = cap['word_sim']
+        captions = cap['humor_captions']
+        img_word_sim_words = cap['img_word_sim_words']
+        img_sim_words = cap['img_sim_words']
+        word_sim_words = cap['word_sim_words']
+
+        print(img_word_sim_words)
+        print(img_sim_words)
+        print(word_sim_words)
+        
+        scores = [img_word['score'] for img_word in img_word_sim_words]
+        img_word_norms = [img_word['norm'] for img_word in img_word_sim_words]
+        
+        img_sim = [ img['sim'] for img in img_sim_words ]
+        img_norms = [ img['norm'] for img in img_sim_words ]
+        
+        word_sim = [ word['sim'] for word in word_sim_words ]
+        word_norms = [ word['norm'] for word in word_sim_words ]
 
         print('caption ', i)
-        print('Original Caption:', cap['normal_caption'])
+        print('Original Caption:')
+        print(cap['caption']['log_likelihood'], cap['caption']['sentence'])
         print('replaced with ', cap['subject'])
 
         print('\nHumor Captions')

@@ -2,6 +2,11 @@ import os
 
 #alexnet and vgg16 are not prepared yet.
 
+#generator env
+
+#img sim class num
+IMG_SIM_CLS_NUM = 1000
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 #model path

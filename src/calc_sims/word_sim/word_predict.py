@@ -23,49 +23,55 @@ class word_sim(object):
         else:
             raise NameError('name ' + self.word_dict + ' is not defined in dict type')
 
+    def __getMedianIndex(self, sim_words):
+        sims = np.asarray([word['sim'] for word in sim_words])
+        med_value = np.median(sims)
+        min_idx = np.abs(sims - med_value).argmin()
+
+        return min_idx
 
     def __calc_sims(self, subject, img_sim_words):
-        sims_dict = {}
-        sims = []
-        words = []
+        sim_words = []
         
         for norms in img_sim_words:
             for norm in norms:
                 #try to check norm is exist in word2vec dict and calc sim
                 try:
                     sim = self.model.wv.similarity(subject, norm)
-                    sims_dict[sim] = norms
+                    sim_words.append( {'norm': norms, 'sim': sim} )
                     break
                 #raise except and not to add norm to dict if doensn't exist
                 except KeyError:
                     continue
+        
+        sim_words = sorted(sim_words, key=lambda x:x['sim'])
 
-        sims_dict = sorted(sims_dict.items(), key=lambda x: x[0])
-
-        #sort words based on sims
-        for sim, word in sims_dict:
-            sims.append(sim)
-            words.append(word)
-
-        return sims, words
+        return sim_words
                 
     def get_norms(self, subject, img_sim_words, num=5, sim_type='high'):
 
-        sims, words= self.__calc_sims(subject, img_sim_words)
+        sim_words =  self.__calc_sims(subject, img_sim_words)
         
         #fix output num to length of img_sim_words if exceeds.
-        if len(img_sim_words) < num:
-            num = len(img_sim_words)
+        num = len(sim_words) if len(sim_words) < num else num
 
         if sim_type == 'high':
-            return sims[::-1][:num], words[::-1][:num]
+            return sim_words[::-1][:num]
+
+        elif sim_type == 'mid':
+            med_index = self.__getMedianIndex(sim_words)
+            half_num, even = divmod(num, 2)
+            start_idx = med_index - half_num
+            end_idx = med_index + half_num + even
+
+            return sim_words[start_idx : end_idx]
+
         elif sim_type == 'low':
-            return sims[:num], words[:num]
+            return sim_words[:num]
+
         elif sim_type == 'rand':
-            pair = list(zip(sims, words,))
-            np.random.shuffle(pair)
-            sims, words = zip(*pair)
-            return sims[:num], words[:num]
+            return np.random.choice(sim_words, num, replace=False)
+        
         else:
             raise TypeError('Variable of sim_type is not one of these (high, low, rand)')
 
@@ -80,15 +86,13 @@ if __name__ == '__main__':
                         help="proper norms to compare with subject")
     parser.add_argument('--num', '-n', type=int, default=5,
                         help="the number of output")
-    parser.add_argument('--sim_type', '-st', type=str, default="low", choices=['high', 'low', 'rand'],
+    parser.add_argument('--sim', '-st', type=str, default="low", choices=['high', 'low', 'mid', 'rand'],
                         help="sim type")
     args = parser.parse_args()
     
     word_model = word_sim(args.word_dict)
-    subject = args.subject
-    proper_norms = args.norms
+    sim_words = word_model.get_norms(args.subject, args.norms, args.num, args.sim)
     
-    sims, words = word_model.get_norms(subject, proper_norms, args.num, args.sim_type)
-
-    for sim, word in zip(sims, words):
-        print(sim, word)
+    print('')
+    for sim_word in sim_words:
+        print(sim_word['sim'], sim_word['norm'])
