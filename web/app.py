@@ -136,7 +136,7 @@ if __name__=='__main__':
 
 
     model = HumorCaptionGenerator(
-            lang = args.lang #same with rnn model type
+            lang = args.lang, #same with rnn model type
             cnn_model_type = args.cnn_model_type,
             beamsize = args.beamsize,
             depth_limit = args.depth_limit,
