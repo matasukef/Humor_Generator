@@ -210,7 +210,6 @@ class HumorCaptionGenerator(object):
             cap = caption['sentence']
 
             for prop_norms in sim_dict:
-                print(subject)
                 humor_caps = [cap.replace(subject, random.choice(random.choices(norm['norm'])), 1).replace(' ', '') for norm in prop_norms['img_word_sim_words'] ]
                 prop_norms['caption'] = caption
                 prop_norms['humor_captions'] = humor_caps

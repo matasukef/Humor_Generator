@@ -38,7 +38,7 @@ class word_sim(object):
                 #try to check norm is exist in word2vec dict and calc sim
                 try:
                     sim = self.model.wv.similarity(subject, norm)
-                    sim_words.append( {'norm': norms, 'sim': sim} )
+                    sim_words.append( {'norm': norms, 'sim': round(sim, 10)} )
                     break
                 #raise except and not to add norm to dict if doensn't exist
                 except KeyError:

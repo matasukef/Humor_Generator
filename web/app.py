@@ -21,11 +21,7 @@ from HumorCaptionGenerator import HumorCaptionGenerator
 from WEB_ENV import (
         UPLOAD_FOLDER,
         ALLOWED_EXTENSIONS,
-        NUM_IMG_OUTPUT,
         NUM_IMG_MULTIPLY,
-        NUM_IMG_CUTOFF,
-        IMG_SIM,
-        WORD_SIM
     )
 
 def model_configuration(args):
@@ -88,19 +84,26 @@ def return_captions():
                 return 'error'
 
             if 'colloquial' in request.values:
-                colloquial = request.values['colloquial']
+                colloquial = True if request.values['colloquial'] == 'true' else False
 
+            if 'num_caption' in request.values:
+                num_caption = int(request.values['num_caption'])
+
+            if 'offset' in request.values:
+                offset = int(request.values['offset'])
+            
             if 'img_sim' in request.values and 'word_sim' in request.values:
                 img_sim = request.values['img_sim']
                 word_sim = request.values['word_sim']
             else:
                 return 'error'
 
+    print(request.values)
     humor_captions = model.generate(
                         img = img_path,
                         multiple = NUM_IMG_MULTIPLY,
-                        num = NUM_IMG_OUTPUT,
-                        cutoff = NUM_IMG_CUTOFF,
+                        num = num_caption,
+                        cutoff = offset,
                         img_sim = img_sim,
                         word_sim = word_sim,
                         colloquial=colloquial

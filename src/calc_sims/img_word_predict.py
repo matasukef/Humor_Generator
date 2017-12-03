@@ -58,7 +58,7 @@ class img_word_sim(object):
             i_sim = [img_sim_word['sim'] for img_sim_word in img_sim_words if img_sim_word['norm'] == word_sim_word['norm']]
             score = i_sim[0] * (1 - word_sim_word['sim'])
 
-            sim_words.append( {'score': score, 'norm': word_sim_word['norm']} )
+            sim_words.append( {'score': round(score, 10), 'norm': word_sim_word['norm']} )
 
         sim_words = sorted(sim_words, key=lambda x: x['score'], reverse=True)
 

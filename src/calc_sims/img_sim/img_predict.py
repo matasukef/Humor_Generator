@@ -121,7 +121,7 @@ class img_sim(object):
         if sim_type == 'high':
             for i in sorted_pred_index[cutoff : num+cutoff]:
                 norm = self.synsets[i].split(' ', 1)[1].split(',')
-                sim_words.append( {'norm': norm, 'sim': float(pred[i])} )
+                sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
         
         elif sim_type == 'mid':
             med_index = self.__getMedianIndex(pred)
@@ -131,19 +131,19 @@ class img_sim(object):
 
             for i in sorted_pred_index[start_idx : end_idx]:
                 norm = self.synsets[i].split(' ', 1)[1].split(',')
-                sim_words.append( {'norm': norm, 'sim': float(pred[i])} )
+                sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
        
         elif sim_type == 'low':
             start_idx = -num - cutoff
             end_idx = -cutoff if cutoff != 0 else len(pred)
             for i in sorted_pred_index[start_idx : end_idx][::-1]:
                 norm = self.synsets[i].split(' ', 1)[1].split(',')
-                sim_words.append( {'norm': norm, 'sim': float(pred[i])} )
+                sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
         
         elif sim_type == 'rand':
             for i in np.random.choice(sorted_pred_index, num):
                 norm = self.synsets[i].split(' ', 1)[1].split(',')
-                sim_words.append( {'norm': norm, 'sim': float(pred[i])} )
+                sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
         
         return sim_words
 
