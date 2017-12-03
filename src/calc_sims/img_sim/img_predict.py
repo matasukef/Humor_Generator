@@ -65,6 +65,10 @@ class img_sim(object):
         elif lang == 'en':
             from ENV import NORM_LIST_EN
             WORDS_DICT = NORM_LIST_EN
+        elif lang == 'ch':
+            # chinese norm list is not implemented yet
+            from ENV import NORM_LIST_CH
+            WORDS_DICT = NORM_LIST_CH
 
         return WORDS_DICT
 
@@ -78,8 +82,18 @@ class img_sim(object):
 
     def __calc_pred(self, img):
         if self.feature:
+            
+            if self.gpu_id >= 0:
+                cuda.get_device(self.gpu_id).use()
+                self.model.to_gpu()
+                img = cuda.to_gpu(img, device=self.gpu_id)
+
             with chainer.using_config('train', False):
                 pred = self.model.pred_from_feature(img).data
+            
+            if self.gpu_id >= 0:
+                pred = cuda.to_cpu(pred)
+        
         else:
             img_arr = self.img_proc.load_img(img)
 
@@ -107,7 +121,7 @@ class img_sim(object):
         if sim_type == 'high':
             for i in sorted_pred_index[cutoff : num+cutoff]:
                 norm = self.synsets[i].split(' ', 1)[1].split(',')
-                sim_words.append( {'norm': norm, 'sim': pred[i]} )
+                sim_words.append( {'norm': norm, 'sim': float(pred[i])} )
         
         elif sim_type == 'mid':
             med_index = self.__getMedianIndex(pred)
@@ -117,19 +131,19 @@ class img_sim(object):
 
             for i in sorted_pred_index[start_idx : end_idx]:
                 norm = self.synsets[i].split(' ', 1)[1].split(',')
-                sim_words.append( {'norm': norm, 'sim': pred[i]} )
+                sim_words.append( {'norm': norm, 'sim': float(pred[i])} )
        
         elif sim_type == 'low':
             start_idx = -num - cutoff
             end_idx = -cutoff if cutoff != 0 else len(pred)
             for i in sorted_pred_index[start_idx : end_idx][::-1]:
                 norm = self.synsets[i].split(' ', 1)[1].split(',')
-                sim_words.append( {'norm': norm, 'sim': pred[i]} )
+                sim_words.append( {'norm': norm, 'sim': float(pred[i])} )
         
         elif sim_type == 'rand':
             for i in np.random.choice(sorted_pred_index, num):
                 norm = self.synsets[i].split(' ', 1)[1].split(',')
-                sim_words.append( {'norm': norm, 'sim': pred[i]} )
+                sim_words.append( {'norm': norm, 'sim': float(pred[i])} )
         
         return sim_words
 

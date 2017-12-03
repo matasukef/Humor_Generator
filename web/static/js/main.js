@@ -49,46 +49,49 @@ $(function(){
                     }
                     
 
+                    var formData = new FormData();
                     var targetFile = $('input[name=img]');
-                    var fd = new FormData();
-                    var target = targetFile.eq(0);
-                    fd.append('file', $(target).prop("files")[0]);
+                    formData.append('file', $(targetFile).prop("files")[0]);
 
+                    //get similarity config
+                    var img_sim = $('#img_sim').val();
+                    var word_sim = $('#word_sim').val();
+                    var colloquial = $('#colloquial').is(':checked');
+                    console.log(colloquial);
+                    formData.append('img_sim', img_sim);
+                    formData.append('word_sim', word_sim);
+                    formData.append('colloquial', colloquial);
+                    
                     $.ajax({
                         url: '/api',
                         type: 'POST',
-                        contentType: 'image/jpeg',
+                        //contentType: 'image/jpeg',
                         //contentType: 'multipart/form-data'
                         dataType: 'json',
-                        data: fd,
+                        data: formData,
                         contentType: false,
                         processData: false,
                     })
                     .success(function(data, statusText, jqXHR){
-
+                        
                         $('#captions').empty();
                         $('#detail').empty();
                         
-                        //var detail = '<p>' + String(data['jp']) + '</p>';
-                        //$('detail').append(detail);
 
-                        var languages = ['Japanese', 'English', 'Chinese'];
-                        
-                        var head = '<tr class="active"><th class="col-md-1">Language</th><th class="col-md-3">Detail</th></tr>';
+                        var head = '<tr><th class="col-md-2">No</th><th class="col-md-8">Captions</th></tr>';
                         $('#captions').append(head);
                         
-                        var num_langs = Object.keys(data).length;
-                        for(i = 0; i < num_langs; i++){
-                            var caps = data[languages[i]];
-                            var elements = '<tr><td class="lang">' + languages[i] + '</td><td><table class="table"><tr class="active"><th>No</th><th>Captions</th>';
+                        var normal_cap = data[0]['caption']['sentence'];
+                        element = '<tr><td>Normal cap</td><td>' + normal_cap + '</td></tr>';
+                        $('#captions').append(element);
 
-                            num_caps = Object.keys(caps).length;
-                            for(j = 0; j < num_caps; j++){
-                                var cap = caps[j];
-                                elements += '<tr><td>' + String(cap['No'] + 1) + '</td><td>' + cap['caption'] + '</td></tr>';
-                            }
-                            elements += '</table></td></tr>';
-                            $('#captions').append(elements);
+                        var num_captions = Object.keys(data[0]['humor_captions']).length;
+                        for(i = 0; i < num_captions; i++){
+                            var cap = data[0]['humor_captions'][i];
+                            var no = i + 1
+                            element = '<tr><td>' + no + '</td><td>' + cap + '</td></tr>';
+
+                            $('#captions').append(element);
                         }
 
                     })
@@ -143,5 +146,34 @@ drawImage = function(tag, img){
         }
     }
     image.src = "data:image/jpg;base64," + img;
+}
+
+createDetail = function(result, table_id){
+    
+    var table_id = '#' + table_id
+    $(table_id).empty();
+    
+    var head = '<thread>' +
+                    '<tr>' +
+                        '<th>keys</th>' +
+                        '<th>values</th>' +
+                    '</tr>' +
+                '/thread';
+
+    $(table_id).append(head);
+                        
+                        var normal_cap = data[0]['caption']['sentence'];
+                        element = '<tr><td>Normal cap</td><td>' + normal_cap + '</td></tr>';
+                        $('#captions').append(element);
+
+                        var num_captions = Object.keys(data[0]['humor_captions']).length;
+                        for(i = 0; i < num_captions; i++){
+                            var cap = data[0]['humor_captions'][i];
+                            var no = i + 1
+                            element = '<tr><td>' + no + '</td><td>' + cap + '</td></tr>';
+
+                            $('#captions').append(element);
+                        }
+
 }
 

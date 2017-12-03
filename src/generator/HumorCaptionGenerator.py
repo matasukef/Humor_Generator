@@ -6,8 +6,6 @@ import random
 import numpy as np
 from janome.tokenizer import Tokenizer
 
-from get_subject import get_subject
-
 sys.path.append('../calc_sims/img_sim')
 sys.path.append('../calc_sims/word_sim')
 sys.path.append('../image_caption')
@@ -21,7 +19,6 @@ class HumorCaptionGenerator(object):
                 'beamsize',
                 'depth_limit',
                 'word_dict',
-                'img_sim_limit',
                 'feature',
                 'gpu_id',
                 't',
@@ -35,7 +32,6 @@ class HumorCaptionGenerator(object):
                 beamsize=1,
                 depth_limit=50,
                 word_dict='jp_wiki_neolog',
-                img_sim_limit=10,
                 feature=True,
                 gpu_id=0
             ):
@@ -45,11 +41,10 @@ class HumorCaptionGenerator(object):
         self.beamsize=beamsize
         self.depth_limit=depth_limit
         self.word_dict=word_dict
-        self.img_sim_limit=img_sim_limit
         self.feature = feature
         self.gpu_id = gpu_id
-
-        self.t = Tokenizer()
+        
+        self.t = Tokenizer(mmap=True)
         self.caption_model = CaptionGenerator(
                                 lang=self.lang,
                                 cnn_model_type=self.cnn_model_type,
@@ -106,11 +101,11 @@ class HumorCaptionGenerator(object):
                                                         word_sim=word_sim
                                                     )
 
-
-
         return result_norms
 
+    '''
     def __get_subject(self, captions):
+        tmp_norms = []
         norm = ''
         norms = []
         
@@ -122,29 +117,83 @@ class HumorCaptionGenerator(object):
                 surface =token.surface
                 pos = token.part_of_speech.split(',')
                 if pos[0] == '名詞':
+                    tmp_norms.append(surface)
                     norm += surface
                 elif len(norm) and surface == 'が':
                     norms.append(norm)
                     break
                 elif pos[0] is not '名詞':
                     norm = ''
+        
+        return tmp_norms
+    '''
 
-        return norms
+    def __get_subject(self, captions):
+            tmp_norms = []
+            
+            for caption in captions:
+                norms = []
+                norm = ''
+                sen = caption['sentence']
+                tokens = self.t.tokenize(sen)
 
-    def generate(self, img, num=5, multiple = 5, cutoff=1, img_sim='high', word_sim='low'):
+                for token in tokens:
+                    surface =token.surface
+                    pos = token.part_of_speech.split(',')
+                    if pos[0] == '名詞' and pos[1] != '非自立':
+                        norm += surface
+                    elif len(norm) and surface == 'が':
+                        norms.append(norm)
+                        break
+                    elif pos[0] is not '名詞':
+                        if len(norm):
+                            norms.append(norm)
+                        norm = ''
+                
+                tmp_norms.append(norms[-1])
+
+            return tmp_norms
+
+
+    def __to_colloquial(self, captions):
+        colloq_captions = []
+
+        for caption in captions:
+            sen = caption['sentence']
+            tokens = self.t.tokenize(sen)
+
+            last_token = tokens[-1]
+            last_surface = last_token.surface
+            last_pos  = last_token.part_of_speech.split(',')
+
+            if last_surface =='いる':
+                caption['sentence'] = caption['sentence'][:-2]  + 'いますね！'
+            elif last_surface == 'ある':
+                caption['sentence'] = caption['sentence'][:-2]  + 'すね！'
+            elif last_pos[0] == '名詞':
+                caption['sentence'] = caption['sentence'] + 'ですね！'
+
+            colloq_captions.append(caption)
+
+        return colloq_captions
+
+    def generate(self, img, num=5, multiple = 5, cutoff=1, img_sim='high', word_sim='low', colloquial=False):
         sim_dict = []
         humor_captions = []
 
         captions, img_feature = self._generate_captions(img)
         subjects = self.__get_subject(captions)
         
+        if colloquial:
+            captions = self.__to_colloquial(captions)
+
         #check subjects are same or not to reduce calc costs
         
         if self.feature:
             img= img_feature
-
+        
         #tempolary use subjects[0] not subjects
-        for subject in subjects[0]:
+        for subject in subjects:
             result_norms = self._calc_img_word_sim(
                                         img=img,
                                         subject=subject,
@@ -161,8 +210,8 @@ class HumorCaptionGenerator(object):
             cap = caption['sentence']
 
             for prop_norms in sim_dict:
-
-                humor_caps = [cap.replace(subject, random.choice(random.choices(norm['norm']))).replace(' ', '') for norm in prop_norms['img_word_sim_words'] ]
+                print(subject)
+                humor_caps = [cap.replace(subject, random.choice(random.choices(norm['norm'])), 1).replace(' ', '') for norm in prop_norms['img_word_sim_words'] ]
                 prop_norms['caption'] = caption
                 prop_norms['humor_captions'] = humor_caps
                 prop_norms['subject'] = subject
@@ -185,8 +234,6 @@ if __name__ == '__main__':
                         help="max limit of generating tokens when constructing captions")
     parser.add_argument('--word_dict', type=str, default='jp_wiki_neolog', choices=['jp_wiki_neolog', 'jp_wiki_ipadic'],
                         help="word2vce dictionary")
-    parser.add_argument('--img_sim_limit', '-isl', type=int, default=5,
-                        help="max output size of words by calculating image sim")
     parser.add_argument('--img_multiply', '-mt', type=int, default=5,
                         help="multiply by num size of image classes is generated")
     parser.add_argument('--output_size', type=int, default=5,
@@ -197,6 +244,8 @@ if __name__ == '__main__':
                         help="similarity of img sim")
     parser.add_argument('--word_sim', '-ws', type=str, default='low', choices=['high', 'low', 'rand'],
                         help="similarity of word sim")
+    parser.add_argument('--colloquial', '-co', action='store_true',
+                        help="return captions as colloquial")
     parser.add_argument('--no_feature', '-f', action='store_false',
                         help="don't use image features to calc img sim class")
     parser.add_argument('--gpu', '-g', type=int, default=-1,
@@ -210,7 +259,6 @@ if __name__ == '__main__':
                             beamsize=args.beamsize,
                             depth_limit=args.depth_limit,
                             word_dict=args.word_dict,
-                            img_sim_limit=args.img_sim_limit,
                             feature=args.no_feature,
                             gpu_id=args.gpu
                         )
@@ -221,10 +269,10 @@ if __name__ == '__main__':
                             num=args.output_size,
                             cutoff=args.cutoff,
                             img_sim=args.img_sim,
-                            word_sim=args.word_sim)
+                            word_sim=args.word_sim,
+                            colloquial=args.colloquial)
     
 
-    print(humor_captions)
     print('caption results\n')
     for i, cap in enumerate(humor_captions):
         captions = cap['humor_captions']
@@ -232,10 +280,6 @@ if __name__ == '__main__':
         img_sim_words = cap['img_sim_words']
         word_sim_words = cap['word_sim_words']
 
-        print(img_word_sim_words)
-        print(img_sim_words)
-        print(word_sim_words)
-        
         scores = [img_word['score'] for img_word in img_word_sim_words]
         img_word_norms = [img_word['norm'] for img_word in img_word_sim_words]
         

@@ -5,20 +5,12 @@
     <div class="row">
         <div class="col-xs-8 col-sm-9 col-md-8 col-lg-6">
             <div class="text-center">
-                <video id='world' width="256" height="256" autoplay></video>
                 <canvas id="main" style="border: 1px solid" width="512" height="512"></canvas>
             </div>
             <form id="img_uplode" class="well" enctype="multiple/form-data">
                 <div class="form-group">
                     <label for="choose">File input</label>
                     <input type="file" id="choose" name="img">
-                    <br>
-                    <label for="cam">Camera</label>
-                    <br>
-                    <button onclick="start()">Start Video</button>
-                    <button onclick="stop()">Finish Video</button>
-                    <button onclick="snapshot()">Capture</button>
-                    <br>
                     <br>
                     <label for="url">URL</label>
                     <input type="url" name="image_url" class="form-control">
@@ -38,6 +30,26 @@
             <div id="TabContent" class="tab-content">
                 
                 <div class="tab-pane fade in active" id="tab1">
+                    <br>
+                    <form id="sim_type" class="form-inline">
+                        <div class="form-group">
+                            <label for="img_sim">Image Sim</label>
+                            <select id="img_sim" class="form-control">
+                                <option value="high" selected>High</option>
+                                <option value="mid">Med</option>
+                                <option value="low">Low</option>
+                                <option value="rand">Random</option>
+                            </select>
+                            <label for="word_sim">Word Sim</label>
+                            <select id="word_sim" class="form-control">
+                                <option value="high">High</option>
+                                <option value="mid">Med</option>
+                                <option value="low" selected>Low</option>
+                                <option value="rand">Random</option>
+                            </select>
+                        </div>
+                    </form>
+
                     <table id="captions" class="table border-collapse:collapse">
                     </table>
                 </div>
@@ -55,44 +67,16 @@
                             <th>Values</th>
                         </tr>
                         <tr>
-                            <td>Japanese RNN Model Path</td>
-                            <td>{{ configuration['rnn_model_jp_path'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>English RNN Model Path</td>
-                            <td>{{ configuration['rnn_model_en_path'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Chinese RNN Model Path</td>
-                            <td>{{ configuration['rnn_model_ch_path'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>CNN Model Path</td>
-                            <td>{{ configuration['cnn_model_path'] }}</td>
+                            <td>Language</td>
+                            <td>{{ configuration['lang'] }}</td>
                         </tr>
                         <tr>
                             <td>CNN Model Type</td>
                             <td>{{ configuration['cnn_model_type'] }}</td>
                         </tr>
                         <tr>
-                            <td>Japanese Dictionary Path</td>
-                            <td>{{ configuration['dict_jp_path'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>English Dictionary Path</td>
-                            <td>{{ configuration['dict_en_path'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Chinese Dictionary Path</td>
-                            <td>{{ configuration['dict_ch_path'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Mean</td>
-                            <td>{{ configuration['mean'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>first Word</td>
-                            <td>{{ configuration['first_word'] }}</td>
+                            <td>Word2Vec dict type</td>
+                            <td>{{ configuration['word_dict'] }}</td>
                         </tr>
                         <tr>
                             <td>BeamSize</td>
@@ -101,10 +85,6 @@
                         <tr>
                             <td>Depth limit</td>
                             <td>{{ configuration['depth_limit'] }}</td>
-                        </tr>
-                        <tr>
-                            <td>Hidden Dim</td>
-                            <td>{{ configuration['hidden_dim'] }}</td>
                         </tr>
                         <tr>
                             <td>GPU</td>

@@ -70,7 +70,7 @@ class word_sim(object):
             return sim_words[:num]
 
         elif sim_type == 'rand':
-            return np.random.choice(sim_words, num, replace=False)
+            return list(np.random.choice(sim_words, num, replace=False))
         
         else:
             raise TypeError('Variable of sim_type is not one of these (high, low, rand)')
