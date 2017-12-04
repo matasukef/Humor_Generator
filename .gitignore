@@ -126,4 +126,5 @@ data/word2vec/train_data/processed/
 data/word2vec/train_data/training_data/
 
 #experiments
+wev/uploader/
 experiments/data/
