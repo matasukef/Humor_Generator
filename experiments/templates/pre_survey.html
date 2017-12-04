@@ -1,0 +1,191 @@
+{% extends "layout.html" %}
+{% block content %}
+
+      <main role="main">
+        <div class="jumbotron text-center">
+          <h1 class="display-5">事前アンケート</h1>
+          <br><br>
+          <!--<hr>-->
+          <div class="col-md-8 offset-2">
+              <h2 class="lead">[アンケートについて]</h2>
+              <br>
+              <p>
+                始めにユーモアに対する事前知識を調査するためにいくつかアンケートを答えていただきます。
+                各アンケート項目に対して，4段階，または5段階で最も当てはまるものを選択してください。
+              </p>
+          </div>
+          <div class="col-md-12">
+
+              <h2 class="lead">[アンケート]</h2>
+              <br>
+              <form action="experiment1" method="post">
+                  <div class="form-group">
+
+                      <!-- SHQ -->
+                      <div class="question">
+                          <p class="lead">1. 面白いことに気づくのは，早い方ですか，遅い方ですか？</p>
+                          <div class="btn-group" role="group" data-toggle="buttons">
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q1" autocomplete="off" value="1" required>早い方
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q1" autocomplete="off" value="2" required>やや早い
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q1" autocomplete="off" value="3"required>やや遅い方
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q1" autocomplete="off" value="4" required>遅い方
+                              </label>
+                          </div>
+                      </div>
+                        
+                      <div class="question">
+                          <p class="lead">2. 周りの人はおもしろい点に気づいているのに，自分だけ気づいていないことがありますか？</p>
+                          <div class="btn-group" role="group" data-toggle="buttons">
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q2" autocomplete="off" value="1" required>ある
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q2" autocomplete="off" value="2" required>時々ある
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q2" autocomplete="off" value="3" required>あまりない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q2" autocomplete="off" value="4" required>ない
+                              </label>
+                          </div>
+                      </div>
+
+                      <div class="question">
+                          <p class="lead">3. あなたを楽しませるために相手が見せた，ちょっとした変化や合図を簡単に理解できますか？</p>
+                          <div class="btn-group" role="group" data-toggle="buttons">
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q3" autocomplete="off" value="4" required>簡単にできる
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q3" autocomplete="off" value="3" required>どちらかといえば簡単にできる
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q3" autocomplete="off" value="2" required>どちらかといえば時間がかかる
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q3" autocomplete="off" value="1" required>時間がかかる
+                              </label>
+                          </div>
+                      </div>
+
+                      <div class="question">
+                          <p class="lead">4. その気になれば，たいていの状況で，こっけいなことや，しゃれや，おもしろいことなどを見つけ出すことができますか？</p>
+                          <div class="btn-group" role="group" data-toggle="buttons">
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q4" autocomplete="off" value="4" required>簡単にできる
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q4" autocomplete="off" value="3" required>どちらかといえば簡単にできる
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q4" autocomplete="off" value="2" required>どちらかといえば時間がかかる
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q4" autocomplete="off" value="1" required>時間がかかる
+                              </label>
+                          </div>
+                      </div>
+
+                      <!--MSHS ユーモアに対する好悪 -->
+                      <div class="question">
+                          <p class="lead">5. 冗談を言って周囲の人を元気づけることは無意味なことだと思います。</p>
+                          <div class="btn-group" role="group" data-toggle="buttons">
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q5" autocomplete="off" value="5" required>そう思わない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q5" autocomplete="off" value="4" required>あまりそう思わない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q5" autocomplete="off" value="3" required>どちらでもない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q5" autocomplete="off" value="2" required>ややそう思う
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q5" autocomplete="off" value="1" required>そう思う
+                              </label>
+                          </div>
+                      </div>
+
+                      <div class="question">
+                          <p class="lead">6. 私はユーモアのある人をすばらしいと思います。</p>
+                          <div class="btn-group" role="group" data-toggle="buttons">
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q6" autocomplete="off" value="1" required>そう思わない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q6" autocomplete="off" value="2" required>あまりそう思わない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q6" autocomplete="off" value="3" required>どちらでもない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q6" autocomplete="off" value="4" required>ややそう思う
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q6" autocomplete="off" value="5" required>そう思う
+                              </label>
+                          </div>
+                      </div>
+
+                      <div class="question">
+                          <p class="lead">7. 私は冗談を言う人が嫌いです。</p>
+                          <div class="btn-group" role="group" data-toggle="buttons">
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q7" autocomplete="off" value="5" required>そう思わない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q7" autocomplete="off" value="4" required>あまりそう思わない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q7" autocomplete="off" value="3" required>どちらでもない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q7" autocomplete="off" value="2" required>ややそう思う
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q7" autocomplete="off" value="1" required>そう思う
+                              </label>
+                          </div>
+                      </div>
+
+                      <div class="question">
+                          <p class="lead">8. 笑っていると周りの人も楽しくなると思います。</p>
+                          <div class="btn-group" role="group" data-toggle="buttons">
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q8" autocomplete="off" value="1" required>そう思わない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q8" autocomplete="off" value="2" required>あまりそう思わない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q8" autocomplete="off" value="3" required>どちらでもない
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q8" autocomplete="off" value="4" required>ややそう思う
+                              </label>
+                              <label class="btn btn-primary">
+                                <input type="radio" name="q8" autocomplete="off" value="5" required>そう思う
+                              </label>
+                          </div>
+                      </div>
+                  </div>
+
+                  <p class="lead">質問は以上です。「次へ」を押して実験を続けてください。</p>
+                  <p><input id="submit" type="submit" class="btn btn-md btn-success" value="次へ"></p>
+              </form>
+          </div>
+        </div>
+      </main>
+
+
+{% endblock %}

@@ -124,3 +124,6 @@ data/word2vec/train_data/original/
 data/word2vec/train_data/converted/
 data/word2vec/train_data/processed/
 data/word2vec/train_data/training_data/
+
+#experiments
+experiments/data/

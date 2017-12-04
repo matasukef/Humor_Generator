@@ -1,0 +1,15 @@
+th, td{
+    text-align: center;
+}
+
+.lang{
+    font-weight: bold;
+}
+
+#captions, #configuration{
+    margin-top: 3%;
+}
+
+.question{
+    margin-bottom: 2em;
+}
