@@ -14,11 +14,18 @@ from calc_sims.img_word_predict import img_word_sim
 from image_caption.CaptionGenerator import CaptionGenerator
 
 class HumorCaptionGenerator(object):
-    __slots__ = ['lang',
+    __slots__ = [
+                'cnn_model_path',
+                'rnn_model_path',
+                'word2vec_model_path',
+                'nic_dict_path',
+                'class_table_path',
                 'cnn_model_type',
                 'beamsize',
                 'depth_limit',
-                'word_dict',
+                'first_word',
+                'hidden_dim',
+                'mean',
                 'feature',
                 'gpu_id',
                 't',
@@ -27,40 +34,59 @@ class HumorCaptionGenerator(object):
             ]
 
     def __init__(self,
-                lang='jp',
+                rnn_model_path,
+                cnn_model_path,
+                word2vec_model_path,
+                nic_dict_path,
+                class_table_path,
                 cnn_model_type='ResNet',
                 beamsize=1,
                 depth_limit=50,
-                word_dict='jp_wiki_neolog',
+                first_word='<S>',
+                hidden_dim=512,
+                mean='imagenet',
                 feature=True,
                 gpu_id=0
             ):
 
-        self.lang = lang
-        self.cnn_model_type=cnn_model_type
-        self.beamsize=beamsize
-        self.depth_limit=depth_limit
-        self.word_dict=word_dict
+        self.rnn_model_path = rnn_model_path
+        self.cnn_model_path = cnn_model_path
+        self.cnn_model_type = cnn_model_type
+        self.nic_dict_path = nic_dict_path
+        self.word2vec_model_path = word2vec_model_path
+        self.class_table_path = class_table_path
+        self.beamsize = beamsize
+        self.depth_limit = depth_limit
+        self.first_word = first_word
+        self.hidden_dim = hidden_dim
+        self.mean = mean
         self.feature = feature
         self.gpu_id = gpu_id
         
         self.t = Tokenizer(mmap=True)
         self.caption_model = CaptionGenerator(
-                                lang=self.lang,
+                                rnn_model_path=rnn_model_path,
+                                cnn_model_path=cnn_model_path,
                                 cnn_model_type=self.cnn_model_type,
+                                dict_path=self.nic_dict_path,
                                 beamsize=self.beamsize,
                                 depth_limit=self.depth_limit,
-                                gpu_id=self.gpu_id
+                                gpu_id=self.gpu_id,
+                                first_word=first_word,
+                                hidden_dim=hidden_dim,
+                                mean=mean
 
                                             
                 )
 
         self.img_word_model = img_word_sim(
+                                cnn_model_path=self.cnn_model_path,
+                                word2vec_model_path=self.word2vec_model_path,
                                 cnn_model_type=self.cnn_model_type,
-                                lang=self.lang,
-                                word_dict=self.word_dict,
+                                class_table_path=self.class_table_path,
                                 feature=self.feature,
-                                gpu_id=self.gpu_id
+                                gpu_id=self.gpu_id,
+                                mean=self.mean
                             )
 
     def _generate_captions(self, img):
@@ -223,16 +249,30 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--img', '-i', type=str, default=os.path.join('..', '..', 'sample_imgs', 'test.jpg'),
                         help="input image")
-    parser.add_argument('--lang', '-l', type=str, default='jp', choices = ['jp', 'en', 'ch'],
-                        help="choose language to generate captions")
-    parser.add_argument('--cnn_model_type', '-ct', type=str, default='ResNet', choices=['ResNet', 'VGG16', 'AlexNet'],
+    parser.add_argument('--cnn_model_path', type=str, default=os.path.join('..', '..', 'data', 'models', 'cnn', 'ResNet50.model'),
+                        help="CNN model path")
+    parser.add_argument('--cnn_model_type', type=str, default='ResNet', choices=['ResNet', 'VGG16', 'AlexNet'],
                         help="CNN model type")
+    parser.add_argument('--rnn_model_path', type=str, default=os.path.join('..', '..', 'data', 'models', 'rnn', 'STAIR_jp_256_Adam.model'),
+                        help="RNN model path")
+    parser.add_argument('--word2vec_model_path', type=str, default=os.path.join('..', '..', 'data', 'word2vec', 'models', 'ja_wikipedia_neolog.model'),
+                        help="Word2vec model path")
+    parser.add_argument('--nic_dict_path', type=str, default=os.path.join('..', '..', 'data', 'nic_dict', 'dict_STAIR_jp_train.pkl'),
+                        help="Neural image caption dictionary path")
+    parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', 'data', 'wordnet', 'resnet_synsets_jp.txt'),
+                        help="class table path")
     parser.add_argument('--beamsize', '-b', type=int, default=1,
                         help="beamsize of neural image caption")
     parser.add_argument('--depth_limit', '-dl', type=int, default=50, 
                         help="max limit of generating tokens when constructing captions")
-    parser.add_argument('--word_dict', type=str, default='jp_wiki_neolog', choices=['jp_wiki_neolog', 'jp_wiki_ipadic'],
-                        help="word2vce dictionary")
+    parser.add_argument('--first_word', type=str, default='<S>',
+                        help="first word")
+    parser.add_argument('--hidden_dim', type=int, default=512,
+                        help="dimension of hidden layers")
+    parser.add_argument('--mean', type=str, default="imagenet",
+                        help="method to preprocess images")
+    parser.add_argument('--no_feature', '-f', action='store_false',
+                        help="don't use image features to calc img sim class")
     parser.add_argument('--img_multiply', '-mt', type=int, default=5,
                         help="multiply by num size of image classes is generated")
     parser.add_argument('--output_size', type=int, default=5,
@@ -245,19 +285,23 @@ if __name__ == '__main__':
                         help="similarity of word sim")
     parser.add_argument('--colloquial', '-co', action='store_true',
                         help="return captions as colloquial")
-    parser.add_argument('--no_feature', '-f', action='store_false',
-                        help="don't use image features to calc img sim class")
     parser.add_argument('--gpu', '-g', type=int, default=-1,
                         help="GPU ID (put -1 if you don't use gpu)")
     
     args = parser.parse_args()
 
     model = HumorCaptionGenerator(
-                            lang=args.lang,
+                            rnn_model_path=args.rnn_model_path,
+                            cnn_model_path=args.cnn_model_path,
+                            word2vec_model_path=args.word2vec_model_path,
+                            nic_dict_path=args.nic_dict_path,
+                            class_table_path=args.class_table_path,
                             cnn_model_type=args.cnn_model_type,
                             beamsize=args.beamsize,
                             depth_limit=args.depth_limit,
-                            word_dict=args.word_dict,
+                            first_word=args.first_word,
+                            hidden_dim=args.hidden_dim,
+                            mean=args.mean,
                             feature=args.no_feature,
                             gpu_id=args.gpu
                         )

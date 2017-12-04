@@ -26,16 +26,22 @@ from WEB_ENV import (
 
 def model_configuration(args):
     
-    lang = args.lang
     #model configuration
-    #cnn_model_path = args.cnn_model_path
+    cnn_model_path = args.cnn_model_path
     cnn_model_type = args.cnn_model_type
+    rnn_model_path = args.rnn_model_path
+    word2vec_model_path = args.word2vec_model_path
+    nic_dict_path = args.nic_dict_path
+    class_table_path = args.class_table_path
     beamsize = args.beamsize
-    word_dict = args.word_dict
     depth_limit = args.depth_limit
+    first_word = args.first_word
+    hidden_dim = args.hidden_dim
+    mean = args.mean
+    feature = args.no_feature
     gpu = args.gpu
 
-    conf_dict = {'lang': lang, 'cnn_model_type': cnn_model_type, 'beamsize': beamsize, 'depth_limit': depth_limit, 'gpu': gpu, 'word_dict': word_dict}
+    conf_dict = {'cnn_model_path': cnn_model_path, 'cnn_model_type': cnn_model_type, 'rnn_model_path': rnn_model_path, 'word2vec_model_path': word2vec_model_path, 'nic_dict_path': nic_dict_path, 'class_table_path': class_table_path, 'beamsize': beamsize, 'depth_limit': depth_limit, 'first_word': first_word, 'hidden_dim': hidden_dim, 'mean': mean, 'feature': feature, 'gpu': gpu}
 
     return conf_dict
 
@@ -98,10 +104,9 @@ def return_captions():
             else:
                 return 'error'
 
-    print(request.values)
     humor_captions = model.generate(
                         img = img_path,
-                        multiple = NUM_IMG_MULTIPLY,
+                        multiple = 1,
                         num = num_caption,
                         cutoff = offset,
                         img_sim = img_sim,
@@ -114,33 +119,47 @@ def return_captions():
 if __name__=='__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--lang', '-l', type=str, default='jp', choices = ['jp', 'en', 'ch'],
-                        help="choose language to generate captions and output image class")
-    parser.add_argument('--cnn_model_type', '-ct', type=str, default="ResNet", choices = ['ResNet', 'VGG16', 'AlexNet'],
+    parser.add_argument('--cnn_model_path', type=str, default=os.path.join('..', 'data', 'models', 'cnn', 'ResNet50.model'),
+                        help="CNN model path")
+    parser.add_argument('--cnn_model_type', type=str, default="ResNet", choices = ['ResNet', 'VGG16', 'AlexNet'],
                         help="CNN model type used in NIC and img_sim")
+    parser.add_argument('--rnn_model_path', type=str, default=os.path.join('..', 'data', 'models', 'rnn', 'STAIR_jp_256_Adam.model'),
+                        help="RNN model path")
+    parser.add_argument('--word2vec_model_path', type=str, default=os.path.join('..', 'data', 'word2vec', 'models', 'ja_wikipedia_neolog.model'),
+                        help="word2vec model path")
+    parser.add_argument('--nic_dict_path', type=str, default=os.path.join('..', 'data', 'nic_dict', 'dict_STAIR_jp_train.pkl'),
+                        help="Neural image caption dictionary path")
+    parser.add_argument('--class_table_path', type=str, default=os.path.join('..', 'data', 'wordnet', 'resnet_synsets_jp.txt'),
+                        help="class table path")
     parser.add_argument('--beamsize', '-b', type=str, default=1,
                         help="beamsize")
-    parser.add_argument('--word_dict', '-wd', type=str, default='jp_wiki_neolog', choices = ['jp_wiki_neolog', 'jp_wiki_ipadic'],
-                        help="word2vec dictionary")
     parser.add_argument('--depth_limit', '-dl', type=int, default=50,
                         help="max limit of generating tokens when constructing captions")
+    parser.add_argument('--first_word', type=str, default='<S>',
+                        help="first word")
+    parser.add_argument('--hidden_dim', type=int, default=512,
+                        help="dimension of hidden layeres")
+    parser.add_argument('--mean', type=str, default='imagenet',
+                        help="method to preprocess images")
     parser.add_argument('--no_feature', '-nf', action='store_false', 
                         help="use NIC feature when calculating img _sim")
     parser.add_argument('--gpu', '-g', type=int, default=0,
                         help="set GPU ID(negative value means using CPU)")
-    #parser.add_argument('--rnn_model_path', '-rm', type=str)
-    #parser.add_argument('--cnn_model_path', '-rm', type=str)
-    #parser.add_argument('--nic_dict_path', '-rm', type=str)
-    #parser.add_argument('--word_sim_model_path', '-rm', type=str)
     args = parser.parse_args()
 
 
     model = HumorCaptionGenerator(
-            lang = args.lang, #same with rnn model type
+            rnn_model_path=args.rnn_model_path, #rnn model path used to generate caption
+            cnn_model_path=args.cnn_model_path, #cnn model path to predict img sim and NIC 
+            word2vec_model_path=args.word2vec_model_path, #word2vec model path for word sim
+            nic_dict_path=args.nic_dict_path, #dictionary path used in NIC
+            class_table_path=args.class_table_path, #class table path used in img sim
             cnn_model_type = args.cnn_model_type, #cnn type which is used in NIC and img_sim
             beamsize = args.beamsize, #num of generated captions
             depth_limit = args.depth_limit, # num of tokens in caption
-            word_dict = args.word_dict, #word dict type used in word_sim
+            first_word=args.first_word, #first word used in NIC
+            hidden_dim=args.hidden_dim, #hidden dim layers in NIC
+            mean=args.mean, # method to preprocess images
             feature = args.no_feature, # use NIC feature or not when calc img_sim
             gpu_id = args.gpu # gpu id
         )

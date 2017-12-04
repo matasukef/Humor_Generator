@@ -95,16 +95,28 @@
                             <th>Values</th>
                         </tr>
                         <tr>
-                            <td>Language</td>
-                            <td>{{ configuration['lang'] }}</td>
+                            <td>CNN model path</td>
+                            <td>{{ configuration['cnn_model_path'] }}</td>
                         </tr>
                         <tr>
                             <td>CNN Model Type</td>
                             <td>{{ configuration['cnn_model_type'] }}</td>
                         </tr>
                         <tr>
-                            <td>Word2Vec dict type</td>
-                            <td>{{ configuration['word_dict'] }}</td>
+                            <td>RNN model path</td>
+                            <td>{{ configuration['rnn_model_path'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Word2vec model path</td>
+                            <td>{{ configuration['word2vec_model_path'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Neural Image Caption dict path</td>
+                            <td>{{ configuration['nic_dict_path'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Class Table path</td>
+                            <td>{{ configuration['class_table_path'] }}</td>
                         </tr>
                         <tr>
                             <td>BeamSize</td>
@@ -113,6 +125,22 @@
                         <tr>
                             <td>Depth limit</td>
                             <td>{{ configuration['depth_limit'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>First word</td>
+                            <td>{{ configuration['first_word'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Hidden dim</td>
+                            <td>{{ configuration['hidden_dim'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>mean</td>
+                            <td>{{ configuration['mean'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Use NIC feature</td>
+                            <td>{{ configuration['feature'] }}</td>
                         </tr>
                         <tr>
                             <td>GPU</td>

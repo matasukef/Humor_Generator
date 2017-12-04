@@ -11,66 +11,51 @@ from common.img_proc import Img_proc
 
 class img_sim(object):
     __slots__ = ['img_proc',
-                'MODEL_PATH',
-                'WORDS_DICT', 
                 'model',
                 'synsets',
                 'feature',
-                'gpu_id'
+                'gpu_id',
+                'cnn_model_path',
+                'cnn_model_type',
+                'class_table_path',
+                'mean'
             ]
 
-    def __init__(self, model='ResNet', lang="jp", feature=False, gpu_id=-1):
-        self.img_proc = Img_proc("imagenet")
-        #use features to predict output class
+    def __init__(
+            self, 
+            cnn_model_path,
+            class_table_path,
+            cnn_model_type='ResNet',
+            mean='imagenet',
+            feature=False,
+            gpu_id=-1
+        ):
+
+        self.cnn_model_path = cnn_model_path
+        self.cnn_model_type = cnn_model_type
+        self.class_table_path = class_table_path
+        self.mean = mean
         self.feature = feature
+        self.gpu_id = gpu_id
         
-        #can change it to use caption generator cnn
-        self.MODEL_PATH, self.model = self.__choose_model(model)    
-        self.WORDS_DICT = self.__choose_lang(lang)
+        self.img_proc = Img_proc(mean)
+        
+        if cnn_model_type == 'ResNet':
+            from CNN.ResNet50 import ResNet
+            self.model = ResNet()
+        elif cnn_model_type == 'VGG16':
+            from CNN.VGG16 import VGG16
+            self.model = VGG16()
+        elif cnn_model_type == 'AlexNet':
+            from CNN.AlexNet import AlexNet
+            self.model = AlexNet()
+        
+        serializers.load_hdf5(cnn_model_path, self.model)
 
-        serializers.load_hdf5(self.MODEL_PATH, self.model)
 
-        with open(self.WORDS_DICT, 'r') as f:
+        with open(class_table_path, 'r') as f:
             self.synsets = f.read().split('\n')[:-1]
         
-        self.gpu_id = gpu_id
-            
-    def __choose_model(self, model_type):
-
-        if model_type == 'ResNet':
-            from CNN.ResNet50 import ResNet
-            from ENV import MODEL_RESNET
-            MODEL_PATH = MODEL_RESNET
-            model = ResNet()
-        
-        elif model_type == 'VGG16':
-            from CNN.VGG16 import VGG16
-            from ENV import MODEL_VGG16
-            MODEL_PATH = MODEL_VGG16
-            model = VGG16()
-       
-        elif model_type == 'AlexNet':
-            from CNN.AlexNet import AlexNet
-            from ENV import MODEL_ALEXNET
-            MODEL_PATH = MODEL_ALEXNET
-            model = AlexNet()
-
-        return MODEL_PATH, model
-
-
-    def __choose_lang(self, lang='jp'):
-        if lang == 'jp':
-            from ENV import NORM_LIST_JP
-            WORDS_DICT = NORM_LIST_JP
-        elif lang == 'en':
-            from ENV import NORM_LIST_EN
-            WORDS_DICT = NORM_LIST_EN
-        elif lang == 'ch':
-            # chinese norm list is not implemented yet
-            from ENV import NORM_LIST_CH
-            WORDS_DICT = NORM_LIST_CH
-
-        return WORDS_DICT
 
     def __getMedianIndex(self, pred_list):
         #get nearest value with num in list
@@ -154,10 +139,14 @@ if __name__ == '__main__':
                         help="image you want to predict")
     parser.add_argument('--gpu', '-g', type=int, default=-1,
                         help="GPU ID(put -1 if you don't use gpu)")
-    parser.add_argument('--lang', '-l', type=str, default='jp',
-                        help="language to output")
-    parser.add_argument('--model_type', type=str, default='ResNet', choices=['ResNet', 'VGG16', 'AlexNet'],
+    parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', '..', 'data', 'wordnet', 'resnet_synsets_jp.txt'),
+                        help="class table path to output probability of image classification")
+    parser.add_argument('--cnn_model_path', type=str, default=os.path.join('..', '..', '..', 'data', 'models', 'cnn', 'ResNet50.model'),
+                        help="CNN model path")
+    parser.add_argument('--cnn_model_type', type=str, default='ResNet', choices=['ResNet', 'VGG16', 'AlexNet'],
                         help="model type")
+    parser.add_argument('--mean', type=str, default='imagenet',
+                        help="method to preprocess images")
     parser.add_argument('--num', '-n', type=int, default=5, 
                         help="the number of output")
     parser.add_argument('--sim', type=str, default='high', choices=['high', 'low', 'mid', 'rand'],
@@ -169,7 +158,15 @@ if __name__ == '__main__':
                         help="use features to output class")
     args = parser.parse_args()
 
-    img_model = img_sim(model=args.model_type, lang=args.lang, gpu_id=args.gpu, feature=args.feature)
+    img_model = img_sim(
+                cnn_model_path=args.cnn_model_path,
+                cnn_model_type=args.cnn_model_type, 
+                class_table_path=args.class_table_path,
+                gpu_id=args.gpu, 
+                mean=args.mean,
+                feature=args.feature
+            )
+
     sim_words = img_model.get_norms(args.img, num=args.num, cutoff=args.cutoff, sim_type=args.sim)
 
     print(sim_words)

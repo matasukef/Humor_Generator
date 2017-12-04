@@ -1,27 +1,23 @@
 import sys
+import os
 import argparse
 import numpy as np
 
 from gensim.models import KeyedVectors
 
 class word_sim(object):
-    __slots__ = ['word_dict',
+    __slots__ = ['word2vec_model_path',
                  'model'
             ]
 
-    def __init__(self, word_dict='jp_wiki_ipadic'):
-        self.word_dict = word_dict
-        if self.word_dict == 'jp_wiki_ipadic':
-            sys.path.append('../..')
-            from ENV import W2V_WIKIPEDIA_IPADIC
-            self.model = KeyedVectors.load(W2V_WIKIPEDIA_IPADIC)
-            #self.model = KeyedVectors.load_word2vec_format(W2V_WIKIPEDIA, binary=True)
-        elif self.word_dict == 'jp_wiki_neolog':
-            sys.path.append('../..')
-            from ENV import W2V_WIKIPEDIA_NEOLOG
-            self.model = KeyedVectors.load(W2V_WIKIPEDIA_NEOLOG)
-        else:
-            raise NameError('name ' + self.word_dict + ' is not defined in dict type')
+    def __init__(
+            self, 
+            word2vec_model_path,
+        ):
+
+        self.word2vec_model_path = word2vec_model_path
+        self.model = KeyedVectors.load(self.word2vec_model_path)
+        #self.model = KeyedVectors.load(self.word2vec_model_path, binary=True)
 
     def __getMedianIndex(self, sim_words):
         sims = np.asarray([word['sim'] for word in sim_words])
@@ -78,8 +74,8 @@ class word_sim(object):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--word_dict', '-d', type=str, default="jp_wiki_ipadic", choices=['jp_wiki_ipadic', 'jp_wiki_neolog'],
-                        help="type of dictionary")
+    parser.add_argument('--word2vec_model_path', type=str, default=os.path.join('..', '..', '..', 'data', 'word2vec', 'models', 'ja_wikipedia_neolog.model'),
+                        help="word2vec model path")
     parser.add_argument('--subject', '-s', type=str, default="男性",
                         help="Subject to compare with proper norms")
     parser.add_argument('--norms', '-nor', type=str, default=[['イヌ', '犬', 'ドッグ', 'tmp_word4except'], ['カンガルー'], ['カカシ', 'tmp_word4test_except2', 'かかし'], ['tmp_word4test_except3', 'サボテン', 'カクタス']],
@@ -90,7 +86,7 @@ if __name__ == '__main__':
                         help="sim type")
     args = parser.parse_args()
     
-    word_model = word_sim(args.word_dict)
+    word_model = word_sim(args.word2vec_model_path)
     sim_words = word_model.get_norms(args.subject, args.norms, args.num, args.sim)
     
     print('')

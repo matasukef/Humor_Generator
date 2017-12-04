@@ -19,55 +19,32 @@ sys.path.append('../CNN')
 import heapq
 
 class CaptionGenerator(object):
-    def __init__(self, lang='jp', cnn_model_type="ResNet", beamsize=3, depth_limit=50, gpu_id=-1):
+    def __init__(self, rnn_model_path, cnn_model_path, dict_path, cnn_model_type="ResNet", beamsize=3, depth_limit=50, gpu_id=-1, first_word='<S>', hidden_dim=512, mean="imagenet"):
+        
         self.gpu_id = gpu_id
         self.beamsize = beamsize
         self.depth_limit = depth_limit
-        self.img_proc = Img_proc(mean_type='imagenet')
-        self.first_word = '<S>'
+        self.img_proc = Img_proc(mean_type=mean)
+        self.index2token = self.parse_dic(dict_path)
+        self.first_word = first_word
 
         if cnn_model_type == 'ResNet':
             from CNN.ResNet50 import ResNet
-            from ENV import MODEL_RESNET
-            
             self.cnn_model = ResNet()
-            serializers.load_hdf5(MODEL_RESNET, self.cnn_model)
         
         elif cnn_model_type == 'VGG16':
             from CNN.VGG16 import VGG16
-            from ENV import MODEL_VGG16
-            
             self.cnn_model = VGG16()
-            serializers.load_hdf5(MODEL_VGG16, self.cnn_model)
        
         elif cnn_model_type == 'AlexNet':
             from CNN.AlexNet import AlexNet
-            from ENV import MODEL_ALEXNET
-            
             self.cnn_model = AlexNet()
-            serializers.load_hdf5(MODEL_ALEXNET, self.cnn_model)
+            
+        serializers.load_hdf5(cnn_model_path, self.cnn_model)
 
-       
-        if lang == 'jp':
-            from ENV import CAP_VOCAB_JP, CAP_RNN_MODEL_JP
-            
-            self.index2token = self.parse_dic(CAP_VOCAB_JP)
-            self.CAP_RNN_MODEL = CAP_RNN_MODEL_JP
+        self.rnn_model = Image2CaptionDecoder(len(self.token2index), hidden_dim=hidden_dim)
         
-        elif lang == 'en':
-            from ENV import CAP_VOCAB_EN, CAP_RNN_MODEL_EN
-            
-            self.index2token = self.parse_dic(CAP_VOCAB_EN)
-            self.CAP_RNN_MODEL = CAP_RNN_MODEL_EN
-        
-        elif lang == 'ch':
-            from ENV import CAP_VOCAB_CH, CAP_RNN_MODEL_CH
-            
-            self.index2token = self.parse_dic(CAP_VOCAB_CH)
-            self.CAP_RNN_MODEL = CAP_RNN_MODEL_CH
-
-        self.rnn_model = Image2CaptionDecoder(len(self.token2index), hidden_dim=512)
-        serializers.load_hdf5(self.CAP_RNN_MODEL, self.rnn_model)
+        serializers.load_hdf5(rnn_model_path, self.rnn_model)
         
         #Gpu configuration
         global xp
@@ -184,27 +161,42 @@ class CaptionGenerator(object):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--lang', '-rm', type=str, default='jp',
+    parser.add_argument('--rnn_model_path', type=str, default=os.path.join('..', '..', 'data', 'models', 'rnn', 'STAIR_jp_256_Adam.model'),
                         help="RNN model path")
+    parser.add_argument('-cnn_model_path', type=str, default=os.path.join('..', '..', 'data', 'models', 'cnn', 'ResNet50.model'),
+                        help="CNN model path")
     parser.add_argument('--cnn_model_type', '-ct', type=str, choices=['ResNet', 'VGG16', 'AlexNet'], default="ResNet",
                         help="CNN model type")
+    parser.add_argument('--dict_path', type=str, default=os.path.join('..', '..', 'data', 'nic_dict', 'dict_STAIR_jp_train.pkl'),
+                        help="Dictionary path")
     parser.add_argument('--beamsize', '-b', type=int, default=3,
                         help="beamsize")
     parser.add_argument('--depth_limit', '-dl', type=int, default=50,
                         help="max limit of generating tokens when constructing captions")
     parser.add_argument('--gpu', '-g', type=int, default=0, 
                         help="set GPU ID(negative value means using CPU)")
+    parser.add_argument('--first_word', type=str, default='<S>',
+                        help="first word")
+    parser.add_argument('--hidden_dim', type=int, default=512,
+                        help="dimension of hidden layers")
+    parser.add_argument('--mean', type=str, default='imagenet',
+                        help="method to preprocess images")
     parser.add_argument('--img', '-i', type=str, default=os.path.join('..', '..', 'sample_imgs', 'test.jpg'),
                         help="path to test image (default is set as sample_img1.jpg)")
     args = parser.parse_args()
     
     
     caption_generator = CaptionGenerator(
-            lang = args.lang,
+            rnn_model_path=args.rnn_model_path,
+            cnn_model_path=args.cnn_model_path,
             cnn_model_type=args.cnn_model_type,
+            dict_path=args.dict_path,
             beamsize = args.beamsize,
             depth_limit = args.depth_limit,
             gpu_id = args.gpu,
+            first_word=args.first_word,
+            hidden_dim=args.hidden_dim,
+            mean=args.mean
         )
 
     captions, _ = caption_generator.generate_sentences(args.img)
