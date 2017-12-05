@@ -4,18 +4,42 @@ import argparse
 import flask
 from flask import Flask, render_template, request, jsonify, Response, url_for
 from werkzeug import secure_filename
-import base64
+import random
 import json
 import pandas as pd
 
+sys.path.append('../src/')
+sys.path.append('../src/CNN')
+sys.path.append('../src/generator')
+sys.path.append('../src/calc_sims/img_sim')
+sys.path.append('../src/calc_sims/word_sim')
+sys.path.append('../src/image_caption')
+from HumorCaptionGenerator import HumorCaptionGenerator
+from WEB_ENV import (
+        EXP1_NUM,
+        IMG_PATH,
+        EXP1_DATA_PATH
+    )
+
 def get_data_exp1(data_path, image_dir, num):
-    files = os.listdir(image_dir)
-    
     csv_data = pd.read_csv(data_path)
-
     data = csv_data.sample(num)
+    
+    images = [ os.path.join(image_dir, image) for image in data.iloc[:, 1]]
+    captions = [ cap for cap in data.iloc[:, 2]]
+    humor_captions = [ humor_cap for humor_cap in data.iloc[:, 3]]
 
-    return files
+    return images, captions, humor_captions
+
+def get_image_list(image_dir):
+    file_list = [ os.path.join(image_dir, img_path) for img_path in os.listdir(image_dir)]
+
+    return file_list
+
+def get_image_path(img_list, num):
+    img_path = random.sample(img_list, num)
+
+    return img_path
 
 
 app = Flask(__name__)
@@ -72,8 +96,84 @@ def experiment1():
 @app.route('/experiment1_content', methods=['GET'])
 def experiment1_content():
     
-    return render_template('experiment1.html')
+    images, captions, humor_captions = get_data_exp1(EXP1_DATA_PATH, IMG_PATH, EXP1_NUM)
+    
+    print(images)
+
+    return render_template('experiment1.html', images=images)
+
+
+@app.route('/api', methods=['POST'])
+def generate_captions():
+    
+
+    if request.method == 'POST':
+        if 'image_path' in request.values:
+            img_path = request.values['image_path']
+
+        if 'num' in request.values:
+            num = request.values['num']
+        else:
+            num = 10
+        
+        if 'img_sim' in request.values and 'word_sim' in request.values:
+            img_sim = request.values['img_sim']
+            word_sim = request.values['word_sim']
+        else:
+            img_sim = 'high'
+            word_sim = 'low'
+        
+        img_path = get_image_path(img_list, num)
 
 
 if __name__=='__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--cnn_model_path', type=str, default=os.path.join('..', 'data', 'models', 'cnn', 'ResNet50.model'),
+                        help="CNN model path")
+    parser.add_argument('--cnn_model_type', type=str, default="ResNet", choices = ['ResNet', 'VGG16', 'AlexNet'],
+                        help="CNN model type used in NIC and img_sim")
+    parser.add_argument('--rnn_model_path', type=str, default=os.path.join('..', 'data', 'models', 'rnn', 'STAIR_jp_256_Adam.model'),
+                        help="RNN model path")
+    parser.add_argument('--word2vec_model_path', type=str, default=os.path.join('..', 'data', 'word2vec', 'models', 'ja_wikipedia_neolog.model'),
+                        help="word2vec model path")
+    parser.add_argument('--nic_dict_path', type=str, default=os.path.join('..', 'data', 'nic_dict', 'dict_STAIR_jp_train.pkl'),
+                        help="Neural image caption dictionary path")
+    parser.add_argument('--class_table_path', type=str, default=os.path.join('..', 'data', 'wordnet', 'resnet_synsets_jp.txt'),
+                        help="class table path")
+    parser.add_argument('--beamsize', '-b', type=str, default=1,
+                        help="beamsize")
+    parser.add_argument('--depth_limit', '-dl', type=int, default=50,
+                        help="max limit of generating tokens when constructing captions")
+    parser.add_argument('--first_word', type=str, default='<S>',
+                        help="first word")
+    parser.add_argument('--hidden_dim', type=int, default=512,
+                        help="dimension of hidden layeres")
+    parser.add_argument('--mean', type=str, default='imagenet',
+                        help="method to preprocess images")
+    parser.add_argument('--no_feature', '-nf', action='store_false', 
+                        help="use NIC feature when calculating img _sim")
+    parser.add_argument('--gpu', '-g', type=int, default=0,
+                        help="set GPU ID(negative value means using CPU)")
+    args = parser.parse_args()
+
+
+    model = HumorCaptionGenerator(
+            rnn_model_path=args.rnn_model_path, #rnn model path used to generate caption
+            cnn_model_path=args.cnn_model_path, #cnn model path to predict img sim and NIC 
+            word2vec_model_path=args.word2vec_model_path, #word2vec model path for word sim
+            nic_dict_path=args.nic_dict_path, #dictionary path used in NIC
+            class_table_path=args.class_table_path, #class table path used in img sim
+            cnn_model_type = args.cnn_model_type, #cnn type which is used in NIC and img_sim
+            beamsize = args.beamsize, #num of generated captions
+            depth_limit = args.depth_limit, # num of tokens in caption
+            first_word=args.first_word, #first word used in NIC
+            hidden_dim=args.hidden_dim, #hidden dim layers in NIC
+            mean=args.mean, # method to preprocess images
+            feature = args.no_feature, # use NIC feature or not when calc img_sim
+            gpu_id = args.gpu # gpu id
+        )
+
+    img_list = get_image_list(IMG_PATH)
+
     app.run(debug=True)

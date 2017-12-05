@@ -2,17 +2,19 @@
 {% block content %}
 
   <main role="main">
+    <div class="jumbotron text-center">
 
     <div class="row">
-        <div class="col-xs-8 col-sm-9 col-md-8 col-lg-6">
-            <div class="text-center">
-                <canvas id="main" style="border: 1px solid" width="512" height="512"></canvas>
-            </div>
-
+        <div class="col-xs-6">
+            <img src="{{ images[0] }}" class="img-responsive">
+            <img src="../../data/images/test2015/ COCO_test2015_000000000676.jpg" class="img-responsive">
+            <div id="test">{{ images[0] }}</div>
         </div>
-        <div class="col-xs-8 col-sm-9 col-md-4 col-lg-6">
-                    <table id="captions" class="table border-collapse:collapse">
-                    </table>
+
+
+        <div class="col-xs-6">
+            <table id="captions" class="table border-collapse:collapse">
+            </table>
         </div>
     </div>
   </main>
