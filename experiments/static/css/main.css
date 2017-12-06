@@ -13,3 +13,77 @@ th, td{
 .question{
     margin-bottom: 2em;
 }
+
+/*
+#caption{
+    background-color: #99bbff;
+    border-radius: 30px;
+    position: relative;
+    height: 40%;
+    width: 85%;
+    float: right;
+    font-size 2em;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    vertical-align: middle;
+    margin: 5%;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 5%;
+    padding: 3%;
+}
+
+#caption:after{
+    border: 10px solid transparent;
+    border-left-color: #99bbff;
+    border-right-width: 0;
+    right: -5px;
+    content: "";
+    display: block;
+    top: 20px;
+    position: absolute;
+    width: 0;
+}
+*/
+
+.progress{
+    height: 2rem;
+    background-color: #aaa;
+    -webkit-bow-shadow: none;
+    box-shadow: none;
+}
+
+
+/* 吹き出し本体 - 上下の中心 */
+#caption{
+  position: relative;
+  padding: 10px;
+  background-color: #99bbff;
+  width: 80%;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* 三角アイコン - 上下の中心 */
+#caption::before{
+  content: '';
+  position: absolute;
+  display: block;
+  width: 0;
+  height: 0;
+  right: -15px;
+  top: 50%;
+  margin-top: -15px;
+  border-left: 15px solid #99bbff;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+}
+
+#caption{
+    margin-left: auto;
+}
+
+#caption_group{
+    padding-bottom: 2.5rem;
+}
+

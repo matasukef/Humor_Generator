@@ -35,11 +35,11 @@ body {
 
 /* Customize container */
 
-/*@media (min-width: 48em) {
+@media (min-width: 48em) {
   .container {
-    max-width: 46rem;
+    max-width: 86rem;
   }
-}*/
+}
 
 .container-narrow > hr {
   margin: 2rem 0;
