@@ -129,3 +129,5 @@ data/word2vec/train_data/training_data/
 wev/uploader/
 experiments/static/images/
 experiments/static/data/
+experiments/static/result/
+
