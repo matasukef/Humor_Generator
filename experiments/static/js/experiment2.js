@@ -177,7 +177,7 @@ var get_all_result = function(){
 
 randamized_captions = randamize_captions(cap_list, humor_cap_list);
 
-show_image(img_list);
+show_image(data_list['images']);
 show_caption(randamized_captions['caps1'], '.caption1');
 show_caption(randamized_captions['caps2'], '.caption2');
 show_progress(num_exp);
