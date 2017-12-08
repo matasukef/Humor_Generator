@@ -4,7 +4,7 @@ import argparse
 import random
 import random
 import numpy as np
-import pandas
+import pandas as pd
 from janome.tokenizer import Tokenizer
 
 sys.path.append('../../src/calc_sims/img_sim')
@@ -13,13 +13,17 @@ sys.path.append('../../src/image_caption')
 sys.path.append('../../src/generator')
 sys.path.append('../../src/')
 
-from HumorCaptionGenerator import HumorCaptionGenerator
+from generator.HumorCaptionGenerator import HumorCaptionGenerator
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--img_dir', '-i', type=str, default=os.path.join('..', '..', 'sample_imgs', 'test.jpg'),
+    parser.add_argument('--img_dir', '-i', type=str, default=os.path.join('..', 'static', 'images', 'test2015'),
                         help="input image")
+    parser.add_argument('--output_csv_dir', type=str, default=os.path.join('..', 'static', 'data'))
+    parser.add_argument('--experiment1', type=str, default='experiment1.csv')
+    parser.add_argument('--experiment2', type=str, default='experiment2.csv')
+    parser.add_argument('--experiment3', type=str, default='experiment3.csv')
     parser.add_argument('--cnn_model_path', type=str, default=os.path.join('..', '..', 'data', 'models', 'cnn', 'ResNet50.model'),
                         help="CNN model path")
     parser.add_argument('--cnn_model_type', type=str, default='ResNet', choices=['ResNet', 'VGG16', 'AlexNet'],
@@ -50,10 +54,6 @@ if __name__ == '__main__':
                         help="output size")
     parser.add_argument('--cutoff', '-c',type=int, default=1,
                         help="the number of ignoring top n img sim word")
-    parser.add_argument('--img_sim', '-im', type=str, default='high', choices=['high', 'low', 'rand'],
-                        help="similarity of img sim")
-    parser.add_argument('--word_sim', '-ws', type=str, default='low', choices=['high', 'low', 'rand'],
-                        help="similarity of word sim")
     parser.add_argument('--colloquial', '-co', action='store_true',
                         help="return captions as colloquial")
     parser.add_argument('--gpu', '-g', type=int, default=-1,
@@ -77,8 +77,33 @@ if __name__ == '__main__':
                             gpu_id=args.gpu
                         )
 
+    
+    images = os.listdir(args.img_dir)
+
+    #experiment1
+    experiment1_path = os.path.join(args.output_csv_dir, args.experiment1)
+    experiment1_header = 'no, images, captions, humor_captions' + '\n'
+    experiment1_body = ''
+
+    with open(experiment1_path, 'w') as f:
+        pass
+
+    
+    for image in enumerate(images):
+        img_path = os.path.join(args.img_dir, image)
+
+        result = model.generate(
+                            img = img_path,
+                            multiple = args.img_multiply,
+                            num = args.output_size,
+                            cutoff = args.cutoff,
+                            img_sim = 'high',
+                            word_sim = 'low',
+                            colloquial = True
+                        )
 
 """
+
     humor_captions = model.generate(
                             img=args.img,
                             multiple=args.img_multiply,
