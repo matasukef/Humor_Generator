@@ -18,6 +18,7 @@ from WEB_ENV import (
         IMG_DIR_PATH,
         EXP1_DATA_PATH,
         EXP2_DATA_PATH,
+        EXP3_DATA_PATH,
         PRE_SURVEY_PATH,
         EXP1_PATH,
         EXP2_PATH,
@@ -58,6 +59,17 @@ def get_data_exp2(data_path, image_dir, num):
 
     return result
 
+
+def get_data_exp3(data_path, image_dir, num):
+    csv_data = pd.read_csv(data_path)
+    data = csv_data.sample(num)
+    
+    images = [ os.path.join(image_dir, image.strip()).split('/', 1)[1] for image in data.iloc[:, 1]]
+    captions = [ cap for cap in data.iloc[:, 2]]
+
+    result = {'images': images, 'captions': captions}
+
+    return result
 
 def make_save_file():
     header = 'age,name,sex,student_id,'
@@ -147,8 +159,7 @@ def _is_valid(session):
 def _is_exist(session, data_path):
     data = pd.read_csv(data_path)
     name = session['name']
-    print(data['name'].values)
-    print(name in data['name'].values)
+    
     if name in data['name'].values:
         return True
     else:
@@ -194,7 +205,6 @@ def finish_experiment():
             current_experiment_no = 'システム評価実験1'
             next_experiment_no = 'システム評価実験2'
             experiment_url = 'experiment2'
-            print(values)
             save_data(values, session, EXP1_PATH)
         
         elif referer == 'experiment2_content':
@@ -202,9 +212,17 @@ def finish_experiment():
             next_experiment_no = 'システム評価実験3'
             experiment_url = 'experiment3'
             save_data(values, session, EXP2_PATH)
-
     
     return render_template('finish_experiment.html', current_experiment_no = current_experiment_no, next_experiment_no = next_experiment_no, experiment_url = experiment_url)
+
+
+@app.route('/finish', methods=['POST'])
+def finish_all_experiment():
+    if request.method == 'POST':
+        values = request.form
+        save_data(values, session, EXP3_PATH)
+    
+    return render_template('finish_all_experiment.html')
 
 
 @app.route('/experiment1', methods=['POST'])
@@ -239,7 +257,15 @@ def experiment2_content():
 @app.route('/experiment3')
 def experiment3():
 
-    return render_template('experiment2_detail.html', experiment_no = 'システム評価実験3', experiment_url = 'experiment3_content')
+    return render_template('experiment3_detail.html', experiment_no = 'システム評価実験3', experiment_url = 'experiment3_content')
+
+@app.route('/experiment3_content')
+def experiment3_content():
+
+    result = get_data_exp3(EXP3_DATA_PATH, IMG_DIR_PATH, EXP3_NUM)
+
+    return render_template('experiment3.html', images = result['images'], captions = result['captions'])
+
 
 if __name__=='__main__':
 

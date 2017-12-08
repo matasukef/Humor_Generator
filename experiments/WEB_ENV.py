@@ -9,7 +9,7 @@ IMG_DIR_PATH = os.path.join('static', 'images', 'test2015')
 
 EXP1_DATA_PATH = os.path.join('static', 'data', 'experiment1.csv')
 EXP2_DATA_PATH = os.path.join('static', 'data', 'experiment2.csv')
-EXP3_DATA_PATH = os.path.join('static', 'data', 'experiment2.csv')
+EXP3_DATA_PATH = os.path.join('static', 'data', 'experiment3.csv')
 
 #num erch exp
 

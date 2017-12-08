@@ -222,7 +222,7 @@ var get_all_result = function(){
                 }
                 for(let i = 0; i < num_exp; i++){
                     let number = i + 1;
-                    let img_path = img_list[i].split('/');
+                    let img_path = data_list['images'][i].split('/');
                         form.append($('<input/>', {type: 'hidden', name: 'exp2_q' + number + '_image', value: img_path[img_path.length - 1] }));
                 }
                 form.appendTo(document.body).submit();
