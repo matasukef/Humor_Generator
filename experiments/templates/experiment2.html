@@ -95,30 +95,32 @@
                 
                 <div id="experiment_content" class="marketing">
                     {% for i in range(1, 10) %}
-                    <div id="caption_group" class="row">
-                        <div id="caption" class="caption{{ i }}">{{ i }}</div>
-                        
-                        <div class="row">
-                            <div class="col-lg-7" style="padding-top: 0.5rem;">
-                                <p class="lead">システムの発話にユーモアを感じた:</p>
-                            </div>
+                        {% if i <= 3 %}
+                        <div id="caption_group" class="row cap_group_{{ i }}">
+                        {% else %}
+                        <div id="caption_group" class="row cap_group_{{ i }}" hidden>
+                        {% endif %}
+                            <div id="caption" class="caption{{ i }}">{{ i }}</div>
+                            
+                            <div class="row">
+                                <div class="col-lg-7" style="padding-top: 0.5rem;">
+                                    <p class="lead">システムの発話にユーモアを感じた:</p>
+                                </div>
 
-                            <div class="col-lg-5">
-                                <div class="btn-group btn-group-lg" role="group" data-toggle="buttons">
-                                    {% for j in range(1, 6) %}
-                                    <label class="btn btn-primary">
-                                        <input type="radio" name="exp2_q{{i}}" autocpmplete="off" value="{{ j }}" required>{{ j }}
-                                    </label>
-                                    {% endfor %}
+                                <div class="col-lg-5">
+                                    <div class="btn-group btn-group-lg" role="group" data-toggle="buttons">
+                                        {% for j in range(1, 6) %}
+                                        <label class="btn btn-primary">
+                                            <input type="radio" name="exp2_q{{i}}" autocpmplete="off" value="{{ j }}" required>{{ j }}
+                                        </label>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     {% endfor %}
 
-                    <br>
                     <p id="warning" class="lead" style="color: red;"></p>
-                    <br>
                     <p><input id="submit" type="submit" class="btn btn-md btn-success" value="次へ"></p>
                 
                 </div>

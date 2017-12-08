@@ -4,8 +4,12 @@ var ctx = canvas.getContext('2d');
 var img = new Image();
 var isInit = false;
 
-var list_q1 = [];
-var list_q2 = [];
+var sim_list = ['ll','lm','lh','ml','mm','mh','hl','hm','hh'];
+
+var answer_list = {}
+for(let i = 0; i < sim_list.length; i++){
+    answer_list[sim_list[i]] = [];
+}
 
 var render = function(){
     if(isInit){
@@ -45,82 +49,41 @@ var render = function(){
 }
 
 
-var show_image = function(img_list){
-    img.src = img_list[0];
-    render();
+var shuffle_array = function(array){
+    var tmp_array = $.extend(true, [], array);
+    for(let i = tmp_array.length-1; i > 0; i--){
+        let r = Math.floor(Math.random() * (i + 1));
+        let tmp = tmp_array[i];
+        tmp_array[i] = tmp_array[r];
+        tmp_array[r] = tmp;
+    }
 
-    var counter = 1;
-    $('#submit').on('click', function(){
-        if(check_state('exp1_q1') && check_state('exp1_q2')){
-            if(counter < num_exp){
-                img.src = img_list[counter];
-                render();
-
-                counter += 1;
-            }
-        }
-    });
-    
-    img.addEventListener('load', render, false);
-    window.addEventListener('resize', render, false);
+    return tmp_array;
 }
 
-var randamize_captions = function(cap1, cap2){
-    var randamized_caps1 = [];
-    var randamized_caps2 = [];
+var randamize_captions = function(caption_list){
+    
+    var randamized_list = {};
+    var sim_table = {};
+    for(let i = 0; i < sim_list.length; i++){
+        randamized_list['cap_' + i] = [];
+        sim_table['cap_' + i] = [];
+    }
 
-    for(var i = 0; i < cap1.length; i++){
-        var select = Math.random() >= 0.5;
-        if(select == 0){
-            randamized_caps1.push(cap1[i]);
-            randamized_caps2.push(cap2[i]);
-        }else{
-            randamized_caps1.push(cap2[i]);
-            randamized_caps2.push(cap1[i]);
+    for(let i = 0; i < num_exp; i++){
+        let random_array = shuffle_array(sim_list);
+        for(let j = 0; j < sim_list.length; j++){
+            randamized_list['cap_' + j].push(data_list['cap_' + random_array[j]][i]);
+            sim_table['cap_' + j].push(random_array[j]);
         }
     }
+
+    caption_with_table = {'randamized_captions': randamized_list, 'sim_table': sim_table}
     
-    var randamized_captions = { 'caps1': randamized_caps1, 'caps2': randamized_caps2 };
-    
-    return randamized_captions;
-}
-
-var show_caption = function(captions, target){
-    first_cap = captions[0];
-    $(target).text(first_cap);
-
-    var cap_counter = 1;
-    $('#submit').on('click', function(){
-        if(check_state('exp1_q1') && check_state('exp1_q2')){
-            if(cap_counter < num_exp){
-                cap_counter += 1;
-                cap = captions[cap_counter];
-                $(target).text(cap);
-            }    
-        }
-    });
-}
-
-var show_progress = function(num){
-    first_ratio = 100 / num;
-    $('.progress-bar').css('width', first_ratio + '%');
-    $('.progress-bar').text('1/' + num);
-
-    var progress_counter = 1;
-    $('#submit').on('click', function(){
-        if(check_state('exp1_q1') && check_state('exp1_q2')){
-            if(progress_counter < num){
-                progress_counter += 1;
-                ratio = (progress_counter / num) * 100;
-                $('.progress-bar').css('width', ratio + '%');
-                $('.progress-bar').text(progress_counter + '/' + num);
-            }
-        }
-    });
+    return caption_with_table;
 }
 
 var check_state = function(target_name){
-    //var state = $('input[name=' + target_name + ']').val();
     var state = $("[name=" + target_name + "]:checked").val();
     return state;
 }
@@ -138,33 +101,129 @@ var get_result = function(target_name, cap_class){
     clear_checked(target_name);
 
     res = {'val': val, 'cap': cap}
-    
-    return res;
 
+    return res;
+}
+
+var show_next_caption = function(cap_class){
+    var class_num = cap_class.match(/\d/g);
+    var next_class = cap_class.replace(class_num, Number(class_num) + 3);
+
+    $(cap_class).attr('hidden', true);
+    $(next_class).attr('hidden', false);
+}
+
+
+var init = function(num, sim_list, data){
+    
+    /*progress bar*/
+    ratio = 100 / num;
+    $('.progress-bar').css('width', ratio + '%');
+    $('.progress-bar').text('1/' + num);
+    
+    /*show image*/
+    img.src = data['images'][0];
+    render();
+    img.addEventListener('load', render, false);
+    window.addEventListener('resize', render, false);
+
+    for(i = 0; i < sim_list.length; i++){
+        let cap_tag = 'cap_' + i;
+        let cap_class = '.caption' + (i+1);
+        $(cap_class).text(caption_with_table['randamized_captions'][cap_tag][0]);
+    }
 }
 
 var get_all_result = function(){
-    var result_counter = 0;
+    let question_counter = 1;
+    let result_counter = 0;
+    
+    var result_table = [];
+    for(let i = 0; i < num_exp; i++){
+        result_table.push([]);
+    }
+
     $('#submit').on('click', function(){
-        if(check_state('exp1_q1') && check_state('exp1_q2')){
+        var q1 = 1 + (question_counter - 1)*3;
+        var q2 = 2 + (question_counter - 1)*3;
+        var q3 = 3 + (question_counter - 1)*3;
+       
+        if(check_state('exp2_q' + q1) && check_state('exp2_q' + q2) && check_state('exp2_q' + q3)){
             $('#warning').empty();
-            res1 = get_result('exp1_q1', '.caption1');
-            res2 = get_result('exp1_q2', '.caption2');
             
-            if(cap_list.indexOf(res1['cap']) >= 0){
-                list_q1.push(res1['val']);
-                list_q2.push(res2['val']);
-            }else{
-                list_q1.push(res2['val']);
-                list_q2.push(res1['val']);
+            if(question_counter <= 3){
+                result_table[result_counter].push(get_result('exp2_q' + q1, '.caption' + q1));
+                result_table[result_counter].push(get_result('exp2_q' + q2, '.caption' + q2));
+                result_table[result_counter].push(get_result('exp2_q' + q3, '.caption' + q3));
+                
+                show_next_caption('.cap_group_' + q1);
+                show_next_caption('.cap_group_' + q2);
+                show_next_caption('.cap_group_' + q3);
+
+                /*show next three captions*/
+                question_counter += 1;
             }
-            result_counter += 1;
+            
+            if(question_counter > 3){
+                /*move to next images*/
+                question_counter = 1;
+                /*move to next image*/
+                result_counter += 1;
+
+                /* show next image captions */
+                for(i = 1; i <= 3; i++){
+                    $('.cap_group_' + i).attr('hidden', false);
+                }
+
+                /* set new image caption to caption class to show */
+                for(i = 0; i < sim_list.length; i++){
+                    let cap_tag = 'cap_' + i;
+                    let cap_class = '.caption' + (i+1);
+                    $(cap_class).text(caption_with_table['randamized_captions'][cap_tag][result_counter]);
+                }
+               
+                /* show new image */
+                img.src = data_list['images'][result_counter];
+                render();
+                
+            }
+            
+            /* progress counter */
+            ratio = ((result_counter+1) / num_exp) * 100;
+            $('.progress-bar').css('width', ratio + '%');
+            $('.progress-bar').text((result_counter + 1) + '/' + num_exp);
+            
+            
+            /* if experiment finish */
             if(result_counter >= num_exp){
+               
+                /* push result to answer_list */
+                for(let i = 0; i < num_exp; i++){
+                    for(let j = 0; j < sim_list.length; j++){
+                        var res_cap = result_table[i][j]['cap'];
+                        var res_val = result_table[i][j]['val'];
+                        for(k = 0; k < sim_list.length; k++){
+                            if(res_cap == caption_with_table['randamized_captions']['cap_' + k][i]){
+                                answer_list[caption_with_table['sim_table']['cap_' + k][i]].push(res_val);
+                            }
+                        }
+                    }
+                }
+                console.log(result_table);
+                console.log(answer_list);
+
+                /* push result_table to result_list */
                 var form = $('<form/>', {action: "finish_experiment", method: "post"});
                 for(i = 0; i < num_exp; i++){
-                    j = i + 1;
-                    form.append($('<input/>', {type: 'hidden', name: 'exp1_q' + j + '_1', value: list_q1[i] }));
-                    form.append($('<input/>', {type: 'hidden', name: 'exp1_q' + j + '_2', value: list_q2[i] }));
+                    for(let j = 0; j < sim_list.length; j++){
+                        let number = i + 1;
+                        form.append($('<input/>', {type: 'hidden', name: 'exp2_q' + number + '_' + sim_list[j], value: answer_list[sim_list[j]][i] }));
+                    }
+                }
+                for(let i = 0; i < num_exp; i++){
+                    let number = i + 1;
+                    let img_path = img_list[i].split('/');
+                        form.append($('<input/>', {type: 'hidden', name: 'exp2_q' + number + '_image', value: img_path[img_path.length - 1] }));
                 }
                 form.appendTo(document.body).submit();
             }
@@ -175,10 +234,11 @@ var get_all_result = function(){
     });
 }
 
-randamized_captions = randamize_captions(cap_list, humor_cap_list);
 
-show_image(data_list['images']);
-show_caption(randamized_captions['caps1'], '.caption1');
-show_caption(randamized_captions['caps2'], '.caption2');
-show_progress(num_exp);
+var caption_with_table = randamize_captions(data_list);
+init(num_exp, sim_list, data_list);
 get_all_result();
+
+
+
+console.log(caption_with_table);

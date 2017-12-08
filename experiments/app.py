@@ -77,6 +77,10 @@ def make_save_file():
         for i in range(1, EXP1_NUM + 1):
             exp1 += 'exp1_q' + str(i) + '_1,'
             exp1 += 'exp1_q' + str(i) + '_2,'
+
+        for i in range(1, EXP1_NUM + 1):
+            exp1 += 'exp1_q' + str(i) + '_image,'
+        
         exp1 += '\n'
         
         with open(EXP1_PATH , 'w') as f:
@@ -96,6 +100,11 @@ def make_save_file():
             exp2 += 'exp2_q' + str(i) + '_hm,'
             exp2 += 'exp2_q' + str(i) + '_hh,'
         
+        for i in range(1, EXP2_NUM + 1):
+            exp2 += 'exp2_q' + str(i) + '_image,'
+        
+        exp2 += '\n'
+
         with open(EXP2_PATH , 'w') as f:
             f.write(exp2)
     
@@ -103,6 +112,11 @@ def make_save_file():
         exp3 = header
         for i in range(1, EXP3_NUM + 1):
             exp3 += 'exp3_q' + str(i) + ','
+
+        for i in range(1, EXP3_NUM + 1):
+            exp3 += 'exp3_q' + str(i) + '_image,'
+
+        exp3 += '\n'
         
         with open(EXP3_PATH , 'w') as f:
             f.write(exp3)
@@ -112,7 +126,7 @@ def save_data(question, session_data, save_path):
 
     if not _is_exist(session_data, save_path):
         body = ''
-        
+
         for data in session_data.values():
             body += data + ',' 
 
@@ -180,9 +194,16 @@ def finish_experiment():
             current_experiment_no = 'システム評価実験1'
             next_experiment_no = 'システム評価実験2'
             experiment_url = 'experiment2'
+            print(values)
             save_data(values, session, EXP1_PATH)
         
+        elif referer == 'experiment2_content':
+            current_experiment_no = 'システム評価実験2'
+            next_experiment_no = 'システム評価実験3'
+            experiment_url = 'experiment3'
+            save_data(values, session, EXP2_PATH)
 
+    
     return render_template('finish_experiment.html', current_experiment_no = current_experiment_no, next_experiment_no = next_experiment_no, experiment_url = experiment_url)
 
 
@@ -195,7 +216,7 @@ def experiment1():
     return render_template('experiment1_detail.html', experiment_no = 'システム評価実験1', experiment_url = 'experiment1_content')
 
 
-@app.route('/experiment1_content', methods=['GET'])
+@app.route('/experiment1_content')
 def experiment1_content():
     
     result = get_data_exp1(EXP1_DATA_PATH, IMG_DIR_PATH, EXP1_NUM)
@@ -214,6 +235,11 @@ def experiment2_content():
     result = get_data_exp2(EXP2_DATA_PATH, IMG_DIR_PATH, EXP2_NUM)
 
     return render_template('experiment2.html', images=result['images'], cap_ll = result['cap_ll'], cap_lm = result['cap_lm'], cap_lh = result['cap_lh'], cap_ml = result['cap_ml'], cap_mm = result['cap_mm'], cap_mh = result['cap_mh'], cap_hl = result['cap_hl'], cap_hm = result['cap_hm'], cap_hh = result['cap_hh'])
+
+@app.route('/experiment3')
+def experiment3():
+
+    return render_template('experiment2_detail.html', experiment_no = 'システム評価実験3', experiment_url = 'experiment3_content')
 
 if __name__=='__main__':
 

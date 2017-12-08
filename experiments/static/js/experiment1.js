@@ -161,10 +161,16 @@ var get_all_result = function(){
             result_counter += 1;
             if(result_counter >= num_exp){
                 var form = $('<form/>', {action: "finish_experiment", method: "post"});
-                for(i = 0; i < num_exp; i++){
-                    j = i + 1;
-                    form.append($('<input/>', {type: 'hidden', name: 'exp1_q' + j + '_1', value: list_q1[i] }));
-                    form.append($('<input/>', {type: 'hidden', name: 'exp1_q' + j + '_2', value: list_q2[i] }));
+                for(let i = 0; i < num_exp; i++){
+                    let number = i + 1;
+                    form.append($('<input/>', {type: 'hidden', name: 'exp1_q' + number + '_1', value: list_q1[i] }));
+                    form.append($('<input/>', {type: 'hidden', name: 'exp1_q' + number + '_2', value: list_q2[i] }));
+                }
+
+                for(let i = 0; i < num_exp; i++){
+                    let number = i + 1;
+                    let img_path = img_list[i].split('/');
+                    form.append($('<input/>', {type: 'hidden', name: 'exp1_q' + number + '_image', value: img_path[img_path.length - 1] }));
                 }
                 form.appendTo(document.body).submit();
             }
