@@ -18,9 +18,6 @@ var render = function(){
         isInit = true;
     }
 
-    canvas.width = parent.clientWidth;
-    canvas.height = parent.clientHeight;
-
     var canvas_height = canvas.height;
     var canvas_width = canvas.width;
 
