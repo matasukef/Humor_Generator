@@ -171,6 +171,12 @@ class HumorCaptionGenerator(object):
                     elif len(norm) and surface == 'が':
                         norms.append(norm)
                         break
+                    elif len(norm) and surface == 'は':
+                        norms.append(norm)
+                        break
+                    elif len(norm) and surface == 'には':
+                        norms.append(norm)
+                        break
                     elif pos[0] is not '名詞':
                         if len(norm):
                             norms.append(norm)
@@ -279,9 +285,9 @@ if __name__ == '__main__':
                         help="output size")
     parser.add_argument('--cutoff', '-c',type=int, default=1,
                         help="the number of ignoring top n img sim word")
-    parser.add_argument('--img_sim', '-im', type=str, default='high', choices=['high', 'low', 'rand'],
+    parser.add_argument('--img_sim', '-im', type=str, default='high', choices=['high', 'low', 'mid', 'rand'],
                         help="similarity of img sim")
-    parser.add_argument('--word_sim', '-ws', type=str, default='low', choices=['high', 'low', 'rand'],
+    parser.add_argument('--word_sim', '-ws', type=str, default='low', choices=['high', 'low', 'mid', 'rand'],
                         help="similarity of word sim")
     parser.add_argument('--colloquial', '-co', action='store_true',
                         help="return captions as colloquial")
@@ -352,3 +358,5 @@ if __name__ == '__main__':
         print('\nword sim')
         for w_n, w_s in zip(word_norms, word_sim):
             print(w_s, w_n)
+
+    print(humor_captions)

@@ -49,7 +49,7 @@ if __name__ == '__main__':
                         help="method to preprocess images")
     parser.add_argument('--no_feature', '-f', action='store_false',
                         help="don't use image features to calc img sim class")
-    parser.add_argument('--img_multiply', '-mt', type=int, default=10,
+    parser.add_argument('--img_multiply', '-mt', type=int, default=5,
                         help="multiply by num size of image classes is generated")
     parser.add_argument('--output_size', type=int, default=5,
                         help="output size")
@@ -57,7 +57,7 @@ if __name__ == '__main__':
                         help="the number of ignoring top n img sim word")
     parser.add_argument('--colloquial', '-co', action='store_true',
                         help="return captions as colloquial")
-    parser.add_argument('--gpu', '-g', type=int, default=-1,
+    parser.add_argument('--gpu', '-g', type=int, default=0,
                         help="GPU ID (put -1 if you don't use gpu)")
     
     args = parser.parse_args()
@@ -103,7 +103,11 @@ if __name__ == '__main__':
     
     for i, image in tqdm(enumerate(images)):
         img_path = os.path.join(args.img_dir, image)
-        
+
+        print(img_path)
+
+        print('result_ll')
+
         result_ll = model.generate(img = img_path,
                                    multiple = args.img_multiply,
                                    num = args.output_size,
@@ -113,6 +117,7 @@ if __name__ == '__main__':
                                    colloquial = True
                                 ) 
         
+        print('result_lm')
         result_lm = model.generate(img = img_path,
                                    multiple = args.img_multiply,
                                    num = args.output_size,
@@ -123,6 +128,7 @@ if __name__ == '__main__':
                                 ) 
         
 
+        print('result_lh')
         result_lh = model.generate(img = img_path,
                                    multiple = args.img_multiply,
                                    num = args.output_size,
@@ -132,6 +138,7 @@ if __name__ == '__main__':
                                    colloquial = True
                                 ) 
         
+        print('result_ml')
         result_ml = model.generate(img = img_path,
                                    multiple = args.img_multiply,
                                    num = args.output_size,
@@ -141,6 +148,7 @@ if __name__ == '__main__':
                                    colloquial = True
                                 ) 
         
+        print('result_mm')
         result_mm = model.generate(img = img_path,
                                    multiple = args.img_multiply,
                                    num = args.output_size,
@@ -151,6 +159,7 @@ if __name__ == '__main__':
                                 ) 
         
 
+        print('result_mh')
         result_mh = model.generate(img = img_path,
                                    multiple = args.img_multiply,
                                    num = args.output_size,
@@ -160,7 +169,7 @@ if __name__ == '__main__':
                                    colloquial = True
                                 ) 
         
-
+        print('result_hl')
         result_hl = model.generate(img = img_path,
                                    multiple = args.img_multiply,
                                    num = args.output_size,
@@ -171,19 +180,21 @@ if __name__ == '__main__':
                                 ) 
         
 
+        print('result_hm')
         result_hm = model.generate(img = img_path,
                                    multiple = args.img_multiply,
                                    num = args.output_size,
-                                   cutoff = 0,
+                                   cutoff = args.cutoff,
                                    img_sim = 'high',
                                    word_sim = 'mid',
                                    colloquial = True
                                 ) 
         
+        print('result_hh')
         result_hh = model.generate(img = img_path,
                                    multiple = args.img_multiply,
                                    num = args.output_size,
-                                   cutoff = 0,
+                                   cutoff = args.cutoff,
                                    img_sim = 'high',
                                    word_sim = 'high',
                                    colloquial = True

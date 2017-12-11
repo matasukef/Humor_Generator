@@ -4,17 +4,25 @@
     本実験では，画像からユーモア文章を自動的に生成するシステムの評価を行っていただきます。
     画像とその画像を下に自動生成された文章が9つ提示されます。
     それぞれの文章に対して1点から5点で面白さを評価してもらいます。
+    全部で{{ exp_num }}枚の画像に対する文章の面白さを評価してきただきます。
   </p>
   
 {% endblock %}
 
 {% block experiment_flow %}
-  <div class="col-md-8 offset-md-2">
-    <div class="text-left">
-      <ul>
-          <li>1</li>
-          <li>2</li>
-      </ul>
+  <div class="col-md-8 offset-md-1">
+    <div class="text-left" style="display:inline-block;">
+      <ol>
+          <li>左に表示される画像を見てください。</li>
+          <li>右に表示される3つの文章を見てください。</li>
+          <li>それぞれの文章は画像に写る状況を説明したものです。</li>
+          <li>それぞれの文章の面白さを1点から5点で評価してください。</li>
+          <li>「次へ」ボタンを押して，結果を送信してください。</li>
+          <li>同じ画像に対して別の文章が3つ表示されます。</li>
+          <li>1~5を3回繰り返すと，次の画像へ進みます。</li>
+          <li>上部のプロセスバーが{{ exp_num_}}/{{ exp_num }}になったら終了です。</li>
+          <li>「次へ」を押して次の実験へ進んでください。</li>
+      </ol>
     </div>
   </div>
 {% endblock %}
@@ -23,11 +31,8 @@
   <div class="col-md-8 offset-md-2">
     <div class="text-left">
       <ul>
-        <li>1</li>
-        <li>1</li>
-        <li>1</li>
-        <li>1</li>
-        <li>1</li>
+        <li>リラックスできる環境で評価してください。</li>
+        <li>評定内容は深く考えず選択してください。</li>
       </ul>
     </div>
   </div>

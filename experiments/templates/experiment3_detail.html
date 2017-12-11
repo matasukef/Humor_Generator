@@ -2,35 +2,34 @@
 {% block experiment_content %}
   <p>  
     本実験では，画像からユーモア文章を自動的に生成するシステムの評価を行っていただきます。
-    画像に対応する文章を見た際，もっと話したいと思ったかどうか，5段階で評価してください。
-    画像とその画像を下に自動生成された文章が9つ提示されます。
-    それぞれの文章に対して1点から5点で面白さを評価してもらいます。
+    システムが画像を下に，発話内容を自動的に生成します。
+    対話システムを利用しているという仮定の下，生成された発話内容を見た際，もっと利用してみたいと思ったかどうか，もっと話してみたいと思ったかどうか1点から5点で評価してください。
+    全部で{{ exp_num }}枚の画像に対する文章を評価していただきます。
   </p>
   
 {% endblock %}
 
 {% block experiment_flow %}
-  <div class="col-md-8 offset-md-2">
-    <div class="text-left">
+  <div class="col-md-10 offset-md-1">
+    <div class="text-left" style="display:inline-block;">
       <ul>
-          <li>1</li>
-          <li>2</li>
+          <li>左に表示される画像を見てください。</li>
+          <li>右に表示される文章を見てください。</li>
+          <li>画像に写る状況を説明する発話文を見た時，もっと利用してみたいと思ったかどうか1点から5点で評価してください。</li>
+          <li>「次へ」を押して，結果を送信してください。</li>
+          <li>上部のプロセスバーが{{ exp_num }}/{{ exp_num }}になったら終了です。</li>
+          <li>「次へ」を押して実験を終了してください。</li>
       </ul>
     </div>
   </div>
 {% endblock %}
 
 {% block experiment_caution %}
-  <div class="col-md-8 offset-md-2">
-    <div class="text-left">
-      <ul>
-        <li>1</li>
-        <li>1</li>
-        <li>1</li>
-        <li>1</li>
-        <li>1</li>
+  <div class="col-md-10 offset-md-1">
+      <ul style="display:inline-block;">
+        <li>リラックスできる環境で評価してください。</li>
+        <li>評定内容は深く考えず選択してください。</li>
       </ul>
-    </div>
   </div>
 {% endblock %}
 

@@ -54,11 +54,18 @@ class word_sim(object):
         if sim_type == 'high':
             return sim_words[::-1][:num]
 
-        elif sim_type == 'mid':
+        elif sim_type == 'med':
             med_index = self.__getMedianIndex(sim_words)
             half_num, even = divmod(num, 2)
             start_idx = med_index - half_num
             end_idx = med_index + half_num + even
+
+            return sim_words[start_idx : end_idx]
+
+        elif sim_type == "mid":
+            half_num, even = divmod(num, 2)
+            start_idx = num - half_num
+            end_idx = num + half_num + even
 
             return sim_words[start_idx : end_idx]
 
@@ -82,7 +89,7 @@ if __name__ == '__main__':
                         help="proper norms to compare with subject")
     parser.add_argument('--num', '-n', type=int, default=5,
                         help="the number of output")
-    parser.add_argument('--sim', '-st', type=str, default="low", choices=['high', 'low', 'mid', 'rand'],
+    parser.add_argument('--sim', '-st', type=str, default="low", choices=['high', 'low', 'mid', 'rand', 'med'],
                         help="sim type")
     args = parser.parse_args()
     

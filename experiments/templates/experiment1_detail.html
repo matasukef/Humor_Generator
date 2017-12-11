@@ -2,36 +2,33 @@
 {% block experiment_content %}
   <p>  
     本実験では，画像から文章を自動的に生成するシステムの評価を行っていただきます。
-    画像とその画像を下に自動生成された文章が２つ提示されます。
+    システムが画像を下に，２つの発話文を生成します。
     それぞれの文章に対して1点から5点で文章の面白さを評価してください。
-    全部で50枚の画像に対する文章の面白さを評価していただきます。
+    全部で{{ exp_num }}枚の画像に対する文章の面白さを評価していただきます。
   </p>
   
 {% endblock %}
 
 {% block experiment_flow %}
   <div class="col-md-10 offset-md-1">
-    <div class="text-left">
-      <ol>
+      <ol class="text-left" style="display:inline-block;">
           <li>左に表示される画像を見てください。</li>
           <li>右に表示される2つの文章を見てください。</li>
           <li>画像に対する文章として，それぞれの面白さを1点から5点で評価してください。</li>
           <li>「次へ」ボタンを押して，結果を送信してください。</li>
           <li>次の画像と文章が提示されるので，1~4 を繰り返してください。</li>
-          <li>上部のプロセスバーが50/50になったら終了です。「次へ」を押して次の実験へ進んでください。</li>
+          <li>上部のプロセスバーが{{ exp_num }}/{{ exp_num }}になったら終了です。</li>
+          <li>「次へ」を押して次の実験へ進んでください。</li>
       </ol>
-    </div>
   </div>
 {% endblock %}
 
 {% block experiment_caution %}
   <div class="col-md-10 offset-md-1">
-    <div class="text-left">
-      <ul>
+      <ul style="display:inline-block;">
         <li>リラックスできる環境で評価してください。</li>
-        <li>評定内容は深く考えず，選択してください。</li>
+        <li>評定内容は深く考えず選択してください。</li>
       </ul>
-    </div>
   </div>
 {% endblock %}
 

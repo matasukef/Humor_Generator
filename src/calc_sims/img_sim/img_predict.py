@@ -62,7 +62,7 @@ class img_sim(object):
         
         med_value = np.median(pred_list)
         min_idx = np.abs(np.asarray(pred_list) - med_value).argmin()
-        
+
         return min_idx
 
     def __calc_pred(self, img):
@@ -108,16 +108,37 @@ class img_sim(object):
                 norm = self.synsets[i].split(' ', 1)[1].split(',')
                 sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
         
-        elif sim_type == 'mid':
+        elif sim_type == 'med':
             med_index = self.__getMedianIndex(pred)
+            print(med_index)
             half_num, even = divmod(num, 2) 
             start_idx = med_index - half_num + cutoff
             end_idx = med_index + half_num + even + cutoff
+   
+            # don't output num number of results because mid value is sometimes differentiate. and cant't get number / 2. i meaan sometimes number/2 is negative value
+            """
+            # sometimes index is below 0.
+            if start_idx < 0:
+                start_idx = 0
+                end_idx = num
+            elif end_idx > len(pred):
+                start_idx = len(pred) - num
+                end_idx = len(pred)
+            """
 
             for i in sorted_pred_index[start_idx : end_idx]:
                 norm = self.synsets[i].split(' ', 1)[1].split(',')
                 sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
-       
+
+        elif sim_type == 'mid':
+            half_num, even = divmod(num, 2)
+            start_idx = int(len(pred) / 2) - half_num + cutoff
+            end_idx = int(len(pred) / 2) + half_num + even + cutoff
+            
+            for i in sorted_pred_index[start_idx : end_idx]:
+                norm = self.synsets[i].split(' ', 1)[1].split(',')
+                sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
+        
         elif sim_type == 'low':
             start_idx = -num - cutoff
             end_idx = -cutoff if cutoff != 0 else len(pred)
@@ -149,7 +170,7 @@ if __name__ == '__main__':
                         help="method to preprocess images")
     parser.add_argument('--num', '-n', type=int, default=5, 
                         help="the number of output")
-    parser.add_argument('--sim', type=str, default='high', choices=['high', 'low', 'mid', 'rand'],
+    parser.add_argument('--sim', type=str, default='high', choices=['high', 'low', 'mid', 'rand', 'med'],
                         help="output sim type")
     parser.add_argument('--cutoff', '-c', type=int, default=0, 
                         help="the number of ignoring top n similar class.\

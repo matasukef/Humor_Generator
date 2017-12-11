@@ -48,7 +48,8 @@ var render = function(){
 var show_image = function(img_list){
     img.src = img_list[0];
     render();
-
+    
+    console.log(cap_list);
     var counter = 1;
     $('#submit').on('click', function(){
         if(check_state('exp1_q1') && check_state('exp1_q2')){
@@ -81,7 +82,6 @@ var randamize_captions = function(cap1, cap2){
     }
     
     var randamized_captions = { 'caps1': randamized_caps1, 'caps2': randamized_caps2 };
-    
     return randamized_captions;
 }
 
@@ -93,8 +93,8 @@ var show_caption = function(captions, target){
     $('#submit').on('click', function(){
         if(check_state('exp1_q1') && check_state('exp1_q2')){
             if(cap_counter < num_exp){
-                cap_counter += 1;
                 cap = captions[cap_counter];
+                cap_counter += 1;
                 $(target).text(cap);
             }    
         }

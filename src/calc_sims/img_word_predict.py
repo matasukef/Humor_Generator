@@ -118,9 +118,9 @@ if __name__ == '__main__':
                         help="the number of output")
     parser.add_argument('--img_cutoff', '-ic', type=int, default=1,
                         help="the number of cutoff for top n sim image")
-    parser.add_argument('--img_sim', '-is', type=str, default="high", choices=['high', 'low', 'rand', 'mid'],
+    parser.add_argument('--img_sim', '-is', type=str, default="high", choices=['high', 'low', 'rand', 'mid', 'med'],
                         help="output img sim type")
-    parser.add_argument('--word_sim', '-ws', type=str, default="low", choices=['high', 'low', 'rand', 'mid'],
+    parser.add_argument('--word_sim', '-ws', type=str, default="low", choices=['high', 'low', 'rand', 'mid', 'med'],
                         help="output word sim type")
     parser.add_argument('--gpu', '-g', type=int, default=-1,
                         help="GPU ID(put -1 if you don't use gpu)")

@@ -231,13 +231,14 @@ def experiment1():
         if _is_valid(session):
             save_data(request.form, session, PRE_SURVEY_PATH)
         
-    return render_template('experiment1_detail.html', experiment_no = 'システム評価実験1', experiment_url = 'experiment1_content')
+    return render_template('experiment1_detail.html', experiment_no = 'システム評価実験1', experiment_url = 'experiment1_content', exp_num = EXP1_NUM)
 
 
 @app.route('/experiment1_content')
 def experiment1_content():
     
     result = get_data_exp1(EXP1_DATA_PATH, IMG_DIR_PATH, EXP1_NUM)
+    print(result['images'])
 
     return render_template('experiment1.html', images=result['images'], captions = result['captions'], humor_captions = result['humor_captions'])
 
@@ -245,7 +246,7 @@ def experiment1_content():
 @app.route('/experiment2', methods=['GET'])
 def experiment2():
         
-    return render_template('experiment2_detail.html', experiment_no = 'システム評価実験2', experiment_url = 'experiment2_content')    
+    return render_template('experiment2_detail.html', experiment_no = 'システム評価実験2', experiment_url = 'experiment2_content', exp_num=EXP2_NUM)    
 
 @app.route('/experiment2_content')
 def experiment2_content():
@@ -257,7 +258,7 @@ def experiment2_content():
 @app.route('/experiment3')
 def experiment3():
 
-    return render_template('experiment3_detail.html', experiment_no = 'システム評価実験3', experiment_url = 'experiment3_content')
+    return render_template('experiment3_detail.html', experiment_no = 'システム評価実験3', experiment_url = 'experiment3_content', exp_num=EXP3_NUM)
 
 @app.route('/experiment3_content')
 def experiment3_content():
