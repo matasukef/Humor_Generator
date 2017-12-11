@@ -10,13 +10,19 @@ from chainer import serializers
 import json
 from PIL import Image
 
+sys.path.append('..')
+sys.path.append('../src/')
 sys.path.append('../src/generator')
 sys.path.append('../src/calc_sims/img_sim')
 sys.path.append('../src/calc_sims/word_sim')
 sys.path.append('../src/image_caption')
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../src/')
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../src/CNN')
-sys.path.append('..')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../src/generator')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../src/calc_sims/img_sim')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../src/calc_sims/word_sim')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../src/image_caption')
+
 from HumorCaptionGenerator import HumorCaptionGenerator
 from WEB_ENV import (
         UPLOAD_FOLDER,
@@ -114,6 +120,7 @@ def return_captions():
                         colloquial=colloquial
                     )
 
+    print(humor_captions)
     return jsonify(humor_captions)
 
 if __name__=='__main__':
@@ -155,8 +162,8 @@ if __name__=='__main__':
             nic_dict_path=args.nic_dict_path, #dictionary path used in NIC
             class_table_path=args.class_table_path, #class table path used in img sim
             cnn_model_type = args.cnn_model_type, #cnn type which is used in NIC and img_sim
-            beamsize = args.beamsize, #num of generated captions
-            depth_limit = args.depth_limit, # num of tokens in caption
+            beamsize = int(args.beamsize), #num of generated captions
+            depth_limit = int(args.depth_limit), # num of tokens in caption
             first_word=args.first_word, #first word used in NIC
             hidden_dim=args.hidden_dim, #hidden dim layers in NIC
             mean=args.mean, # method to preprocess images
