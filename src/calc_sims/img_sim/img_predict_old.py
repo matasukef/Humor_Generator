@@ -65,39 +65,6 @@ class img_sim(object):
 
         return min_idx
 
-    def __check_duplicate(self, norms, known_norms):
-        DUPLICATE = True
-        for norm in norms:
-            if norm in known_norms:
-                DUPLICATE = False
-                break
-
-        return DUPLICATE
-
-    def __get_sim_words(self, pred, start_idx, num, cutoff=0, dsc=True):
-        sim_words = []
-        known_words = []
-        
-        if dsc:
-            sorted_pred_index = np.argsort(pred)[::-1]
-        else:
-            sorted_pred_index = np.argsort(pred)
-
-        for i in sorted_pred_index[start_idx:]:
-            if len(sim_words) < num + cutoff:
-                norms = self.synsets[i].split(' ', 1)[1].split(',')
-
-                if self.__check_duplicate(norms, known_words):
-                    # add norms to known_words to avoid appending known sim words to sim_words
-                    for norm in norms:
-                        known_words.append(norm)
-
-                    sim_words.append( {'norm': norms, 'sim': round(float(pred[i]), 10)} )
-            else:
-                break
-
-        return sim_words[cutoff:]
-
     def __calc_pred(self, img):
         if self.feature:
             
@@ -129,37 +96,60 @@ class img_sim(object):
         return pred[0]
 
     def get_norms(self, img, num=5, cutoff=0, sim_type='high'):
-        #cutoff parameter is only available when sim_type is high or low
+        sim_words = []
 
         pred = self.__calc_pred(img)
 
+        #sorted pred index
+        sorted_pred_index = np.argsort(pred)[::-1]
+        
         if sim_type == 'high':
-            sim_words = self.__get_sim_words(pred, 0, num, cutoff=cutoff, dsc=True)
-
+            for i in sorted_pred_index[cutoff : num+cutoff]:
+                norm = self.synsets[i].split(' ', 1)[1].split(',')
+                sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
+        
         elif sim_type == 'med':
             med_index = self.__getMedianIndex(pred)
+            print(med_index)
             half_num, even = divmod(num, 2) 
-            start_idx = med_index - half_num
+            start_idx = med_index - half_num + cutoff
+            end_idx = med_index + half_num + even + cutoff
+   
+            # don't output num number of results because mid value is sometimes differentiate. and cant't get number / 2. i meaan sometimes number/2 is negative value
+            """
+            # sometimes index is below 0.
+            if start_idx < 0:
+                start_idx = 0
+                end_idx = num
+            elif end_idx > len(pred):
+                start_idx = len(pred) - num
+                end_idx = len(pred)
+            """
 
-            sim_words = self.__get_sim_words(pred, start_idx, num, cutoff=0, dsc=True)
+            for i in sorted_pred_index[start_idx : end_idx]:
+                norm = self.synsets[i].split(' ', 1)[1].split(',')
+                sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
 
         elif sim_type == 'mid':
             half_num, even = divmod(num, 2)
-            start_idx = int(len(pred) / 2) - half_num
+            start_idx = int(len(pred) / 2) - half_num + cutoff
+            end_idx = int(len(pred) / 2) + half_num + even + cutoff
             
-            sim_words = self.__get_sim_words(pred, start_idx, num, cutoff=0, dsc=True)
-            
+            for i in sorted_pred_index[start_idx : end_idx]:
+                norm = self.synsets[i].split(' ', 1)[1].split(',')
+                sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
+        
         elif sim_type == 'low':
-            sim_words = self.__get_sim_words(pred, 0, num, cutoff=cutoff, dsc=False)
-            
+            start_idx = -num - cutoff
+            end_idx = -cutoff if cutoff != 0 else len(pred)
+            for i in sorted_pred_index[start_idx : end_idx][::-1]:
+                norm = self.synsets[i].split(' ', 1)[1].split(',')
+                sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
+        
         elif sim_type == 'rand':
-            sim_words = []
-
-            sorted_pred_index = np.argsort(pred)
-            
             for i in np.random.choice(sorted_pred_index, num):
-                norms = self.synsets[i].split(' ', 1)[1].split(',')
-                sim_words.append( {'norm': norms, 'sim': round(float(pred[i]), 10)} )
+                norm = self.synsets[i].split(' ', 1)[1].split(',')
+                sim_words.append( {'norm': norm, 'sim': round(float(pred[i]), 10)} )
         
         return sim_words
 
@@ -200,5 +190,6 @@ if __name__ == '__main__':
 
     sim_words = img_model.get_norms(args.img, num=args.num, cutoff=args.cutoff, sim_type=args.sim)
 
+    print(sim_words)
     for sim_word in sim_words:
         print(sim_word['sim'], sim_word['norm'])
