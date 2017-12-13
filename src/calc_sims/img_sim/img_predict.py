@@ -170,7 +170,7 @@ if __name__ == '__main__':
                         help="image you want to predict")
     parser.add_argument('--gpu', '-g', type=int, default=-1,
                         help="GPU ID(put -1 if you don't use gpu)")
-    parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', '..', 'data', 'wordnet', 'resnet_synsets_jp.txt'),
+    parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', '..', 'data', 'wordnet', 'resnet_synsets_jp_modified.txt'),
                         help="class table path to output probability of image classification")
     parser.add_argument('--cnn_model_path', type=str, default=os.path.join('..', '..', '..', 'data', 'models', 'cnn', 'ResNet50.model'),
                         help="CNN model path")

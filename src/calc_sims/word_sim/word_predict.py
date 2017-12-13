@@ -7,17 +7,21 @@ from gensim.models import KeyedVectors
 
 class word_sim(object):
     __slots__ = ['word2vec_model_path',
-                 'model'
+                 'model',
             ]
 
     def __init__(
             self, 
             word2vec_model_path,
+            binary
         ):
 
         self.word2vec_model_path = word2vec_model_path
-        self.model = KeyedVectors.load(self.word2vec_model_path)
-        #self.model = KeyedVectors.load(self.word2vec_model_path, binary=True)
+        
+        if binary:
+            self.model = KeyedVectors.load_word2vec_format(self.word2vec_model_path, binary=binary)
+        else:
+            self.model = KeyedVectors.load(self.word2vec_model_path)
 
     def __getMedianIndex(self, sim_words):
         sims = np.asarray([word['sim'] for word in sim_words])
@@ -85,15 +89,17 @@ if __name__ == '__main__':
                         help="word2vec model path")
     parser.add_argument('--subject', '-s', type=str, default="男性",
                         help="Subject to compare with proper norms")
-    parser.add_argument('--norms', '-nor', type=str, default=[['イヌ', '犬', 'ドッグ', 'tmp_word4except'], ['カンガルー'], ['カカシ', 'tmp_word4test_except2', 'かかし'], ['tmp_word4test_except3', 'サボテン', 'カクタス']],
+    parser.add_argument('--norms', '-nor', type=str, default=[['イヌ', '犬', 'ドッグ'], ['カンガルー'], ['カカシ', 'かかし'], ['サボテン', 'カクタス'], ['ネコ', 'ねこ', '猫'], ['コアラ'], ['マントヒヒ'], ['小鳥', '鳥']],
                         help="proper norms to compare with subject")
     parser.add_argument('--num', '-n', type=int, default=5,
                         help="the number of output")
     parser.add_argument('--sim', '-st', type=str, default="low", choices=['high', 'low', 'mid', 'rand', 'med'],
                         help="sim type")
+    parser.add_argument('--binary', '-bin', action="store_true",
+                        help="use binary data")
     args = parser.parse_args()
     
-    word_model = word_sim(args.word2vec_model_path)
+    word_model = word_sim(args.word2vec_model_path, args.binary)
     sim_words = word_model.get_norms(args.subject, args.norms, args.num, args.sim)
     
     print('')
