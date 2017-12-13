@@ -18,6 +18,7 @@ class HumorCaptionGenerator(object):
                 'cnn_model_path',
                 'rnn_model_path',
                 'word2vec_model_path',
+                'word2vec_binary_data',
                 'nic_dict_path',
                 'class_table_path',
                 'cnn_model_type',
@@ -37,6 +38,7 @@ class HumorCaptionGenerator(object):
                 rnn_model_path,
                 cnn_model_path,
                 word2vec_model_path,
+                word2vec_binary_data,
                 nic_dict_path,
                 class_table_path,
                 cnn_model_type='ResNet',
@@ -54,6 +56,7 @@ class HumorCaptionGenerator(object):
         self.cnn_model_type = cnn_model_type
         self.nic_dict_path = nic_dict_path
         self.word2vec_model_path = word2vec_model_path
+        self.word2vec_binary_data = word2vec_binary_data
         self.class_table_path = class_table_path
         self.beamsize = beamsize
         self.depth_limit = depth_limit
@@ -83,6 +86,7 @@ class HumorCaptionGenerator(object):
                                 cnn_model_path=self.cnn_model_path,
                                 word2vec_model_path=self.word2vec_model_path,
                                 cnn_model_type=self.cnn_model_type,
+                                word2vec_binary_data = self.word2vec_binary_data,
                                 class_table_path=self.class_table_path,
                                 feature=self.feature,
                                 gpu_id=self.gpu_id,
@@ -115,12 +119,11 @@ class HumorCaptionGenerator(object):
         
         return word_sim_words
 
-    def _calc_img_word_sim(self, img, subject, multiple = 5, num=5, cutoff=0, img_sim='high', word_sim='low'):
+    def _calc_img_word_sim(self, img, subject, num=5, cutoff=0, img_sim='high', word_sim='low'):
         #change it to get dict of humor_scores and img_word_norms
         result_norms = self.img_word_model.get_img_word_sim_norms(
                                                         img=img,
                                                         subject=subject,
-                                                        multiple=multiple,
                                                         num=num,
                                                         cutoff=cutoff,
                                                         img_sim=img_sim,
@@ -209,7 +212,7 @@ class HumorCaptionGenerator(object):
 
         return colloq_captions
 
-    def generate(self, img, num=5, multiple = 5, cutoff=1, img_sim='high', word_sim='low', colloquial=False):
+    def generate(self, img, num=5, cutoff=1, img_sim='high', word_sim='low', colloquial=False):
         sim_dict = []
         humor_captions = []
 
@@ -229,7 +232,6 @@ class HumorCaptionGenerator(object):
             result_norms = self._calc_img_word_sim(
                                         img=img,
                                         subject=subject,
-                                        multiple=multiple,
                                         num=num,
                                         cutoff=cutoff,
                                         img_sim=img_sim,
@@ -263,9 +265,11 @@ if __name__ == '__main__':
                         help="RNN model path")
     parser.add_argument('--word2vec_model_path', type=str, default=os.path.join('..', '..', 'data', 'word2vec', 'models', 'ja_wikipedia_neolog.model'),
                         help="Word2vec model path")
+    parser.add_argument('--word2vec_binary_data', action="store_true",
+                        help="use binary data for word2vec model")
     parser.add_argument('--nic_dict_path', type=str, default=os.path.join('..', '..', 'data', 'nic_dict', 'dict_STAIR_jp_train.pkl'),
                         help="Neural image caption dictionary path")
-    parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', 'data', 'wordnet', 'resnet_synsets_jp.txt'),
+    parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', 'data', 'wordnet', 'resnet_synsets_jp_modified.txt'),
                         help="class table path")
     parser.add_argument('--beamsize', '-b', type=int, default=1,
                         help="beamsize of neural image caption")
@@ -279,9 +283,7 @@ if __name__ == '__main__':
                         help="method to preprocess images")
     parser.add_argument('--no_feature', '-f', action='store_false',
                         help="don't use image features to calc img sim class")
-    parser.add_argument('--img_multiply', '-mt', type=int, default=5,
-                        help="multiply by num size of image classes is generated")
-    parser.add_argument('--output_size', type=int, default=5,
+    parser.add_argument('--output_size', type=int, default=20,
                         help="output size")
     parser.add_argument('--cutoff', '-c',type=int, default=1,
                         help="the number of ignoring top n img sim word")
@@ -300,6 +302,7 @@ if __name__ == '__main__':
                             rnn_model_path=args.rnn_model_path,
                             cnn_model_path=args.cnn_model_path,
                             word2vec_model_path=args.word2vec_model_path,
+                            word2vec_binary_data=args.word2vec_binary_data,
                             nic_dict_path=args.nic_dict_path,
                             class_table_path=args.class_table_path,
                             cnn_model_type=args.cnn_model_type,
@@ -314,7 +317,6 @@ if __name__ == '__main__':
 
     humor_captions = model.generate(
                             img=args.img,
-                            multiple=args.img_multiply,
                             num=args.output_size,
                             cutoff=args.cutoff,
                             img_sim=args.img_sim,
@@ -359,4 +361,4 @@ if __name__ == '__main__':
         for w_n, w_s in zip(word_norms, word_sim):
             print(w_s, w_n)
 
-    print(humor_captions)
+    #print(humor_captions)
