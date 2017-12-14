@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+    <main role="main">
+      <div class="jumbotron text-center">
+        <h1 class="display-5">{{ experiment_no }}</h1>
+        <br><br>
+
+        <div class="col-md-8 offset-md-2">
+            <h2 class="lead">[実験内容について]</h2>
+            {% block experiment_content %}{% endblock %}
+
+            <br>
+            <h2 class="lead">[実験手順]</h2>
+            <p>以下の手順にしたがって実験を開始してください。</p>
+            {% block experiment_flow %}{% endblock %}
+
+            <br>
+            <h2 class="lead">[注意事項]</h2>
+            <p>実験の際，以下の点に注意してください。</p>
+            {% block experiment_caution %}{% endblock %}
+
+            <br>
+            <p class="lead">「次へ」を押して，{{ experiment_no }}を開始してください。<p>
+            <a href="{{ experiment_url }}">
+             <p><button type="submit" class="btn btn-md btn-success">次へ</button></p>
+            </a>
+        </div>
+       </div>
+    </main>
+{% endblock %}
