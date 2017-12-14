@@ -1,25 +1,26 @@
-import sys
 import os
 import argparse
 import numpy as np
 
 from gensim.models import KeyedVectors
 
+
 class word_sim(object):
     __slots__ = ['word2vec_model_path',
                  'model',
-            ]
+                 ]
 
     def __init__(
-            self, 
-            word2vec_model_path,
-            binary
-        ):
+        self,
+        word2vec_model_path,
+        binary
+    ):
 
         self.word2vec_model_path = word2vec_model_path
-        
+
         if binary:
-            self.model = KeyedVectors.load_word2vec_format(self.word2vec_model_path, binary=binary)
+            self.model = KeyedVectors.load_word2vec_format(
+                self.word2vec_model_path, binary=binary)
         else:
             self.model = KeyedVectors.load(self.word2vec_model_path)
 
@@ -32,27 +33,27 @@ class word_sim(object):
 
     def __calc_sims(self, subject, img_sim_words):
         sim_words = []
-        
+
         for norms in img_sim_words:
             for norm in norms:
-                #try to check norm is exist in word2vec dict and calc sim
+                # try to check norm is exist in word2vec dict and calc sim
                 try:
                     sim = self.model.wv.similarity(subject, norm)
-                    sim_words.append( {'norm': norms, 'sim': round(sim, 10)} )
+                    sim_words.append({'norm': norms, 'sim': round(sim, 10)})
                     break
-                #raise except and not to add norm to dict if doensn't exist
+                # raise except and not to add norm to dict if doensn't exist
                 except KeyError:
                     continue
-        
-        sim_words = sorted(sim_words, key=lambda x:x['sim'])
+
+        sim_words = sorted(sim_words, key=lambda x: x['sim'])
 
         return sim_words
-                
+
     def get_norms(self, subject, img_sim_words, num=5, sim_type='high'):
 
-        sim_words =  self.__calc_sims(subject, img_sim_words)
-        
-        #fix output num to length of img_sim_words if exceeds.
+        sim_words = self.__calc_sims(subject, img_sim_words)
+
+        # fix output num to length of img_sim_words if exceeds.
         num = len(sim_words) if len(sim_words) < num else num
 
         if sim_type == 'high':
@@ -64,23 +65,25 @@ class word_sim(object):
             start_idx = med_index - half_num
             end_idx = med_index + half_num + even
 
-            return sim_words[start_idx : end_idx]
+            return sim_words[start_idx: end_idx]
 
         elif sim_type == "mid":
             half_num, even = divmod(num, 2)
             start_idx = num - half_num
             end_idx = num + half_num + even
 
-            return sim_words[start_idx : end_idx]
+            return sim_words[start_idx: end_idx]
 
         elif sim_type == 'low':
             return sim_words[:num]
 
         elif sim_type == 'rand':
             return list(np.random.choice(sim_words, num, replace=False))
-        
+
         else:
-            raise TypeError('Variable of sim_type is not one of these (high, low, rand)')
+            raise TypeError(
+                'Variable of sim_type is not one of these (high, low, rand)')
+
 
 if __name__ == '__main__':
 
@@ -98,10 +101,11 @@ if __name__ == '__main__':
     parser.add_argument('--binary', '-bin', action="store_true",
                         help="use binary data")
     args = parser.parse_args()
-    
+
     word_model = word_sim(args.word2vec_model_path, args.binary)
-    sim_words = word_model.get_norms(args.subject, args.norms, args.num, args.sim)
-    
+    sim_words = word_model.get_norms(
+        args.subject, args.norms, args.num, args.sim)
+
     print('')
     for sim_word in sim_words:
         print(sim_word['sim'], sim_word['norm'])
