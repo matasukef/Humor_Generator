@@ -53,12 +53,26 @@ class img_word_sim(object):
         )
 
         self.word_model = word_sim(
-            word2vec_model_path=word2vec_model_path, binary=word2vec_binary_data)
+            word2vec_model_path=word2vec_model_path,
+            binary=word2vec_binary_data
+        )
 
-    def get_img_sim_norms(self, img, num=5, cutoff=0, sim_type='high'):
+    def get_img_sim_norms(
+            self,
+            img,
+            num=5,
+            cutoff=0,
+            sim_type='high'
+    ):
         return self.img_model.get_norms(img, num, cutoff, sim_type)
 
-    def get_word_sim_norms(self, subject, img_sim_words, num=5, sim_type='low'):
+    def get_word_sim_norms(
+            self,
+            subject,
+            img_sim_words,
+            num=5,
+            sim_type='low'
+    ):
 
         img_sim_norms = []
         for img_sim_word in img_sim_words:
@@ -67,26 +81,54 @@ class img_word_sim(object):
 
         return self.word_model.get_norms(subject, img_sim_norms, num, sim_type)
 
-    def get_img_word_sim_norms(self, img, subject, num=5, cutoff=0, img_sim='high', word_sim='low'):
+    def get_img_word_sim_norms(
+            self,
+            img,
+            subject,
+            num=5,
+            cutoff=0,
+            img_sim='high',
+            word_sim='low'
+    ):
+
         img_sim_words = self.get_img_sim_norms(img, num, cutoff, img_sim)
         word_sim_words = self.get_word_sim_norms(
             subject, img_sim_words, num, word_sim)
 
-        img_word_sim_words = self.__calc_score(img_sim_words, word_sim_words)
+        img_word_sim_words = self.__calc_score(
+                img_sim_words,
+                word_sim_words,
+                img_sim, word_sim
+        )
 
         result_norms = {'img_word_sim_words': img_word_sim_words,
-                        'img_sim_words': img_sim_words, 'word_sim_words': word_sim_words}
+                        'img_sim_words': img_sim_words,
+                        'word_sim_words': word_sim_words
+                        }
 
         return result_norms
 
-    def __calc_score(self, img_sim_words, word_sim_words):
+    def __calc_score(self, img_sim_words, word_sim_words, img_sim, word_sim):
         sim_words = []
 
         for word_sim_word in word_sim_words:
 
+            # it would be more efficient
             i_sim = [img_sim_word['sim']
                      for img_sim_word in img_sim_words if img_sim_word['norm'] == word_sim_word['norm']]
-            score = i_sim[0] * (1 - word_sim_word['sim'])
+
+            if img_sim == 'low' and word_sim == 'low':
+                score = (1 - i_sim[0]) * (1 - word_sim_word['sim'])
+            elif img_sim == 'low' and word_sim == 'high':
+                score = (1 - i_sim[0]) * word_sim_word['sim']
+            elif img_sim == 'high' and word_sim == 'low':
+                score = i_sim[0] * (1 - word_sim_word['sim'])
+            elif img_sim == 'high' and word_sim == 'high':
+                score = i_sim[0] * word_sim_word['sim']
+            else:
+                # temporary use this score metrics
+                # because it's difficult to caluculate scores for mid sim
+                score = i_sim[0] * (1 - word_sim_word['sim'])
 
             sim_words.append({'score': round(score, 10),
                               'norm': word_sim_word['norm']})
@@ -152,7 +194,7 @@ if __name__ == '__main__':
     print('sim\t\tnorm')
 
     for img_sim_word in img_sim_words:
-        print(round(img_sim_word['sim'], 5), '\t', img_sim_word['norm'])
+        print(round(img_sim_word['sim'], 10), '\t', img_sim_word['norm'])
 
     word_sim_words = img_word_model.get_word_sim_norms(subject=args.subject,
                                                        img_sim_words=img_sim_words,
@@ -164,7 +206,7 @@ if __name__ == '__main__':
     print('sim: ', args.word_sim)
     print('sim\t\tnorm')
     for word_sim_word in word_sim_words:
-        print(round(word_sim_word['sim'], 5), '\t', word_sim_word['norm'])
+        print(round(word_sim_word['sim'], 10), '\t', word_sim_word['norm'])
 
     result_norms = img_word_model.get_img_word_sim_norms(img=args.img,
                                                          subject=args.subject,

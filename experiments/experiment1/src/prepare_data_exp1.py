@@ -14,7 +14,8 @@ from generator.HumorCaptionGenerator import HumorCaptionGenerator
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--img_dir', '-i', type=str, default=os.path.join('..', 'static', 'images', 'mpii_human_pose'), help="input image")
+    parser.add_argument('--img_dir', '-i', type=str, default=os.path.join(
+        '..', 'static', 'images', 'mpii_human_pose'), help="input image")
     parser.add_argument('--output_csv_dir', type=str,
                         default=os.path.join('..', 'static', 'data'))
     parser.add_argument('--experiment1', type=str, default='experiment1.csv')
@@ -75,7 +76,7 @@ if __name__ == '__main__':
 
     # experiment
     experiment1_path = os.path.join(args.output_csv_dir, args.experiment1)
-    experiment1_header = 'no,images,cap_original,cap_ll,cap_lh,cap_hl,cap_hh' + '\n' 
+    experiment1_header = 'no,images,cap_original,cap_ll,cap_lh,cap_hl,cap_hh' + '\n'
 
     # write experiment1 header
     with open(experiment1_path, 'w') as f:
@@ -84,47 +85,37 @@ if __name__ == '__main__':
     for i, image in tqdm(enumerate(images)):
         img_path = os.path.join(args.img_dir, image)
 
-        print(img_path)
-
-        print('result_ll')
 
         result_ll = model.generate(img=img_path,
-                                   multiple=args.img_multiply,
                                    num=args.output_size,
                                    cutoff=0,
                                    img_sim='low',
                                    word_sim='low',
-                                   colloquial=True
+                                   colloquial=args.colloquial
                                    )
 
-        print('result_lh')
         result_lh = model.generate(img=img_path,
-                                   multiple=args.img_multiply,
                                    num=args.output_size,
                                    cutoff=0,
                                    img_sim='low',
                                    word_sim='high',
-                                   colloquial=True
+                                   colloquial=args.colloquial
                                    )
 
-        print('result_hl')
         result_hl = model.generate(img=img_path,
-                                   multiple=args.img_multiply,
                                    num=args.output_size,
                                    cutoff=args.cutoff,
                                    img_sim='high',
                                    word_sim='low',
-                                   colloquial=True
+                                   colloquial=args.colloquial
                                    )
-
-        print('result_hh')
+        
         result_hh = model.generate(img=img_path,
-                                   multiple=args.img_multiply,
                                    num=args.output_size,
                                    cutoff=0,
                                    img_sim='high',
                                    word_sim='high',
-                                   colloquial=True
+                                   colloquial=args.colloquial
                                    )
 
         caption = result_hl[0]['caption']['sentence']
@@ -133,44 +124,16 @@ if __name__ == '__main__':
         cap_hl = result_hl[0]['humor_captions']
         cap_hh = result_hh[0]['humor_captions']
 
-        result = model.generate(
-            img=img_path,
-            multiple=args.img_multiply,
-            num=args.output_size,
-            cutoff=args.cutoff,
-            img_sim='high',
-            word_sim='low',
-            colloquial=True
-        )
-
-        caption = result[0]['caption']['sentence']
-        humor_caption = result[0]['humor_captions']
-
         if '<UNK>' in caption:
             continue
-        elif not cap_ll or not cap_lm or not cap_lh \
-                or not cap_ml or not cap_mm or not cap_mh \
-                or not cap_hl or not cap_hm or not cap_hh:
+        elif not cap_ll or not cap_lh or not cap_hl or not cap_hh:
             continue
 
         body = str(i + 1) + ',' + image + ','
 
         # experiment1
-        exp1_body = body + caption + ',' + cap_hl[0] + '\n'
+        exp1_body = body + caption + ',' + cap_ll[0] + ',' + \
+            cap_lh[0] + ',' + cap_hl[0] + ',' + cap_hh[0] + '\n'
 
         with open(experiment1_path, 'a') as f:
             f.write(exp1_body)
-
-        # experiment2
-        exp2_body = body + cap_ll[0] + ',' + cap_lm[0] + ',' + cap_lh[0] + ',' + \
-            cap_ml[0] + ',' + cap_mm[0] + ',' + cap_mh[0] + ',' + \
-            cap_hl[0] + ',' + cap_hm[0] + ',' + cap_hh[0] + '\n'
-
-        with open(experiment2_path, 'a') as f:
-            f.write(exp2_body)
-
-        # experiment3
-        exp3_body = body + cap_hl[0] + '\n'
-
-        with open(experiment3_path, 'a') as f:
-            f.write(exp3_body)
