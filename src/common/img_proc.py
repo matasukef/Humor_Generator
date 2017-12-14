@@ -3,11 +3,11 @@ import cv2
 
 
 class Img_proc(object):
-    def __init__(self, mean_type = None):
-        
-        if mean_type == None:
+    def __init__(self, mean_type=None):
+
+        if mean_type is None:
             self.mean = np.zeros([3, 1, 1])
-        
+
         elif mean_type == 'imagenet':
             mean = np.ndarray([3, 224, 224], dtype=np.float32)
             mean[0] = 103.939
@@ -20,7 +20,7 @@ class Img_proc(object):
 
         elif mean_type == 'LCN':
             pass
-        
+
         elif len(mean_type) == 3:
             mean = np.ndarray([3, 244, 244], dtype=np.float32)
             mean[0] = mean_type[0]
@@ -28,7 +28,15 @@ class Img_proc(object):
             mean[2] = mean_type[2]
             self.mean = mean
 
-    def load_img(self, img_path, img_h = 224, img_w = 224, resize = True, expand_dim = True):
+    def load_img(
+            self,
+            img_path,
+            img_h=224,
+            img_w=224,
+            resize=True,
+            expand_dim=True
+    ):
+
         img = cv2.imread(img_path).astype(np.float32)
 
         if resize:
@@ -38,7 +46,7 @@ class Img_proc(object):
         else:
             size = (img.shape[0], img.shape[1])
             img = img.transpose(2, 0, 1)
-        
+
         img -= self.mean
 
         if expand_dim:
