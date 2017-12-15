@@ -138,7 +138,7 @@ class HumorCaptionGenerator(object):
         )
 
         return result_norms
-
+    
     # TODO: __get_subject is not efficient to get subject
     # more efficient way can be found
     def __get_subject(self, captions):
@@ -374,3 +374,12 @@ if __name__ == '__main__':
             print(w_s, w_n)
 
     # print(humor_captions)
+
+    print(img_word_sim_words[0]['score'])
+    for sim in img_sim_words:
+        if sim['norm'] == img_word_sim_words[0]['norm']:
+            print(sim['sim'])
+
+    for sim in word_sim_words:
+        if sim['norm'] == img_word_sim_words[0]['norm']:
+            print(sim['sim'])

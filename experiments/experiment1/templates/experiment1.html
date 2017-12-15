@@ -36,6 +36,7 @@
         data_list['cap_hh'].push("{{ cap }}");
         {% endfor %}
 
+        console.log(data_list);
     </script>
 
   <main role="main">
@@ -52,7 +53,6 @@
          <div class="col-md-5">
              <div id="canvas-container">
                  <canvas id="canvas" width=512 height=512 style="border: 1px solid"></canvas>
-                 <script src="{{ url_for('static', filename="js/canvas_config.js") }}"></script>
              </div>
          </div>
         

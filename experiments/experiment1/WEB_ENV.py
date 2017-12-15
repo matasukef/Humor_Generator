@@ -1,7 +1,7 @@
 import os
 
 PRE_SURVEY_NUM = 8
-EXP1_NUM = 5
+EXP1_NUM = 30
 
 IMG_DIR_PATH = os.path.join('static', 'images', 'mpii_human_pose')
 

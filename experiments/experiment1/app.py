@@ -40,7 +40,7 @@ def make_save_file():
         pre_survey = header
         for i in range(1, PRE_SURVEY_NUM + 1):
             pre_survey += 'q' + str(i) + ','
-        pre_survey += '\n'
+        pre_survey =  pre_survey[:-1] + '\n'
 
         with open(PRE_SURVEY_PATH, 'w') as f:
             f.write(pre_survey)
@@ -57,7 +57,7 @@ def make_save_file():
         for i in range(1, EXP1_NUM + 1):
             exp1 += 'exp1_q' + str(i) + '_image,'
 
-        exp1 += '\n'
+        exp1 =  exp1[:-1] + '\n'
 
         with open(EXP1_PATH, 'w') as f:
             f.write(exp1)
@@ -74,7 +74,7 @@ def save_data(question, session_data, save_path):
         for value in question.values():
             body += value + ','
 
-        body += '\n'
+        body = body[:-1] + '\n'
 
         with open(save_path, 'a') as f:
             f.write(body)

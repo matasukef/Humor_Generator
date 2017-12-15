@@ -11,6 +11,13 @@ sys.path.append('../../../src/')
 
 from generator.HumorCaptionGenerator import HumorCaptionGenerator
 
+
+def get_top_sim_score(sim_words, word):
+    for sim in sim_words:
+        if sim['norm'] == word:
+            return sim['sim']
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -79,7 +86,12 @@ if __name__ == '__main__':
 
     # experiment
     experiment1_path = os.path.join(args.output_csv_dir, args.experiment1)
-    experiment1_header = 'no,images,cap_original,cap_ll,cap_lh,cap_hl,cap_hh' + '\n'
+    experiment1_header = 'no,images,subject,cap_original,cap_ll,cap_lh,cap_hl,cap_hh,' + \
+                         'll_humor_score,ll_img_sim,ll_word_sim,'+ \
+                         'lh_humor_score,lh_img_sim,lh_word_sim,' + \
+                         'hl_humor_score,hl_img_sim,hl_word_sim,' + \
+                         'hh_humor_score,hh_img_sim,hh_word_sim' + '\n'
+
 
     # write experiment1 header
     with open(experiment1_path, 'w') as f:
@@ -112,7 +124,7 @@ if __name__ == '__main__':
                                    word_sim='low',
                                    colloquial=args.colloquial
                                    )
-        
+
         result_hh = model.generate(img=img_path,
                                    num=args.output_size,
                                    cutoff=0,
@@ -132,11 +144,46 @@ if __name__ == '__main__':
         elif not cap_ll or not cap_lh or not cap_hl or not cap_hh:
             continue
 
-        body = str(i + 1) + ',' + image + ','
+        print(image)
+        # similariy
+        ll_humor_score = result_ll[0]['img_word_sim_words'][0]['score']
+        ll_humor_norm = result_ll[0]['img_word_sim_words'][0]['norm']
+        ll_img_sim_words = result_ll[0]['img_sim_words']
+        ll_word_sim_words = result_ll[0]['word_sim_words']
+        ll_img_sim = get_top_sim_score(ll_img_sim_words, ll_humor_norm)
+        ll_word_sim = get_top_sim_score(ll_word_sim_words, ll_humor_norm)
+
+        lh_humor_score = result_lh[0]['img_word_sim_words'][0]['score']
+        lh_humor_norm = result_lh[0]['img_word_sim_words'][0]['norm']
+        lh_img_sim_words = result_lh[0]['img_sim_words']
+        lh_word_sim_words = result_lh[0]['word_sim_words']
+        lh_img_sim = get_top_sim_score(lh_img_sim_words, lh_humor_norm)
+        lh_word_sim = get_top_sim_score(lh_word_sim_words, lh_humor_norm)
+
+        hl_humor_score = result_hl[0]['img_word_sim_words'][0]['score']
+        hl_humor_norm = result_hl[0]['img_word_sim_words'][0]['norm']
+        hl_img_sim_words = result_hl[0]['img_sim_words']
+        hl_word_sim_words = result_hl[0]['word_sim_words']
+        hl_img_sim = get_top_sim_score(hl_img_sim_words, hl_humor_norm)
+        hl_word_sim = get_top_sim_score(hl_word_sim_words, hl_humor_norm)
+
+        hh_humor_score = result_hh[0]['img_word_sim_words'][0]['score']
+        hh_humor_norm = result_hh[0]['img_word_sim_words'][0]['norm']
+        hh_img_sim_words = result_hh[0]['img_sim_words']
+        hh_word_sim_words = result_hh[0]['word_sim_words']
+        hh_img_sim = get_top_sim_score(hh_img_sim_words, hh_humor_norm)
+        hh_word_sim = get_top_sim_score(hh_word_sim_words, hh_humor_norm)
+
+
+        body = str(i + 1) + ',' + image + ',' + result_hl[0]['subject'][0] + ','
 
         # experiment1
         exp1_body = body + caption + ',' + cap_ll[0] + ',' + \
-            cap_lh[0] + ',' + cap_hl[0] + ',' + cap_hh[0] + '\n'
+            cap_lh[0] + ',' + cap_hl[0] + ',' + cap_hh[0] + ',' + \
+            str(ll_humor_score) + ',' + str(ll_img_sim) + ',' + str(ll_word_sim) + ',' + \
+            str(lh_humor_score) + ',' + str(lh_img_sim) + ',' + str(lh_word_sim) + ',' + \
+            str(hl_humor_score) + ',' + str(hl_img_sim) + ',' + str(hl_word_sim) + ',' + \
+            str(hh_humor_score) + ',' + str(hh_img_sim) + ',' + str(hh_word_sim) + '\n'
 
         with open(experiment1_path, 'a') as f:
             f.write(exp1_body)

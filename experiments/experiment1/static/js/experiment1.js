@@ -145,12 +145,13 @@ var get_all_result = function(){
                     question_counter = 0;
                     
                     /* set new image caption to caption class to show */
-                    let next_cap = 'cap_' + result_counter;
-                    $('#caption').text(caption_with_table['randamized_captions'][next_cap][0]);
+                    let next_cap = 'cap_0';
+                    $('#caption').text(caption_with_table['randamized_captions'][next_cap][result_counter]);
                    
                     /* show new image */
                     img.src = data_list['images'][result_counter];
                     render();
+
                 }
 
             }
