@@ -142,7 +142,6 @@ def return_captions():
         colloquial=colloquial
     )
 
-    print(humor_captions)
     return jsonify(humor_captions)
 
 

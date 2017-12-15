@@ -139,6 +139,8 @@ class HumorCaptionGenerator(object):
 
         return result_norms
 
+    # TODO: __get_subject is not efficient to get subject
+    # more efficient way can be found
     def __get_subject(self, captions):
         tmp_norms = []
 
@@ -147,6 +149,14 @@ class HumorCaptionGenerator(object):
             norm = ''
             sen = caption['sentence']
             tokens = self.t.tokenize(sen)
+
+            # add func to get last norms which is seems to be subject
+            if sen[-4:] == 'ですね！':
+                tmp_norms.append(tokens[-4].surface)
+                continue
+            elif tokens[-1].part_of_speech.split(',')[0] == '名詞':
+                tmp_norms.append(tokens[-1].surface)
+                continue
 
             for token in tokens:
                 surface = token.surface
@@ -162,7 +172,7 @@ class HumorCaptionGenerator(object):
                 elif len(norm) and surface == 'には':
                     norms.append(norm)
                     break
-                elif pos[0] is not '名詞':
+                elif pos[0] != '名詞':
                     if len(norm):
                         norms.append(norm)
                     norm = ''
@@ -185,7 +195,7 @@ class HumorCaptionGenerator(object):
             if last_surface == 'いる':
                 caption['sentence'] = caption['sentence'][:-2] + 'いますね！'
             elif last_surface == 'ある':
-                caption['sentence'] = caption['sentence'][:-2] + 'すね！'
+                caption['sentence'] = caption['sentence'][:-2] + 'ありますね！'
             elif last_pos[0] == '名詞':
                 caption['sentence'] = caption['sentence'] + 'ですね！'
 

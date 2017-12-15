@@ -3,11 +3,11 @@ import sys
 import argparse
 from tqdm import tqdm
 
-sys.path.append('../../src/calc_sims/img_sim')
-sys.path.append('../../src/calc_sims/word_sim')
-sys.path.append('../../src/image_caption')
-sys.path.append('../../src/generator')
-sys.path.append('../../src/')
+sys.path.append('../../../src/calc_sims/img_sim')
+sys.path.append('../../../src/calc_sims/word_sim')
+sys.path.append('../../../src/image_caption')
+sys.path.append('../../../src/generator')
+sys.path.append('../../../src/')
 
 from generator.HumorCaptionGenerator import HumorCaptionGenerator
 
@@ -19,17 +19,19 @@ if __name__ == '__main__':
     parser.add_argument('--output_csv_dir', type=str,
                         default=os.path.join('..', 'static', 'data'))
     parser.add_argument('--experiment1', type=str, default='experiment1.csv')
-    parser.add_argument('--cnn_model_path', type=str, default=os.path.join('..', '..', 'data', 'models', 'cnn', 'ResNet50.model'),
+    parser.add_argument('--cnn_model_path', type=str, default=os.path.join('..', '..', '..', 'data', 'models', 'cnn', 'ResNet50.model'),
                         help="CNN model path")
     parser.add_argument('--cnn_model_type', type=str, default='ResNet', choices=['ResNet', 'VGG16', 'AlexNet'],
                         help="CNN model type")
-    parser.add_argument('--rnn_model_path', type=str, default=os.path.join('..', '..', 'data', 'models', 'rnn', 'STAIR_jp_256_Adam.model'),
+    parser.add_argument('--rnn_model_path', type=str, default=os.path.join('..', '..', '..', 'data', 'models', 'rnn', 'STAIR_jp_256_Adam.model'),
                         help="RNN model path")
-    parser.add_argument('--word2vec_model_path', type=str, default=os.path.join('..', '..', 'data', 'word2vec', 'models', 'ja_wikipedia_neolog.model'),
+    parser.add_argument('--word2vec_model_path', type=str, default=os.path.join('..', '..', '..', 'data', 'word2vec', 'models', 'ja_wikipedia_neolog.model'),
                         help="Word2vec model path")
-    parser.add_argument('--nic_dict_path', type=str, default=os.path.join('..', '..', 'data', 'nic_dict', 'dict_STAIR_jp_train.pkl'),
+    parser.add_argument('--word2vec_binary_data', action="store_true",
+                        help="use binary data for word2vec model")
+    parser.add_argument('--nic_dict_path', type=str, default=os.path.join('..', '..', '..', 'data', 'nic_dict', 'dict_STAIR_jp_train.pkl'),
                         help="Neural image caption dictionary path")
-    parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', 'data', 'wordnet', 'resnet_synsets_jp_modified.txt'),
+    parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', '..', 'data', 'wordnet', 'resnet_synsets_jp_modified.txt'),
                         help="class table path")
     parser.add_argument('--beamsize', '-b', type=int, default=1,
                         help="beamsize of neural image caption")
@@ -47,7 +49,7 @@ if __name__ == '__main__':
                         help="multiply by num size of image classes is generated")
     parser.add_argument('--output_size', type=int, default=50,
                         help="output size")
-    parser.add_argument('--cutoff', '-c', type=int, default=1,
+    parser.add_argument('--cutoff', '-c', type=int, default=0,
                         help="the number of ignoring top n img sim word")
     parser.add_argument('--colloquial', '-co', action='store_true',
                         help="return captions as colloquial")
@@ -60,6 +62,7 @@ if __name__ == '__main__':
         rnn_model_path=args.rnn_model_path,
         cnn_model_path=args.cnn_model_path,
         word2vec_model_path=args.word2vec_model_path,
+        word2vec_binary_data=args.word2vec_binary_data,
         nic_dict_path=args.nic_dict_path,
         class_table_path=args.class_table_path,
         cnn_model_type=args.cnn_model_type,
