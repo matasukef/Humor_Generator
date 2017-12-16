@@ -1,9 +1,9 @@
 import os
 
 PRE_SURVEY_NUM = 8
-EXP1_NUM = 30
+EXP1_NUM = 2
 
-IMG_DIR_PATH = os.path.join('static', 'images', 'mpii_human_pose')
+IMG_DIR_PATH = os.path.join('static', 'images', 'human_images')
 
 EXP1_DATA_PATH = os.path.join('static', 'data', 'experiment1.csv')
 

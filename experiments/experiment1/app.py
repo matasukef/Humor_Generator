@@ -19,11 +19,11 @@ def get_data_exp1(data_path, image_dir, num):
 
     images = [os.path.join(image_dir, image.strip())
               .split('/', 1)[1] for image in data.iloc[:, 1]]
-    cap_origin = [cap for cap in data.iloc[:, 2]]
-    cap_ll = [cap for cap in data.iloc[:, 3]]
-    cap_lh = [cap for cap in data.iloc[:, 4]]
-    cap_hl = [cap for cap in data.iloc[:, 5]]
-    cap_hh = [cap for cap in data.iloc[:, 6]]
+    cap_origin = [cap for cap in data.iloc[:, 3]]
+    cap_ll = [cap for cap in data.iloc[:, 4]]
+    cap_lh = [cap for cap in data.iloc[:, 5]]
+    cap_hl = [cap for cap in data.iloc[:, 6]]
+    cap_hh = [cap for cap in data.iloc[:, 7]]
 
     result = {'images': images, 'cap_origin': cap_origin,
               'cap_ll': cap_ll, 'cap_lh': cap_lh,

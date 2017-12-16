@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--img_dir', '-i', type=str, default=os.path.join(
-        '..', 'static', 'images', 'mpii_human_pose'), help="input image")
+        '..', 'static', 'images', 'human_images'), help="input image")
     parser.add_argument('--output_csv_dir', type=str,
                         default=os.path.join('..', 'static', 'data'))
     parser.add_argument('--experiment1', type=str, default='experiment1.csv')
@@ -58,7 +58,7 @@ if __name__ == '__main__':
                         help="output size")
     parser.add_argument('--cutoff', '-c', type=int, default=0,
                         help="the number of ignoring top n img sim word")
-    parser.add_argument('--colloquial', '-co', action='store_true',
+    parser.add_argument('--colloquial', '-co', action='store_false',
                         help="return captions as colloquial")
     parser.add_argument('--gpu', '-g', type=int, default=0,
                         help="GPU ID (put -1 if you don't use gpu)")
@@ -143,6 +143,22 @@ if __name__ == '__main__':
             continue
         elif not cap_ll or not cap_lh or not cap_hl or not cap_hh:
             continue
+        elif caption in (cap_ll[0], cap_lh[0], cap_hl[0], cap_hh[0]):
+            print("origin")
+            continue
+        elif cap_ll[0] in (caption, cap_lh[0], cap_hl[0], cap_hh[0]):
+            print("capll")
+            continue
+        elif cap_lh[0] in (caption, cap_ll[0], cap_hl[0], cap_hh[0]):
+            print("caplh")
+            continue
+        elif cap_hl[0] in (caption, cap_ll[0], cap_lh[0], cap_hh[0]):
+            print("cap_hl")
+            continue
+        elif cap_hh[0] in (caption, cap_ll[0], cap_lh[0], cap_hl[0]):
+            print("caphh")
+            continue
+
 
         print(image)
         # similariy
@@ -174,12 +190,11 @@ if __name__ == '__main__':
         hh_img_sim = get_top_sim_score(hh_img_sim_words, hh_humor_norm)
         hh_word_sim = get_top_sim_score(hh_word_sim_words, hh_humor_norm)
 
-
-        body = str(i + 1) + ',' + image + ',' + result_hl[0]['subject'][0] + ','
+        body = str(i + 1) + ',' + image + ',' + result_hl[0]['subject'] + ','
 
         # experiment1
         exp1_body = body + caption + ',' + cap_ll[0] + ',' + \
-            cap_lh[0] + ',' + cap_hl[0] + ',' + cap_hh[0] + ',' + \
+                cap_lh[0] + ',' + cap_hl[0] + ',' + cap_hh[0] + ',' + \
             str(ll_humor_score) + ',' + str(ll_img_sim) + ',' + str(ll_word_sim) + ',' + \
             str(lh_humor_score) + ',' + str(lh_img_sim) + ',' + str(lh_word_sim) + ',' + \
             str(hl_humor_score) + ',' + str(hl_img_sim) + ',' + str(hl_word_sim) + ',' + \
