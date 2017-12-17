@@ -83,14 +83,57 @@ for(i in 1:EXP_NUM){
 }
 
 
+# calculate frequency of each similarities
 
 #calc frequency for origin caps
-origin_caps_frequency = data.frame(origin_caps[1:3])
-freq_table = 0
-for(i in origin_caps[4:53]){
-    freq= table(i)
-    freq_table = rbind(freq_table, freq)
+origin_count = c()
+for(i in 1:23){
+  origin_count = append(origin_count, as.numeric(origin_caps[i, 4:53]))
 }
+origin_freq = table(origin_count)
 
-rownames(freq_table) <- matrix(1:51)
+#calc frequency for low low caption
+ll_count = c()
+for(i in 1:23){
+  ll_count = append(ll_count, as.numeric(ll_caps[i, 4:53]))
+}
+ll_freq = table(ll_count)
+
+
+#calc frequency for low high caption
+lh_count = c()
+for(i in 1:23){
+  lh_count = append(lh_count, as.numeric(lh_caps[i, 4:53]))
+}
+lh_freq = table(lh_count)
+
+
+#calc frequency for high low caption
+hl_count = c()
+for(i in 1:23){
+  hl_count = append(hl_count, as.numeric(hl_caps[i, 4:53]))
+}
+hl_freq = table(hl_count)
+
+
+#calc frequency for high high caption
+hh_count = c()
+for(i in 1:23){
+  hh_count = append(hh_count, as.numeric(hh_caps[i, 4:53]))
+}
+hh_freq = table(hh_count)
+
+
+# create each freq barplot
+par(mfrow=c(3,2))
+barplot(origin_freq, main="Baseline captions", xlab="Scores(Baseline)" , ylab="Frequency", ylim=c(0,700))
+barplot(ll_freq, main="LL captions", xlab="Scores(LL Captions)" , ylab="Frequency", ylim=c(0,700))
+barplot(lh_freq, main="LH captions", xlab="Scores(LH Captions)" , ylab="Frequency", ylim=c(0,700))
+barplot(hl_freq, main="HL captions", xlab="Scores(HL Captions)" , ylab="Frequency", ylim=c(0,700))
+barplot(hh_freq, main="HH captions", xlab="Scores(HH Captions)" , ylab="Frequency", ylim=c(0,700))
+
+
+
+
+
 
