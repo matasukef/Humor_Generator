@@ -33,18 +33,10 @@ cap_scores_sum = humor_scores[6:10]
 cap_scores_mean = cap_scores_sum / EXP_NUM
 
 #mean scores by col
+summary(cap_scores_mean)
 each_cap_mean = apply(cap_scores_mean, MARGIN=2, mean)
 
 
-# calculate each sims frequency to validate it is based on normal disctibution.
-#sims_frequenct = data.frame()
-#for(i in SIMS){
-#  label = paste('cap_', i, sep="")
-#  for(j in 1:EXP_NUM){
-#    name = paste('exp1_q', j, '_', i, sep="")
-#    print(data[name])
-#  }
-#}
 
 
 # origin caps
