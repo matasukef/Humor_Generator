@@ -126,6 +126,9 @@ barplot(hh_freq, main="HH captions", xlab="Scores(HH Captions)" , ylab="Frequenc
 
 
 
+#create plot for each subjects
+
+
 
 
 
