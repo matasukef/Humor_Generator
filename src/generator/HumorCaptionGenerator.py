@@ -221,13 +221,18 @@ class HumorCaptionGenerator(object):
         cutoff=1,
         img_sim='high',
         word_sim='low',
-        colloquial=False
+        colloquial=False,
+        caption=False
     ):
 
         sim_dict = []
         humor_captions = []
 
         captions, img_feature = self._generate_captions(img)
+
+        if caption:
+            captions = [{'sentence': caption, 'log_likelihood': 'original'}]
+
         subjects = self.__get_subject(captions)
 
         if colloquial:
@@ -308,7 +313,8 @@ if __name__ == '__main__':
                         help="return captions as colloquial")
     parser.add_argument('--gpu', '-g', type=int, default=-1,
                         help="GPU ID (put -1 if you don't use gpu)")
-
+    parser.add_argument('-caption', type=str,
+                        help="input caption if neccesary")
     args = parser.parse_args()
 
     model = HumorCaptionGenerator(
@@ -334,7 +340,8 @@ if __name__ == '__main__':
         cutoff=args.cutoff,
         img_sim=args.img_sim,
         word_sim=args.word_sim,
-        colloquial=args.colloquial)
+        colloquial=args.colloquial,
+        caption=args.caption)
 
     print('caption results\n')
     for i, cap in enumerate(humor_captions):
