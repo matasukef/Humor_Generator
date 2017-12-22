@@ -91,6 +91,7 @@ class HumorCaptionGenerator(object):
             cnn_model_type=self.cnn_model_type,
             word2vec_binary_data=self.word2vec_binary_data,
             class_table_path=self.class_table_path,
+            animal_class_path=animal_class_path,
             feature=self.feature,
             gpu_id=self.gpu_id,
             mean=self.mean
@@ -128,7 +129,8 @@ class HumorCaptionGenerator(object):
         num=5,
         cutoff=0,
         img_sim='high',
-        word_sim='low'
+        word_sim='low',
+        animals=False
     ):
 
         # change it to get dict of humor_scores and img_word_norms
@@ -138,7 +140,8 @@ class HumorCaptionGenerator(object):
             num=num,
             cutoff=cutoff,
             img_sim=img_sim,
-            word_sim=word_sim
+            word_sim=word_sim,
+            animals=animals
         )
 
         return result_norms
@@ -226,7 +229,7 @@ class HumorCaptionGenerator(object):
         img_sim='high',
         word_sim='low',
         colloquial=False,
-        animals=True,
+        animals=False,
         caption=False
     ):
 
@@ -256,7 +259,8 @@ class HumorCaptionGenerator(object):
                 num=num,
                 cutoff=cutoff,
                 img_sim=img_sim,
-                word_sim=word_sim
+                word_sim=word_sim,
+                animals=animals
             )
 
             sim_dict.append(result_norms)
@@ -294,6 +298,8 @@ if __name__ == '__main__':
                         help="Neural image caption dictionary path")
     parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', 'data', 'wordnet', 'resnet_synsets_jp_modified.txt'),
                         help="class table path")
+    parser.add_argument('--animal_class_path', type=str, default=os.path.join('..', '..', 'data', 'wordnet', 'animals.txt'),
+                        help="animal class path")
     parser.add_argument('--beamsize', '-b', type=int, default=1,
                         help="beamsize of neural image caption")
     parser.add_argument('--depth_limit', '-dl', type=int, default=50,
@@ -320,11 +326,8 @@ if __name__ == '__main__':
                         help="GPU ID (put -1 if you don't use gpu)")
     parser.add_argument('-caption', type=str,
                         help="input caption if neccesary")
-    parser.add_argument('--animal_class_path', '-acp', type=str, default=os.path.join('..', '..', 'data', 'wordnet', 'animals.txt'),
-                        help="animal class path")
     parser.add_argument('--animals', '-a', action="store_true",
                         help="outputs of image sim are limited to animals")
-    
     args = parser.parse_args()
 
     model = HumorCaptionGenerator(
@@ -334,6 +337,7 @@ if __name__ == '__main__':
         word2vec_binary_data=args.word2vec_binary_data,
         nic_dict_path=args.nic_dict_path,
         class_table_path=args.class_table_path,
+        animal_class_path=args.animal_class_path,
         cnn_model_type=args.cnn_model_type,
         beamsize=args.beamsize,
         depth_limit=args.depth_limit,
@@ -351,6 +355,7 @@ if __name__ == '__main__':
         img_sim=args.img_sim,
         word_sim=args.word_sim,
         colloquial=args.colloquial,
+        animals=args.animals,
         caption=args.caption)
 
     print('caption results\n')
