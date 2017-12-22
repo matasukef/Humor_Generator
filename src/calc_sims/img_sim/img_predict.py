@@ -18,6 +18,8 @@ class img_sim(object):
                  'cnn_model_path',
                  'cnn_model_type',
                  'class_table_path',
+                 'animal_class_path',
+                 'animals',
                  'mean'
                  ]
 
@@ -25,6 +27,7 @@ class img_sim(object):
         self,
         cnn_model_path,
         class_table_path,
+        animal_class_path,
         cnn_model_type='ResNet',
         mean='imagenet',
         feature=False,
@@ -34,6 +37,7 @@ class img_sim(object):
         self.cnn_model_path = cnn_model_path
         self.cnn_model_type = cnn_model_type
         self.class_table_path = class_table_path
+        self.animal_class_path = animal_class_path
         self.mean = mean
         self.feature = feature
         self.gpu_id = gpu_id
@@ -55,6 +59,9 @@ class img_sim(object):
         with open(class_table_path, 'r') as f:
             self.synsets = f.read().split('\n')[:-1]
 
+        with open(animal_class_path, 'r') as f:
+            self.animals = f.read().split(',')
+
     def __getMedianIndex(self, pred_list):
         # get nearest value with num in list
 
@@ -72,7 +79,7 @@ class img_sim(object):
 
         return DUPLICATE
 
-    def __get_sim_words(self, pred, start_idx, num, cutoff=0, dsc=True):
+    def __get_sim_words(self, pred, start_idx, num, cutoff=0, dsc=True, animals=False):
         sim_words = []
         known_words = []
 
@@ -90,8 +97,15 @@ class img_sim(object):
                     for norm in norms:
                         known_words.append(norm)
 
-                    sim_words.append(
-                        {'norm': norms, 'sim': round(float(pred[i]), 10)})
+                    if animals:
+                        if any(norm in self.animals for norm in norms):
+                            sim_words.append(
+                                {'norm': norms, 'sim': round(float(pred[i]), 10)}
+                            )
+                    else:
+                        sim_words.append(
+                            {'norm': norms, 'sim': round(float(pred[i]), 10)}
+                        )
             else:
                 break
 
@@ -127,14 +141,14 @@ class img_sim(object):
 
         return pred[0]
 
-    def get_norms(self, img, num=5, cutoff=0, sim_type='high'):
+    def get_norms(self, img, num=5, cutoff=0, sim_type='high', animals=False):
         # cutoff parameter is only available when sim_type is high or low
 
         pred = self.__calc_pred(img)
 
         if sim_type == 'high':
             sim_words = self.__get_sim_words(
-                pred, 0, num, cutoff=cutoff, dsc=True)
+                pred, 0, num, cutoff=cutoff, dsc=True, animals=animals)
 
         elif sim_type == 'med':
             med_index = self.__getMedianIndex(pred)
@@ -142,19 +156,20 @@ class img_sim(object):
             start_idx = med_index - half_num
 
             sim_words = self.__get_sim_words(
-                pred, start_idx, num, cutoff=0, dsc=True)
+                pred, start_idx, num, cutoff=0, dsc=True, animals=animals)
 
         elif sim_type == 'mid':
             half_num, even = divmod(num, 2)
             start_idx = int(len(pred) / 2) - half_num
 
             sim_words = self.__get_sim_words(
-                pred, start_idx, num, cutoff=0, dsc=True)
+                pred, start_idx, num, cutoff=0, dsc=True, animals=animals)
 
         elif sim_type == 'low':
             sim_words = self.__get_sim_words(
-                pred, 0, num, cutoff=cutoff, dsc=False)
+                pred, 0, num, cutoff=cutoff, dsc=False, animals=animals)
 
+        # only animal function is not implemented in rand
         elif sim_type == 'rand':
             sim_words = []
 
@@ -177,6 +192,8 @@ if __name__ == '__main__':
                         help="GPU ID(put -1 if you don't use gpu)")
     parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', '..', 'data', 'wordnet', 'resnet_synsets_jp_modified.txt'),
                         help="class table path to output probability of image classification")
+    parser.add_argument('--animal_class_path', type=str, default=os.path.join('..', '..', '..', 'data', 'wordnet', 'animals.txt'),
+                        help="animal class path")
     parser.add_argument('--cnn_model_path', type=str, default=os.path.join('..', '..', '..', 'data', 'models', 'cnn', 'ResNet50.model'),
                         help="CNN model path")
     parser.add_argument('--cnn_model_type', type=str, default='ResNet', choices=['ResNet', 'VGG16', 'AlexNet'],
@@ -192,19 +209,22 @@ if __name__ == '__main__':
                                 This option is valid only when sim is high.")
     parser.add_argument('--feature', '-f', action='store_true',
                         help="use features to output class")
+    parser.add_argument('--animals', '-a', action='store_true',
+                        help="output only animal classes")
     args = parser.parse_args()
 
     img_model = img_sim(
         cnn_model_path=args.cnn_model_path,
         cnn_model_type=args.cnn_model_type,
         class_table_path=args.class_table_path,
+        animal_class_path=args.animal_class_path,
         gpu_id=args.gpu,
         mean=args.mean,
         feature=args.feature
     )
 
     sim_words = img_model.get_norms(
-        args.img, num=args.num, cutoff=args.cutoff, sim_type=args.sim)
+        args.img, num=args.num, cutoff=args.cutoff, sim_type=args.sim, animals=args.animals)
 
     for sim_word in sim_words:
         print(sim_word['sim'], sim_word['norm'])

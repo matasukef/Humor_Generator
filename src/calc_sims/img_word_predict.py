@@ -18,6 +18,7 @@ class img_word_sim(object):
                  'cnn_model_type',
                  'word2vec_model_path',
                  'class_table_path',
+                 'animal_class_path',
                  'feature',
                  'gpu_id',
                  'mean'
@@ -28,6 +29,7 @@ class img_word_sim(object):
         cnn_model_path,
         word2vec_model_path,
         class_table_path,
+        animal_class_path,
         word2vec_binary_data=True,
         cnn_model_type='ResNet',
         feature=False,
@@ -38,15 +40,16 @@ class img_word_sim(object):
         self.cnn_model_path = cnn_model_path
         self.word2vec_model_path = word2vec_model_path
         self.class_table_path = class_table_path
+        self.animal_class_path = animal_class_path,
         self.cnn_model_type = cnn_model_type
         self.feature = feature
         self.gpu_id = gpu_id
         self.mean = mean
-
         self.img_model = img_sim(
             cnn_model_path=cnn_model_path,
             cnn_model_type=cnn_model_type,
             class_table_path=class_table_path,
+            animal_class_path=animal_class_path,
             gpu_id=gpu_id,
             mean=mean,
             feature=feature
@@ -62,9 +65,10 @@ class img_word_sim(object):
             img,
             num=5,
             cutoff=0,
-            sim_type='high'
+            sim_type='high',
+            animals=False
     ):
-        return self.img_model.get_norms(img, num, cutoff, sim_type)
+        return self.img_model.get_norms(img, num, cutoff, sim_type, animals=animals)
 
     def get_word_sim_norms(
             self,
@@ -88,10 +92,11 @@ class img_word_sim(object):
             num=5,
             cutoff=0,
             img_sim='high',
-            word_sim='low'
+            word_sim='low',
+            animals=False
     ):
 
-        img_sim_words = self.get_img_sim_norms(img, num, cutoff, img_sim)
+        img_sim_words = self.get_img_sim_norms(img, num, cutoff, img_sim, animals)
         word_sim_words = self.get_word_sim_norms(
             subject, img_sim_words, num, word_sim)
 
@@ -152,6 +157,8 @@ if __name__ == '__main__':
                         help="help binary data for word2vec model")
     parser.add_argument('--class_table_path', type=str, default=os.path.join('..', '..', 'data', 'wordnet', 'resnet_synsets_jp_modified.txt'),
                         help="class table path to output prob of image class")
+    parser.add_argument('--animal_class_path', type=str, default=os.path.join('..', '..', 'data', 'wordnet', 'animals.txt'),
+                        help="animal class path")
     parser.add_argument('--mean', type=str, default='imagenet',
                         help="method to preprocess images")
     parser.add_argument('--feature', '-f', action='store_true',
@@ -170,6 +177,8 @@ if __name__ == '__main__':
                         help="output word sim type")
     parser.add_argument('--gpu', '-g', type=int, default=-1,
                         help="GPU ID(put -1 if you don't use gpu)")
+    parser.add_argument('--animals', '-a', action="store_true",
+                        help="outputs of img sim are limited to animals.")
     args = parser.parse_args()
 
     img_word_model = img_word_sim(
@@ -178,6 +187,7 @@ if __name__ == '__main__':
         word2vec_binary_data=args.word2vec_binary_data,
         cnn_model_type=args.cnn_model_type,
         class_table_path=args.class_table_path,
+        animal_class_path=args.animal_class_path,
         gpu_id=args.gpu,
         mean=args.mean,
         feature=args.feature
@@ -186,7 +196,8 @@ if __name__ == '__main__':
     img_sim_words = img_word_model.get_img_sim_norms(img=args.img,
                                                      num=args.num,
                                                      cutoff=args.img_cutoff,
-                                                     sim_type=args.img_sim
+                                                     sim_type=args.img_sim,
+                                                     animals=args.animals
                                                      )
 
     print('img sim result\n')
@@ -213,7 +224,8 @@ if __name__ == '__main__':
                                                          num=args.num,
                                                          cutoff=args.img_cutoff,
                                                          img_sim=args.img_sim,
-                                                         word_sim=args.word_sim
+                                                         word_sim=args.word_sim,
+                                                         animals=args.animals
                                                          )
 
     print('')
