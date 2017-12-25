@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+
+  <main role="main">
+    <div class="jumbotron text-center">
+      <h1 class="display-5">実験内容</h1>
+      <br><br>
+      
+      <div class="col-md-8 offset-md-2">
+          <h2 class="lead">[本実験について]</h2>
+          <p>
+            この度は実験にご協力ありがとうございます。
+            これから画像を下に文章を自動生成するシステムの評価を行っていただきます。
+            実験環境はパソコンを想定しています。
+            スマートフォンでの実験はご遠慮ください。
+            所要時間は1時間程度を想定しております。
+          </p>
+
+          <p class="lead">[謝礼について]</p>
+          <p>
+            本実験の参加協力費として1500円お支払いします。
+          </p>
+          <br>
+
+          <p class="lead">[注意事項]</p>
+          <p>実験の際，以下の点に注意してください。</p>
+            <div class=="text-center">
+                <ul style="display: inline-block;">
+                    <li>なるべくリラックスできる環境で評価してください。</li>
+                    <li>評定内容は深く考えず選択してください。</li>
+                </ul>
+            </div>
+          </div>
+            
+          <p class="lead">「次へ」を押して，実験を開始してください。<p>
+          <a href="profile">
+              <p><button type="submit" class="btn btn-md btn-success">次へ</button></p>
+          </a>
+      </div>
+    </div>
+  </main>
+
+{% endblock %}

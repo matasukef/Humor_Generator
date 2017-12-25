@@ -5,13 +5,8 @@ pre_survey <- read.csv('pre_survey_result.csv')
 proposed_data <- read.csv('experiment1.csv')
 images <- proposed_data[c(2, 9:20)]
 
-#extract data which age is distributed from 20 to 29.
-
-
-
 SQH_score <- apply(pre_survey[4:7], MARGIN=1, sum)
 MSHS_score <- apply(pre_survey[8:11], MARGIN=1, sum)
-
 pre_survey_scores <- cbind(pre_survey[0:3], SQH_score, MSHS_score)
 
 # bind scores with exp1
@@ -22,11 +17,7 @@ data = subset(data, data$age < 30)
 
 # row 6 canavo and 24 REMINDER62 are seems to not to be used
 #because her score distribution is not goold. scores for original caption is highter than other caps.
-#data = subset(data, data$name != 'REMINDER62' & data$name != 'canavo' & data$name != 'happyturnkulukulri' & data$name != 'sayaka.am' & data$name != 'りんちゃん☆')
-#data = subset(data, data$name != 'happyturnkulukulri' & data$name != 'REMINDER62' & data$name != 'canavo')
-data = subset(data, data$name != 'happyturnkulukulri')
-#merge result date with test_data
-#merged_data = merge(data, test_data, by.x=c('image'))
+data = subset(data, data$name != 'happyturnkulukulri' )
 
 EXP_NUM = 50
 SUBJECT_NUM=length(data[,1])
@@ -59,112 +50,65 @@ each_cap_mean = apply(cap_scores_mean, MARGIN=2, mean)
 
 #boxplot
 par(mfrow=c(1,1))
-#boxplot(cap_scores_mean, names=c('baseline', 'LL caption', 'LH caption', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores", ylim=c(1,4))
-boxplot(cap_scores_mean[2:5], names=c('LL caption', 'LH caption', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores", ylim=c(1,4))
-#each sim mean scores per subjects
-origin = cap_scores_mean$cap_origin
-ll = cap_scores_mean$cap_ll
-lh = cap_scores_mean$cap_lh
-hl = cap_scores_mean$cap_hl
-hh = cap_scores_mean$cap_hh
+boxplot(cap_scores_mean, names=c('baseline', 'LL caption', 'LH caption', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores", ylim=c(1,4))
 
+
+#origin = cap_scores_mean$cap_origin
+#ll = cap_scores_mean$cap_ll
+#lh = cap_scores_mean$cap_lh
+#hl = cap_scores_mean$cap_hl
+#hh = cap_scores_mean$cap_hh
 
 # Two factor analysis of variance
-all_mean_data <- c(ll, lh, hl, hh)
-img_sim <- factor(c(rep('画像高', SUBJECT_NUM*2), rep('画像低', SUBJECT_NUM*2)))
-word_sim <- factor(rep(c(rep('単語高', SUBJECT_NUM), rep('単語低', SUBJECT_NUM)),2))
-levels <- factor(rep(1:SUBJECT_NUM, 4))
-summary(aov(all_mean_data~img_sim*word_sim+Error(levels+levels:img_sim+levels:word_sim+levels:img_sim:word_sim)))
-
-# bonferroni only img sim
-ll_and_lh_data <- c(ll, lh)
-hl_and_hh_data <- c(hl, hh)
-ll_and_hl_data <- c(ll, hl)
-lh_and_hh_data <- c(lh, hh)
-t.test(ll_and_lh_data, hl_and_hh_data, paired=TRUE)
-t.test(ll_and_hl_data, lh_and_hh_data, paired=TRUE)
-
-
-#bonferroni 
-#group <- factor(c(rep('LL',SUBJECT_NUM),rep('LH', SUBJECT_NUM), rep('HL', SUBJECT_NUM), rep('HH', SUBJECT_NUM)))
-#pairwise.t.test(all_mean_data, group , p.adj = "bonf")
+#all_mean_data <- c(ll, lh, hl, hh)
+#img_sim <- factor(c(rep('画像高', SUBJECT_NUM*2), rep('画像低', SUBJECT_NUM*2)))
+#word_sim <- factor(rep(c(rep('単語高', SUBJECT_NUM), rep('単語低', SUBJECT_NUM)),2))
+#levels <- factor(rep(1:SUBJECT_NUM, 4))
+#summary(aov(all_mean_data~img_sim*word_sim+Error(levels+levels:img_sim+levels:word_sim+levels:img_sim:word_sim)))
 
 
 # here just need to check difference between origin caps and hl captions.
 # origin caps
 origin_caps = data.frame(data[1:3])
+ll_caps = data.frame(data[1:3])
+lh_caps = data.frame(data[1:3])
+hl_caps = data.frame(data[1:3])
+hh_caps = data.frame(data[1:3])
 for(i in 1:EXP_NUM){
   name = paste('exp1_q', i, '_origin', sep="")
   origin_caps = data.frame(origin_caps, data[name])
-}
-
-# low low caps
-ll_caps = data.frame(data[1:3])
-for(i in 1:EXP_NUM){
+  
   name = paste('exp1_q', i, '_ll', sep="")
   ll_caps = data.frame(ll_caps, data[name])
-}
-
-# low high caps
-lh_caps = data.frame(data[1:3])
-for(i in 1:EXP_NUM){
+  
   name = paste('exp1_q', i, '_lh', sep="")
   lh_caps = data.frame(lh_caps, data[name])
-}
-
-# high low caps
-hl_caps = data.frame(data[1:3])
-for(i in 1:EXP_NUM){
+  
   name = paste('exp1_q', i, '_hl', sep="")
   hl_caps = data.frame(hl_caps, data[name])
-}
-
-# high high caps
-hh_caps = data.frame(data[1:3])
-for(i in 1:EXP_NUM){
+  
   name = paste('exp1_q', i, '_hh', sep="")
   hh_caps = data.frame(hh_caps, data[name])
 }
 
 
 # calculate frequency of each similarities
-
-#calc frequency for origin caps
 origin_count = c()
-for(i in 1:SUBJECT_NUM){
-  origin_count = append(origin_count, as.numeric(origin_caps[i, 4:53]))
-}
-origin_freq = table(origin_count)
-
-#calc frequency for low low caption
 ll_count = c()
-for(i in 1:SUBJECT_NUM){
-  ll_count = append(ll_count, as.numeric(ll_caps[i, 4:53]))
-}
-ll_freq = table(ll_count)
-
-
-#calc frequency for low high caption
 lh_count = c()
-for(i in 1:SUBJECT_NUM){
-  lh_count = append(lh_count, as.numeric(lh_caps[i, 4:53]))
-}
-lh_freq = table(lh_count)
-
-
-#calc frequency for high low caption
 hl_count = c()
-for(i in 1:SUBJECT_NUM){
-  hl_count = append(hl_count, as.numeric(hl_caps[i, 4:53]))
-}
-hl_freq = table(hl_count)
-
-
-#calc frequency for high high caption
 hh_count = c()
 for(i in 1:SUBJECT_NUM){
+  origin_count = append(origin_count, as.numeric(origin_caps[i, 4:53]))
+  ll_count = append(ll_count, as.numeric(ll_caps[i, 4:53]))
+  lh_count = append(lh_count, as.numeric(lh_caps[i, 4:53]))
+  hl_count = append(hl_count, as.numeric(hl_caps[i, 4:53]))
   hh_count = append(hh_count, as.numeric(hh_caps[i, 4:53]))
 }
+origin_freq = table(origin_count)
+ll_freq = table(ll_count)
+lh_freq = table(lh_count)
+hl_freq = table(hl_count)
 hh_freq = table(hh_count)
 
 
@@ -181,39 +125,42 @@ barplot(hh_freq, main="HH captions", xlab="Scores(HH Captions)" , ylab="Frequenc
 #install.packages("exactRankTests", repos="http://cran.ism.ac.jp/")
 library(exactRankTests)
 
-#calculate each median.
-origin_caps_median = apply(origin_caps[4:53], MARGIN=1, median)
-ll_caps_median = apply(ll_caps[4:53], MARGIN=1, median)
-lh_caps_median = apply(lh_caps[4:53], MARGIN=1, median)
-hl_caps_median = apply(hl_caps[4:53], MARGIN=1, median)
-hh_caps_median = apply(hh_caps[4:53], MARGIN=1, median)
-all_median_data <- c(ll_caps_median, lh_caps_median, hl_caps_median, hh_caps_median)
 
-wilcox.exact(x=origin_caps_median,y=hl_caps_median,paired=T)
+#create list to collect each sims scores for all subjects.
 
-img_high_sim_median = (hl_caps_median + hh_caps_median) / 2
-wilcox.exact(x=origin_caps_median, y=img_high_sim_median, paired=T)
-
-#wilcox.exact(x=origin_caps_median,y=hl_caps_median,paired=T)
-wilcox.exact(x=origin,y=hl,paired=T) # there is difference between origin cap and hl cap.
-
-
-wilcox.exact(x=origin,y=ll,paired=T)
-wilcox.exact(x=origin,y=lh,paired=T)
-wilcox.exact(x=origin,y=hl,paired=T)
-wilcox.exact(x=origin,y=hh,paired=T)
-wilcox.exact(x=ll,y=lh,paired=T) # no difference
-wilcox.exact(x=ll,y=hl,paired=T) # p < 0.1
-wilcox.exact(x=ll,y=hh,paired=T) # no difference
-wilcox.exact(x=lh,y=hl,paired=T) # no difference
-wilcox.exact(x=lh,y=hh,paired=T)
-wilcox.exact(x=hl,y=hh,paired=T)
-
-#create plot for each subjects
+origin_all_scores = c()
+ll_all_scores = c()
+lh_all_scores = c()
+hl_all_scores = c()
+hh_all_scores = c()
+for(i in 4:length(origin_caps)){
+  origin_all_scores = c(origin_all_scores, origin_caps[,i])
+  ll_all_scores = c(ll_all_scores, ll_caps[,i])
+  lh_all_scores = c(lh_all_scores, lh_caps[,i])
+  hl_all_scores = c(hl_all_scores, hl_caps[,i])
+  hh_all_scores = c(hh_all_scores, hh_caps[,i])
+}
 
 
 
+# calculate wilcox.exact by above data
+wilcox.exact(x=origin_all_scores,y=ll_all_scores,paired=T)　# there is difference
+wilcox.exact(x=origin_all_scores,y=lh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=origin_all_scores,y=hl_all_scores,paired=T)　# there is difference
+wilcox.exact(x=origin_all_scores,y=hh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=ll_all_scores,y=lh_all_scores,paired=T) # No difference
+wilcox.exact(x=ll_all_scores,y=hl_all_scores,paired=T) # there is difference between ll caps and hl caps p < 0.01
+wilcox.exact(x=ll_all_scores,y=hh_all_scores,paired=T) # No difference
+wilcox.exact(x=lh_all_scores,y=hl_all_scores,paired=T) # there is difference between lh caps and hl caps p < 0.01
+wilcox.exact(x=lh_all_scores,y=hh_all_scores,paired=T) # No difference
+wilcox.exact(x=hl_all_scores,y=hh_all_scores,paired=T) # No difference
 
+
+# Original captionｔとその他提案手法を含むcaption間では有意な差が見られたため，只のキャプションを提示するよりは，
+# ユーザーのユーモア受容性が向上すると明らかになった
+
+# その他のキャプションについては，LL caption と LH caption間で5%ｓ水準で有意な差があったため，画像間類似度がユーモアの受容性に関連する
+# HL captionと HH captionに関しても 1%水準で有意な差があったため，単語間類似度がユーモアの受容性に関連する
 
 #------------------------------------------------------------------------------------------------------------------------#
 # cor
@@ -223,7 +170,8 @@ ll_word_sim = images['ll_word_sim']
 each_ll_mean_score = as.numeric(apply(ll_caps[4:53], MARGIN=2, mean))
 cor(ll_img_sim, each_ll_mean_score)
 cor(ll_word_sim, each_ll_mean_score)
-cor(hl_humor_score, each_ll_mean_score)
+cor(ll_humor_score, each_ll_mean_score)
+
 
 lh_humor_score = images['lh_humor_score']
 lh_img_sim = images['lh_img_sim']
@@ -271,31 +219,29 @@ ll_scores = apply(ll_caps[4:53], MARGIN=2, mean)
 lh_scores = apply(lh_caps[4:53], MARGIN=2, mean)
 hl_scores = apply(hl_caps[4:53], MARGIN=2, mean) # q12 is max
 hh_scores = apply(hh_caps[4:53], MARGIN=2, mean) # q10 is max
-plot(origin_scores)
-plot(ll_scores)
-plot(lh_scores)
-plot(hl_scores)
-plot(hh_scores)
+par(mfrow=c(3,2))
+barplot(origin_scores)
+barplot(ll_scores)
+barplot(lh_scores)
+barplot(hl_scores)
+barplot(hh_scores)
+
+max(hl_scores)
+max(hh_scores)
 
 
 
 
-
-
-
-
-#-----------------------------------------------------------------------------------------------#
+#analize based on SQH and MSHS scores-----------------------------------------------------------------------------------#
 
 #based on SQH and MSHS scores
 SQH_low_group = subset(humor_scores, humor_scores$SQH_score <= 8)
 SQH_high_group = subset(humor_scores, humor_scores$SQH_score >= 9)
-MSHS_low_group = subset(humor_scores, humor_scores$MSHS_score <= 15)
-MSHS_high_group = subset(humor_scores, humor_scores$MSHS_score >= 16)
-
+MSHS_low_group = subset(humor_scores, humor_scores$MSHS_score <= 17)
+MSHS_high_group = subset(humor_scores, humor_scores$MSHS_score >= 18)
 
 
 # has to validate normality.
-# 大数の法則により，正規分布になっているはず
 par(mfrow=c(2,2))
 
 sqh_low_group_scores_mean = SQH_low_group[6:10] / EXP_NUM
@@ -319,108 +265,485 @@ summary(MSHS_high_group_mean[6:10])
 boxplot(MSHS_high_group_mean[6:10], main="MSHS high group", names=c('baseline', 'LL caption', 'LH caption', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores")
 
 
+# all data based on SQH and MSHS scores
+SQH_low_group_data = subset(data, data$SQH_score <= 8)
+SQH_high_group_data = subset(data, data$SQH_score >= 9)
+MSHS_low_group_data = subset(data, data$MSHS_score <= 15)
+MSHS_high_group_data = subset(data, data$MSHS_score >= 16)
+
+
 ## SQH low group ---------------------------------------------------------------------------------------
 #each sim mean scores per subjects
-SQH_low_group_origin = SQH_low_group_mean[6:10]$cap_origin
-SQH_low_group_ll = SQH_low_group_mean[6:10]$cap_ll
-SQH_low_group_lh = SQH_low_group_mean[6:10]$cap_lh
-SQH_low_group_hl = SQH_low_group_mean[6:10]$cap_hl
-SQH_low_group_hh = SQH_low_group_mean[6:10]$cap_hh
+SQH_LOW_SUBJECT_NUM=length(SQH_low_group_data[,1])
 
-SQH_LOW_SUBJECT_NUM=length(SQH_low_group[,1])
+SQH_low_origin_caps = data.frame(SQH_low_group_data[1:3])
+SQH_low_ll_caps = data.frame(SQH_low_group_data[1:3])
+SQH_low_lh_caps = data.frame(SQH_low_group_data[1:3])
+SQH_low_hl_caps = data.frame(SQH_low_group_data[1:3])
+SQH_low_hh_caps = data.frame(SQH_low_group_data[1:3])
+for(i in 1:EXP_NUM){
+  name = paste('exp1_q', i, '_origin', sep="")
+  SQH_low_origin_caps = data.frame(SQH_low_origin_caps, SQH_low_group_data[name])
+  
+  name = paste('exp1_q', i, '_ll', sep="")
+  SQH_low_ll_caps = data.frame(SQH_low_ll_caps, SQH_low_group_data[name])
+  
+  name = paste('exp1_q', i, '_lh', sep="")
+  SQH_low_lh_caps = data.frame(SQH_low_lh_caps, SQH_low_group_data[name])
+  
+  name = paste('exp1_q', i, '_hl', sep="")
+  SQH_low_hl_caps = data.frame(SQH_low_hl_caps, SQH_low_group_data[name])
+  
+  name = paste('exp1_q', i, '_hh', sep="")
+  SQH_low_hh_caps = data.frame(SQH_low_hh_caps, SQH_low_group_data[name])
+}
 
-# Two factor analysis of variance
-SQH_low_group_all_mean_data <- c(SQH_low_group_ll, SQH_low_group_lh, SQH_low_group_hl, SQH_low_group_hh)
-img_sim <- factor(c(rep('画像高', SQH_LOW_SUBJECT_NUM*2), rep('画像低', SQH_LOW_SUBJECT_NUM*2)))
-word_sim <- factor(rep(c(rep('単語高', SQH_LOW_SUBJECT_NUM), rep('単語低', SQH_LOW_SUBJECT_NUM)),2))
-levels <- factor(rep(1:SQH_LOW_SUBJECT_NUM, 4))
-summary(aov(SQH_low_group_all_mean_data~img_sim*word_sim+Error(levels+levels:img_sim+levels:word_sim+levels:img_sim:word_sim)))
+
+# calculate frequency of each similarities
+SQH_low_origin_count = c()
+SQH_low_ll_count = c()
+SQH_low_lh_count = c()
+SQH_low_hl_count = c()
+SQH_low_hh_count = c()
+for(i in 1:SQH_LOW_SUBJECT_NUM){
+  SQH_low_origin_count = append(SQH_low_origin_count, as.numeric(SQH_low_origin_caps[i, 4:53]))
+  SQH_low_ll_count = append(SQH_low_ll_count, as.numeric(SQH_low_ll_caps[i, 4:53]))
+  SQH_low_lh_count = append(SQH_low_lh_count, as.numeric(SQH_low_lh_caps[i, 4:53]))
+  SQH_low_hl_count = append(SQH_low_hl_count, as.numeric(SQH_low_hl_caps[i, 4:53]))
+  SQH_low_hh_count = append(SQH_low_hh_count, as.numeric(SQH_low_hh_caps[i, 4:53]))
+}
+SQH_low_origin_freq = table(SQH_low_origin_count)
+SQH_low_ll_freq = table(SQH_low_ll_count)
+SQH_low_lh_freq = table(SQH_low_lh_count)
+SQH_low_hl_freq = table(SQH_low_hl_count)
+SQH_low_hh_freq = table(SQH_low_hh_count)
+
+
+# create each freq barplot
+par(mfrow=c(3,2))
+#par(mfrow=c(1,2))
+barplot(SQH_low_origin_freq, main="Baseline", xlab="Scores(Baseline)" , ylab="Frequency", ylim=c(0,800))
+barplot(SQH_low_ll_freq, main="LL captions", xlab="Scores(LL Captions)" , ylab="Frequency", ylim=c(0,800))
+barplot(SQH_low_lh_freq, main="LH captions", xlab="Scores(LH Captions)" , ylab="Frequency", ylim=c(0,800))
+barplot(SQH_low_hl_freq, main="HL captions", xlab="Scores(Proposed method)" , ylab="Frequency", ylim=c(0,800))
+barplot(SQH_low_hh_freq, main="HH captions", xlab="Scores(HH Captions)" , ylab="Frequency", ylim=c(0,800))
+
+
+#create list to collect each sims scores for all subjects.
+
+SQH_low_origin_all_scores = c()
+SQH_low_ll_all_scores = c()
+SQH_low_lh_all_scores = c()
+SQH_low_hl_all_scores = c()
+SQH_low_hh_all_scores = c()
+for(i in 4:length(SQH_low_origin_caps)){
+  SQH_low_origin_all_scores = c(SQH_low_origin_all_scores, SQH_low_origin_caps[,i])
+  SQH_low_ll_all_scores = c(SQH_low_ll_all_scores, SQH_low_ll_caps[,i])
+  SQH_low_lh_all_scores = c(SQH_low_lh_all_scores, SQH_low_lh_caps[,i])
+  SQH_low_hl_all_scores = c(SQH_low_hl_all_scores, SQH_low_hl_caps[,i])
+  SQH_low_hh_all_scores = c(SQH_low_hh_all_scores, SQH_low_hh_caps[,i])
+}
+
+
+
+# calculate wilcox.exact by above data
+wilcox.exact(x=SQH_low_origin_all_scores,y=SQH_low_ll_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_low_origin_all_scores,y=SQH_low_lh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_low_origin_all_scores,y=SQH_low_hl_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_low_origin_all_scores,y=SQH_low_hh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_low_ll_all_scores,y=SQH_low_lh_all_scores,paired=T) # No difference
+wilcox.exact(x=SQH_low_ll_all_scores,y=SQH_low_hl_all_scores,paired=T) # there is difference between ll caps and hl caps p < 0.01
+wilcox.exact(x=SQH_low_ll_all_scores,y=SQH_low_hh_all_scores,paired=T) # No difference
+wilcox.exact(x=SQH_low_lh_all_scores,y=SQH_low_hl_all_scores,paired=T) # there is difference between lh caps and hl caps p < 0.01
+wilcox.exact(x=SQH_low_lh_all_scores,y=SQH_low_hh_all_scores,paired=T) # No difference
+wilcox.exact(x=SQH_low_hl_all_scores,y=SQH_low_hh_all_scores,paired=T) # There is difference between hl caps and hh caps p < 0.05
+
+
 
 #----------------------------------------------------------------------------------------------------------
 
 ## SQH high group-----------------------------------------------------------------------------------------
 
 #each sim mean scores per subjects
-SQH_high_group_origin = SQH_high_group_mean[6:10]$cap_origin
-SQH_high_group_ll = SQH_high_group_mean[6:10]$cap_ll
-SQH_high_group_lh = SQH_high_group_mean[6:10]$cap_lh
-SQH_high_group_hl = SQH_high_group_mean[6:10]$cap_hl
-SQH_high_group_hh = SQH_high_group_mean[6:10]$cap_hh
+SQH_HIGH_SUBJECT_NUM=length(SQH_high_group_data[,1])
 
-SQH_HIGH_SUBJECT_NUM=length(SQH_high_group[,1])
+SQH_high_origin_caps = data.frame(SQH_high_group_data[1:3])
+SQH_high_ll_caps = data.frame(SQH_high_group_data[1:3])
+SQH_high_lh_caps = data.frame(SQH_high_group_data[1:3])
+SQH_high_hl_caps = data.frame(SQH_high_group_data[1:3])
+SQH_high_hh_caps = data.frame(SQH_high_group_data[1:3])
 
-# Two factor analysis of variance
-SQH_high_group_all_mean_data <- c(SQH_high_group_ll, SQH_high_group_lh, SQH_high_group_hl, SQH_high_group_hh)
-img_sim <- factor(c(rep('画像高', SQH_HIGH_SUBJECT_NUM*2), rep('画像低', SQH_HIGH_SUBJECT_NUM*2)))
-word_sim <- factor(rep(c(rep('単語高', SQH_HIGH_SUBJECT_NUM), rep('単語低', SQH_HIGH_SUBJECT_NUM)),2))
-levels <- factor(rep(1:SQH_HIGH_SUBJECT_NUM, 4))
-summary(aov(SQH_high_group_all_mean_data~img_sim*word_sim+Error(levels+levels:img_sim+levels:word_sim+levels:img_sim:word_sim)))
+for(i in 1:EXP_NUM){
+  name = paste('exp1_q', i, '_origin', sep="")
+  SQH_high_origin_caps = data.frame(SQH_high_origin_caps, SQH_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_ll', sep="")
+  SQH_high_ll_caps = data.frame(SQH_high_ll_caps, SQH_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_lh', sep="")
+  SQH_high_lh_caps = data.frame(SQH_high_lh_caps, SQH_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_hl', sep="")
+  SQH_high_hl_caps = data.frame(SQH_high_hl_caps, SQH_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_hh', sep="")
+  SQH_high_hh_caps = data.frame(SQH_high_hh_caps, SQH_high_group_data[name])
+}
+
+# calculate frequency of each similarities
+SQH_high_origin_count = c()
+SQH_high_ll_count = c()
+SQH_high_lh_count = c()
+SQH_high_hl_count = c()
+SQH_high_hh_count = c()
+for(i in 1:SQH_LOW_SUBJECT_NUM){
+  SQH_high_origin_count = append(SQH_high_origin_count, as.numeric(SQH_high_origin_caps[i, 4:53]))
+  SQH_high_ll_count = append(SQH_high_ll_count, as.numeric(SQH_high_ll_caps[i, 4:53]))
+  SQH_high_lh_count = append(SQH_high_lh_count, as.numeric(SQH_high_lh_caps[i, 4:53]))
+  SQH_high_hl_count = append(SQH_high_hl_count, as.numeric(SQH_high_hl_caps[i, 4:53]))
+  SQH_high_hh_count = append(SQH_high_hh_count, as.numeric(SQH_high_hh_caps[i, 4:53]))
+}
+SQH_high_origin_freq = table(SQH_high_origin_count)
+SQH_high_ll_freq = table(SQH_high_ll_count)
+SQH_high_lh_freq = table(SQH_high_lh_count)
+SQH_high_hl_freq = table(SQH_high_hl_count)
+SQH_high_hh_freq = table(SQH_high_hh_count)
+
+
+# create each freq barplot
+par(mfrow=c(3,2))
+barplot(SQH_high_origin_freq, main="Baseline", xlab="Scores(Baseline)", ylab="Frequency", ylim=c(0,800))
+barplot(SQH_high_ll_freq, main="LL captions", xlab="Scores(LL Captions)", ylab="Frequency", ylim=c(0,800))
+barplot(SQH_high_lh_freq, main="LH captions", xlab="Scores(LH Captions)", ylab="Frequency", ylim=c(0,800))
+barplot(SQH_high_hl_freq, main="HL captions", xlab="Scores(Proposed method)", ylab="Frequency", ylim=c(0,800))
+barplot(SQH_high_hh_freq, main="HH captions", xlab="Scores(HH Captions)", ylab="Frequency", ylim=c(0,800))
+
+
+#create list to collect each sims scores for all subjects.
+
+SQH_high_origin_all_scores = c()
+SQH_high_ll_all_scores = c()
+SQH_high_lh_all_scores = c()
+SQH_high_hl_all_scores = c()
+SQH_high_hh_all_scores = c()
+for(i in 4:length(SQH_low_origin_caps)){
+  SQH_high_origin_all_scores = c(SQH_high_origin_all_scores, SQH_high_origin_caps[,i])
+  SQH_high_ll_all_scores = c(SQH_high_ll_all_scores, SQH_high_ll_caps[,i])
+  SQH_high_lh_all_scores = c(SQH_high_lh_all_scores, SQH_high_lh_caps[,i])
+  SQH_high_hl_all_scores = c(SQH_high_hl_all_scores, SQH_high_hl_caps[,i])
+  SQH_high_hh_all_scores = c(SQH_high_hh_all_scores, SQH_high_hh_caps[,i])
+}
+
+
+
+# calculate wilcox.exact by above data
+wilcox.exact(x=SQH_high_origin_all_scores,y=SQH_high_ll_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_high_origin_all_scores,y=SQH_high_lh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_high_origin_all_scores,y=SQH_high_hl_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_high_origin_all_scores,y=SQH_high_hh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_high_ll_all_scores,y=SQH_high_lh_all_scores,paired=T) # No difference
+wilcox.exact(x=SQH_high_ll_all_scores,y=SQH_high_hl_all_scores,paired=T) # there is difference between ll caps and hl caps p < 0.01
+wilcox.exact(x=SQH_high_ll_all_scores,y=SQH_high_hh_all_scores,paired=T) # No difference
+wilcox.exact(x=SQH_high_lh_all_scores,y=SQH_high_hl_all_scores,paired=T) # there is difference between lh caps and hl caps p < 0.01
+wilcox.exact(x=SQH_high_lh_all_scores,y=SQH_high_hh_all_scores,paired=T) # No difference
+wilcox.exact(x=SQH_high_hl_all_scores,y=SQH_high_hh_all_scores,paired=T) # There is difference between hl caps and hh caps p < 0.05
+
+
+
 
 
 #---------------------------------------------------------------------------------------------------------
 
-## SQH low group ---------------------------------------------------------------------------------------
+## MSHS low group ---------------------------------------------------------------------------------------
 #each sim mean scores per subjects
-MSHS_low_group_origin = MSHS_low_group_mean[6:10]$cap_origin
-MSHS_low_group_ll = MSHS_low_group_mean[6:10]$cap_ll
-MSHS_low_group_lh = MSHS_low_group_mean[6:10]$cap_lh
-MSHS_low_group_hl = MSHS_low_group_mean[6:10]$cap_hl
-MSHS_low_group_hh = MSHS_low_group_mean[6:10]$cap_hh
+MSHS_LOW_SUBJECT_NUM=length(MSHS_low_group_data[,1])
 
-MSHS_LOW_SUBJECT_NUM=length(MSHS_low_group[,1])
+MSHS_low_origin_caps = data.frame(MSHS_low_group_data[1:3])
+MSHS_low_ll_caps = data.frame(MSHS_low_group_data[1:3])
+MSHS_low_lh_caps = data.frame(MSHS_low_group_data[1:3])
+MSHS_low_hl_caps = data.frame(MSHS_low_group_data[1:3])
+MSHS_low_hh_caps = data.frame(MSHS_low_group_data[1:3])
 
-# Two factor analysis of variance
-MSHS_low_group_all_mean_data <- c(MSHS_low_group_ll, MSHS_low_group_lh, MSHS_low_group_hl, MSHS_low_group_hh)
-img_sim <- factor(c(rep('画像高', MSHS_LOW_SUBJECT_NUM*2), rep('画像低', MSHS_LOW_SUBJECT_NUM*2)))
-word_sim <- factor(rep(c(rep('単語高', MSHS_LOW_SUBJECT_NUM), rep('単語低', MSHS_LOW_SUBJECT_NUM)),2))
-levels <- factor(rep(1:MSHS_LOW_SUBJECT_NUM, 4))
-summary(aov(MSHS_low_group_all_mean_data~img_sim*word_sim+Error(levels+levels:img_sim+levels:word_sim+levels:img_sim:word_sim)))
+for(i in 1:EXP_NUM){
+  name = paste('exp1_q', i, '_origin', sep="")
+  MSHS_low_origin_caps = data.frame(MSHS_low_origin_caps, MSHS_low_group_data[name])
+  
+  name = paste('exp1_q', i, '_ll', sep="")
+  MSHS_low_ll_caps = data.frame(MSHS_low_ll_caps, MSHS_low_group_data[name])
+  
+  name = paste('exp1_q', i, '_lh', sep="")
+  MSHS_low_lh_caps = data.frame(MSHS_low_lh_caps, MSHS_low_group_data[name])
+  
+  name = paste('exp1_q', i, '_hl', sep="")
+  MSHS_low_hl_caps = data.frame(MSHS_low_hl_caps, MSHS_low_group_data[name])
+  
+  name = paste('exp1_q', i, '_hh', sep="")
+  MSHS_low_hh_caps = data.frame(MSHS_low_hh_caps, MSHS_low_group_data[name])
+}
+
+
+# calculate frequency of each similarities
+MSHS_low_origin_count = c()
+MSHS_low_ll_count = c()
+MSHS_low_lh_count = c()
+MSHS_low_hl_count = c()
+MSHS_low_hh_count = c()
+for(i in 1:MSHS_LOW_SUBJECT_NUM){
+  MSHS_low_origin_count = append(MSHS_low_origin_count, as.numeric(MSHS_low_origin_caps[i, 4:53]))
+  MSHS_low_ll_count = append(MSHS_low_ll_count, as.numeric(MSHS_low_ll_caps[i, 4:53]))
+  MSHS_low_lh_count = append(MSHS_low_lh_count, as.numeric(MSHS_low_lh_caps[i, 4:53]))
+  MSHS_low_hl_count = append(MSHS_low_hl_count, as.numeric(MSHS_low_hl_caps[i, 4:53]))
+  MSHS_low_hh_count = append(MSHS_low_hh_count, as.numeric(MSHS_low_hh_caps[i, 4:53]))
+}
+MSHS_low_origin_freq = table(MSHS_low_origin_count)
+MSHS_low_ll_freq = table(MSHS_low_ll_count)
+MSHS_low_lh_freq = table(MSHS_low_lh_count)
+MSHS_low_hl_freq = table(MSHS_low_hl_count)
+MSHS_low_hh_freq = table(MSHS_low_hh_count)
+
+
+# create each freq barplot
+par(mfrow=c(3,2))
+#par(mfrow=c(1,2))
+barplot(MSHS_low_origin_freq, main="Baseline", xlab="Scores(Baseline)" , ylab="Frequency", ylim=c(0,800))
+barplot(MSHS_low_ll_freq, main="LL captions", xlab="Scores(LL Captions)" , ylab="Frequency", ylim=c(0,800))
+barplot(MSHS_low_lh_freq, main="LH captions", xlab="Scores(LH Captions)" , ylab="Frequency", ylim=c(0,800))
+barplot(MSHS_low_hl_freq, main="HL captions", xlab="Scores(Proposed method)" , ylab="Frequency", ylim=c(0,800))
+barplot(MSHS_low_hh_freq, main="HH captions", xlab="Scores(HH Captions)" , ylab="Frequency", ylim=c(0,800))
+
+
+#create list to collect each sims scores for all subjects.
+
+MSHS_low_origin_all_scores = c()
+MSHS_low_ll_all_scores = c()
+MSHS_low_lh_all_scores = c()
+MSHS_low_hl_all_scores = c()
+MSHS_low_hh_all_scores = c()
+for(i in 4:length(MSHS_low_origin_caps)){
+  MSHS_low_origin_all_scores = c(MSHS_low_origin_all_scores, MSHS_low_origin_caps[,i])
+  MSHS_low_ll_all_scores = c(MSHS_low_ll_all_scores, MSHS_low_ll_caps[,i])
+  MSHS_low_lh_all_scores = c(MSHS_low_lh_all_scores, MSHS_low_lh_caps[,i])
+  MSHS_low_hl_all_scores = c(MSHS_low_hl_all_scores, MSHS_low_hl_caps[,i])
+  MSHS_low_hh_all_scores = c(MSHS_low_hh_all_scores, MSHS_low_hh_caps[,i])
+}
+
+
+
+# calculate wilcox.exact by above data
+wilcox.exact(x=MSHS_low_origin_all_scores, y=MSHS_low_ll_all_scores, paired=T)　# there is difference
+wilcox.exact(x=MSHS_low_origin_all_scores, y=MSHS_low_lh_all_scores, paired=T)　# there is difference
+wilcox.exact(x=MSHS_low_origin_all_scores, y=MSHS_low_hl_all_scores, paired=T)　# there is difference
+wilcox.exact(x=MSHS_low_origin_all_scores, y=MSHS_low_hh_all_scores, paired=T)　# there is difference
+wilcox.exact(x=MSHS_low_ll_all_scores, y=MSHS_low_lh_all_scores, paired=T) # No difference
+wilcox.exact(x=MSHS_low_ll_all_scores, y=MSHS_low_hl_all_scores, paired=T) # there is difference between ll caps and hl caps p < 0.01
+wilcox.exact(x=MSHS_low_ll_all_scores, y=MSHS_low_hh_all_scores, paired=T) # No difference
+wilcox.exact(x=MSHS_low_lh_all_scores, y=MSHS_low_hl_all_scores, paired=T) # there is difference between lh caps and hl caps p < 0.01
+wilcox.exact(x=MSHS_low_lh_all_scores, y=MSHS_low_hh_all_scores, paired=T) # No difference
+wilcox.exact(x=MSHS_low_hl_all_scores, y=MSHS_low_hh_all_scores, paired=T) # There is difference between hl caps and hh caps p < 0.05
+
 
 #----------------------------------------------------------------------------------------------------------
 
-## SQH low group ---------------------------------------------------------------------------------------
+## MSHS high group ---------------------------------------------------------------------------------------
+
 #each sim mean scores per subjects
-MSHS_high_group_origin = MSHS_high_group_mean[6:10]$cap_origin
-MSHS_high_group_ll = MSHS_high_group_mean[6:10]$cap_ll
-MSHS_high_group_lh = MSHS_high_group_mean[6:10]$cap_lh
-MSHS_high_group_hl = MSHS_high_group_mean[6:10]$cap_hl
-MSHS_high_group_hh = MSHS_high_group_mean[6:10]$cap_hh
+MSHS_HIGH_SUBJECT_NUM=length(MSHS_high_group_data[,1])
 
-MSHS_HIGH_SUBJECT_NUM=length(MSHS_high_group[,1])
+MSHS_high_origin_caps = data.frame(MSHS_high_group_data[1:3])
+MSHS_high_ll_caps = data.frame(MSHS_high_group_data[1:3])
+MSHS_high_lh_caps = data.frame(MSHS_high_group_data[1:3])
+MSHS_high_hl_caps = data.frame(MSHS_high_group_data[1:3])
+MSHS_high_hh_caps = data.frame(MSHS_high_group_data[1:3])
 
-# Two factor analysis of variance
-MSHS_high_group_all_mean_data <- c(MSHS_high_group_ll, MSHS_high_group_lh, MSHS_high_group_hl, MSHS_high_group_hh)
-img_sim <- factor(c(rep('画像高', MSHS_HIGH_SUBJECT_NUM*2), rep('画像低', MSHS_HIGH_SUBJECT_NUM*2)))
-word_sim <- factor(rep(c(rep('単語高', MSHS_HIGH_SUBJECT_NUM), rep('単語低', MSHS_HIGH_SUBJECT_NUM)),2))
-levels <- factor(rep(1:MSHS_HIGH_SUBJECT_NUM, 4))
-summary(aov(MSHS_high_group_all_mean_data~img_sim*word_sim+Error(levels+levels:img_sim+levels:word_sim+levels:img_sim:word_sim)))
+for(i in 1:EXP_NUM){
+  name = paste('exp1_q', i, '_origin', sep="")
+  MSHS_high_origin_caps = data.frame(MSHS_high_origin_caps, MSHS_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_ll', sep="")
+  MSHS_high_ll_caps = data.frame(MSHS_high_ll_caps, MSHS_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_lh', sep="")
+  MSHS_high_lh_caps = data.frame(MSHS_high_lh_caps, MSHS_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_hl', sep="")
+  MSHS_high_hl_caps = data.frame(MSHS_high_hl_caps, MSHS_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_hh', sep="")
+  MSHS_high_hh_caps = data.frame(MSHS_high_hh_caps, MSHS_high_group_data[name])
+}
+
+# calculate frequency of each similarities
+MSHS_high_origin_count = c()
+MSHS_high_ll_count = c()
+MSHS_high_lh_count = c()
+MSHS_high_hl_count = c()
+MSHS_high_hh_count = c()
+for(i in 1:MSHS_LOW_SUBJECT_NUM){
+  MSHS_high_origin_count = append(MSHS_high_origin_count, as.numeric(MSHS_high_origin_caps[i, 4:53]))
+  MSHS_high_ll_count = append(MSHS_high_ll_count, as.numeric(MSHS_high_ll_caps[i, 4:53]))
+  MSHS_high_lh_count = append(MSHS_high_lh_count, as.numeric(MSHS_high_lh_caps[i, 4:53]))
+  MSHS_high_hl_count = append(MSHS_high_hl_count, as.numeric(MSHS_high_hl_caps[i, 4:53]))
+  MSHS_high_hh_count = append(MSHS_high_hh_count, as.numeric(MSHS_high_hh_caps[i, 4:53]))
+}
+MSHS_high_origin_freq = table(MSHS_high_origin_count)
+MSHS_high_ll_freq = table(MSHS_high_ll_count)
+MSHS_high_lh_freq = table(MSHS_high_lh_count)
+MSHS_high_hl_freq = table(MSHS_high_hl_count)
+MSHS_high_hh_freq = table(MSHS_high_hh_count)
+
+
+# create each freq barplot
+par(mfrow=c(3,2))
+barplot(MSHS_high_origin_freq, main="Baseline", xlab="Scores(Baseline)", ylab="Frequency", ylim=c(0,800))
+barplot(MSHS_high_ll_freq, main="LL captions", xlab="Scores(LL Captions)", ylab="Frequency", ylim=c(0,800))
+barplot(MSHS_high_lh_freq, main="LH captions", xlab="Scores(LH Captions)", ylab="Frequency", ylim=c(0,800))
+barplot(MSHS_high_hl_freq, main="HL captions", xlab="Scores(Proposed method)", ylab="Frequency", ylim=c(0,800))
+barplot(MSHS_high_hh_freq, main="HH captions", xlab="Scores(HH Captions)", ylab="Frequency", ylim=c(0,800))
+
+
+#create list to collect each sims scores for all subjects.
+
+MSHS_high_origin_all_scores = c()
+MSHS_high_ll_all_scores = c()
+MSHS_high_lh_all_scores = c()
+MSHS_high_hl_all_scores = c()
+MSHS_high_hh_all_scores = c()
+for(i in 4:length(MSHS_high_origin_caps)){
+  MSHS_high_origin_all_scores = c(MSHS_high_origin_all_scores, MSHS_high_origin_caps[,i])
+  MSHS_high_ll_all_scores = c(MSHS_high_ll_all_scores, MSHS_high_ll_caps[,i])
+  MSHS_high_lh_all_scores = c(MSHS_high_lh_all_scores, MSHS_high_lh_caps[,i])
+  MSHS_high_hl_all_scores = c(MSHS_high_hl_all_scores, MSHS_high_hl_caps[,i])
+  MSHS_high_hh_all_scores = c(MSHS_high_hh_all_scores, MSHS_high_hh_caps[,i])
+}
+
+
+
+# calculate wilcox.exact by above data
+wilcox.exact(x=MSHS_high_origin_all_scores,y=MSHS_high_ll_all_scores,paired=T)　# there is difference
+wilcox.exact(x=MSHS_high_origin_all_scores,y=MSHS_high_lh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=MSHS_high_origin_all_scores,y=MSHS_high_hl_all_scores,paired=T)　# there is difference
+wilcox.exact(x=MSHS_high_origin_all_scores,y=MSHS_high_hh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=MSHS_high_ll_all_scores,y=MSHS_high_lh_all_scores,paired=T) # No difference
+wilcox.exact(x=MSHS_high_ll_all_scores,y=MSHS_high_hl_all_scores,paired=T) # there is difference between ll caps and hl caps p < 0.01
+wilcox.exact(x=MSHS_high_ll_all_scores,y=MSHS_high_hh_all_scores,paired=T) # No difference
+wilcox.exact(x=MSHS_high_lh_all_scores,y=MSHS_high_hl_all_scores,paired=T) # there is difference between lh caps and hl caps p < 0.01
+wilcox.exact(x=MSHS_high_lh_all_scores,y=MSHS_high_hh_all_scores,paired=T) # No difference
+wilcox.exact(x=MSHS_high_hl_all_scores,y=MSHS_high_hh_all_scores,paired=T) # There is difference between hl caps and hh caps p < 0.05
+
 
 #----------------------------------------------------------------------------------------------------------
 
 
 
+
+# SHQ high and MSHS high group ----------------------------------------------------------------------------
 #SQH high and MSHS low
-SQH_high_and_MSHS_high_group = subset(SQH_high_group, SQH_high_group$MSHS_score >= 16)
+
+#SQHだけを設定して，SQHが高いほどユーモアへのスコアが高くなる
+
+# MSHSを15以上,18以下, SQHを12以上にすると平均値が高いが MSHSを19い以下にすると平均値がだだ下がり
+# ユーモアを適度に好む人はユーモアへの審査が厳しいと分かる
+
+SQH_high_and_MSHS_high_group = subset(humor_scores, humor_scores$SQH_score >= 10 & humor_scores$MSHS_score <= 18 & humor_scores$MSHS_score >= 15)
+
+par(mfrow=c(1,1))
 
 SQH_high_and_MSHS_high_group_scores_mean = SQH_high_and_MSHS_high_group[6:10] / EXP_NUM
 SQH_high_and_MSHS_high_group_mean = cbind(SQH_high_and_MSHS_high_group[1:5], SQH_high_and_MSHS_high_group_scores_mean)
 summary(SQH_high_and_MSHS_high_group_mean[6:10])
 boxplot(SQH_high_and_MSHS_high_group_mean[6:10], main="SQH high and SHSQ high group", names=c('baseline', 'LL caption', 'LH caption', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores")
 
-SQH_high_and_MSHS_high_group_origin = SQH_high_and_MSHS_high_group_mean[6:10]$cap_origin
-SQH_high_and_MSHS_high_group_ll = SQH_high_and_MSHS_high_group_mean[6:10]$cap_ll
-SQH_high_and_MSHS_high_group_lh = SQH_high_and_MSHS_high_group_mean[6:10]$cap_lh
-SQH_high_and_MSHS_high_group_hl = SQH_high_and_MSHS_high_group_mean[6:10]$cap_hl
-SQH_high_and_MSHS_high_group_hh = SQH_high_and_MSHS_high_group_mean[6:10]$cap_hh
+#SQH_high_and_MSHS_high_group_data = subset(data, data$SQH_score >= 10 & data$MSHS_score >= 12 & humor_scores$MSHS_score <= 17)
+SQH_high_and_MSHS_high_group_data = subset(data, data$SQH_score >= 12 & humor_scores$MSHS_score <= 18)
 
-SQH_HIGH_AND_MSHS_HIGH_SUBJECT_NUM=length(SQH_high_and_MSHS_high_group[,1])
+SQH_HIGH_and_MSHS_HIGH_SUBJECT_NUM=length(SQH_high_and_MSHS_high_group[,1])
 
-# Two factor analysis of variance
-SQH_high_and_MSHS_high_group_all_mean_data <- c(SQH_high_and_MSHS_high_group_ll, SQH_high_and_MSHS_high_group_lh, SQH_high_and_MSHS_high_group_hl, SQH_high_and_MSHS_high_group_hh)
-img_sim <- factor(c(rep('画像高', SQH_HIGH_AND_MSHS_HIGH_SUBJECT_NUM*2), rep('画像低', SQH_HIGH_AND_MSHS_HIGH_SUBJECT_NUM*2)))
-word_sim <- factor(rep(c(rep('単語高', SQH_HIGH_AND_MSHS_HIGH_SUBJECT_NUM), rep('単語低', SQH_HIGH_AND_MSHS_HIGH_SUBJECT_NUM)),2))
-levels <- factor(rep(1:SQH_HIGH_AND_MSHS_HIGH_SUBJECT_NUM, 4))
-summary(aov(SQH_high_and_MSHS_high_group_all_mean_data~img_sim*word_sim+Error(levels+levels:img_sim+levels:word_sim+levels:img_sim:word_sim)))
+#each sim mean scores per subjects
+SQH_high_and_MSHS_high_origin_caps = data.frame(SQH_high_and_MSHS_high_group_data[1:3])
+SQH_high_and_MSHS_high_ll_caps = data.frame(SQH_high_and_MSHS_high_group_data[1:3])
+SQH_high_and_MSHS_high_lh_caps = data.frame(SQH_high_and_MSHS_high_group_data[1:3])
+SQH_high_and_MSHS_high_hl_caps = data.frame(SQH_high_and_MSHS_high_group_data[1:3])
+SQH_high_and_MSHS_high_hh_caps = data.frame(SQH_high_and_MSHS_high_group_data[1:3])
+
+for(i in 1:EXP_NUM){
+  name = paste('exp1_q', i, '_origin', sep="")
+  SQH_high_and_MSHS_high_origin_caps = data.frame(SQH_high_and_MSHS_high_origin_caps, SQH_high_and_MSHS_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_ll', sep="")
+  SQH_high_and_MSHS_high_ll_caps = data.frame(SQH_high_and_MSHS_high_ll_caps, SQH_high_and_MSHS_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_lh', sep="")
+  SQH_high_and_MSHS_high_lh_caps = data.frame(SQH_high_and_MSHS_high_lh_caps, SQH_high_and_MSHS_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_hl', sep="")
+  SQH_high_and_MSHS_high_hl_caps = data.frame(SQH_high_and_MSHS_high_hl_caps, SQH_high_and_MSHS_high_group_data[name])
+  
+  name = paste('exp1_q', i, '_hh', sep="")
+  SQH_high_and_MSHS_high_hh_caps = data.frame(SQH_high_and_MSHS_high_hh_caps, SQH_high_and_MSHS_high_group_data[name])
+}
+
+# calculate frequency of each similarities
+SQH_high_and_MSHS_high_origin_count = c()
+SQH_high_and_MSHS_high_ll_count = c()
+SQH_high_and_MSHS_high_lh_count = c()
+SQH_high_and_MSHS_high_hl_count = c()
+SQH_high_and_MSHS_high_hh_count = c()
+for(i in 1:SQH_HIGH_and_MSHS_HIGH_SUBJECT_NUM){
+  SQH_high_and_MSHS_high_origin_count = append(SQH_high_and_MSHS_high_origin_count, as.numeric(SQH_high_and_MSHS_high_origin_caps[i, 4:53]))
+  SQH_high_and_MSHS_high_ll_count = append(SQH_high_and_MSHS_high_ll_count, as.numeric(SQH_high_and_MSHS_high_ll_caps[i, 4:53]))
+  SQH_high_and_MSHS_high_lh_count = append(SQH_high_and_MSHS_high_lh_count, as.numeric(SQH_high_and_MSHS_high_lh_caps[i, 4:53]))
+  SQH_high_and_MSHS_high_hl_count = append(SQH_high_and_MSHS_high_hl_count, as.numeric(SQH_high_and_MSHS_high_hl_caps[i, 4:53]))
+  SQH_high_and_MSHS_high_hh_count = append(SQH_high_and_MSHS_high_hh_count, as.numeric(SQH_high_and_MSHS_high_hh_caps[i, 4:53]))
+}
+SQH_high_and_MSHS_high_origin_freq = table(SQH_high_and_MSHS_high_origin_count)
+SQH_high_and_MSHS_high_ll_freq = table(SQH_high_and_MSHS_high_ll_count)
+SQH_high_and_MSHS_high_lh_freq = table(SQH_high_and_MSHS_high_lh_count)
+SQH_high_and_MSHS_high_hl_freq = table(SQH_high_and_MSHS_high_hl_count)
+SQH_high_and_MSHS_high_hh_freq = table(SQH_high_and_MSHS_high_hh_count)
+
+
+# create each freq barplot
+par(mfrow=c(3,2))
+barplot(SQH_high_and_MSHS_high_origin_freq, main="Baseline", xlab="Scores(Baseline)", ylab="Frequency", ylim=c(0,800))
+barplot(SQH_high_and_MSHS_high_ll_freq, main="LL captions", xlab="Scores(LL Captions)", ylab="Frequency", ylim=c(0,800))
+barplot(SQH_high_and_MSHS_high_lh_freq, main="LH captions", xlab="Scores(LH Captions)", ylab="Frequency", ylim=c(0,800))
+barplot(SQH_high_and_MSHS_high_hl_freq, main="HL captions", xlab="Scores(Proposed method)", ylab="Frequency", ylim=c(0,800))
+barplot(SQH_high_and_MSHS_high_hh_freq, main="HH captions", xlab="Scores(HH Captions)", ylab="Frequency", ylim=c(0,800))
+
+
+#create list to collect each sims scores for all subjects.
+
+SQH_high_and_MSHS_high_origin_all_scores = c()
+SQH_high_and_MSHS_high_ll_all_scores = c()
+SQH_high_and_MSHS_high_lh_all_scores = c()
+SQH_high_and_MSHS_high_hl_all_scores = c()
+SQH_high_and_MSHS_high_hh_all_scores = c()
+for(i in 4:length(SQH_high_and_MSHS_high_origin_caps)){
+  SQH_high_and_MSHS_high_origin_all_scores = c(SQH_high_and_MSHS_high_origin_all_scores, SQH_high_and_MSHS_high_origin_caps[,i])
+  SQH_high_and_MSHS_high_ll_all_scores = c(SQH_high_and_MSHS_high_ll_all_scores, SQH_high_and_MSHS_high_ll_caps[,i])
+  SQH_high_and_MSHS_high_lh_all_scores = c(SQH_high_and_MSHS_high_lh_all_scores, SQH_high_and_MSHS_high_lh_caps[,i])
+  SQH_high_and_MSHS_high_hl_all_scores = c(SQH_high_and_MSHS_high_hl_all_scores, SQH_high_and_MSHS_high_hl_caps[,i])
+  SQH_high_and_MSHS_high_hh_all_scores = c(SQH_high_and_MSHS_high_hh_all_scores, SQH_high_and_MSHS_high_hh_caps[,i])
+}
+
+
+
+# calculate wilcox.exact by above data
+wilcox.exact(x=SQH_high_and_MSHS_high_origin_all_scores,y=SQH_high_and_MSHS_high_ll_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_high_and_MSHS_high_origin_all_scores,y=SQH_high_and_MSHS_high_lh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_high_and_MSHS_high_origin_all_scores,y=SQH_high_and_MSHS_high_hl_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_high_and_MSHS_high_origin_all_scores,y=SQH_high_and_MSHS_high_hh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=SQH_high_and_MSHS_high_ll_all_scores,y=SQH_high_and_MSHS_high_lh_all_scores,paired=T) # No difference
+wilcox.exact(x=SQH_high_and_MSHS_high_ll_all_scores,y=SQH_high_and_MSHS_high_hl_all_scores,paired=T) # there is difference between ll caps and hl caps p < 0.01
+wilcox.exact(x=SQH_high_and_MSHS_high_ll_all_scores,y=SQH_high_and_MSHS_high_hh_all_scores,paired=T) # No difference
+wilcox.exact(x=SQH_high_and_MSHS_high_lh_all_scores,y=SQH_high_and_MSHS_high_hl_all_scores,paired=T) # there is difference between lh caps and hl caps p < 0.01
+wilcox.exact(x=SQH_high_and_MSHS_high_lh_all_scores,y=SQH_high_and_MSHS_high_hh_all_scores,paired=T) # No difference
+wilcox.exact(x=SQH_high_and_MSHS_high_hl_all_scores,y=SQH_high_and_MSHS_high_hh_all_scores,paired=T) # There is difference between hl caps and hh caps p < 0.05
+
+
+
+
+
 
 
 

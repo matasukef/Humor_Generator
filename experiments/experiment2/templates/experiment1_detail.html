@@ -1,0 +1,39 @@
+{% extends 'experiment_temp.html' %}
+{% block experiment_content %}
+  <p>  
+    本実験では，画像を下に文章を自動生成するシステムの評価を行っていただきます。
+    システムが画像を下にいくつかの文章を自動生成するので，生成された文章に対して，ユーモアを感じたか，面白いと感じたかどうか評価していただきます。
+    各画像に対して5つの文章が提示されるので，それぞれの文章に対して，1点から5点で面白さを評価してください。
+    画像は全部で{{ exp_num }}枚提示されます。
+  </p>
+  
+{% endblock %}
+
+{% block experiment_flow %}
+  <div class="col-md-8 offset-md-2">
+    <div class="mx-auto text-left" style="display:inline-block;">
+      <ol>
+          <li>左に表示される画像を見てください。</li>
+          <li>右に表示される文章を見てください。</li>
+          <li>提示された文章の面白さを1点から5点で評価してください。</li>
+          <li>「次へ」ボタンを押して，結果を送信してください。</li>
+          <li>同じ画像に対して別の文章が表示されます。</li>
+          <li>1~5を5回繰り返すと，次の画像へ進みます。</li>
+          <li>上部のプロセスバーが{{ exp_num*4 }}/{{ exp_num*4 }}になったら終了です。</li>
+          <li>「次へ」を押して実験を終了してください。</li>
+      </ol>
+    </div>
+  </div>
+{% endblock %}
+
+{% block experiment_caution %}
+  <div class="col-md-8 offset-md-2">
+    <div class="mx-auto text-left" style="display:inline-block;">
+      <ul>
+        <li>なるべくリラックスできる環境で評価してください。</li>
+        <li>評定内容は深く考えず選択してください。</li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
+
