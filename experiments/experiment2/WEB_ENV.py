@@ -1,7 +1,7 @@
 import os
 
 PRE_SURVEY_NUM = 8
-EXP1_NUM = 2
+EXP1_NUM = 50
 
 IMG_DIR_PATH = os.path.join('static', 'images', 'human_images')
 

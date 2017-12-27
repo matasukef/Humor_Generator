@@ -90,9 +90,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--word2vec_model_path', type=str, default=os.path.join('..', '..', '..', 'data', 'word2vec', 'models', 'ja_wikipedia_neolog.model'),
                         help="word2vec model path")
-    parser.add_argument('--subject', '-s', type=str, default="男性",
+    parser.add_argument('--subject', '-s', type=str, default="女性",
                         help="Subject to compare with proper norms")
-    parser.add_argument('--norms', '-nor', type=str, default=[['イヌ', '犬', 'ドッグ'], ['カンガルー'], ['カカシ', 'かかし'], ['サボテン', 'カクタス'], ['ネコ', 'ねこ', '猫'], ['コアラ'], ['マントヒヒ'], ['小鳥', '鳥']],
+    parser.add_argument('--norms', '-nor', type=str, default=[['イヌ', '犬', 'ドッグ'], ['カンガルー'], ['カカシ', 'かかし'], ['サボテン', 'カクタス'], ['ネコ', 'ねこ', '猫'], ['コアラ'], ['マントヒヒ'], ['小鳥', '鳥'], ['ゴキブリ'], ['ザリガニ'], ['コックローチ']],
                         help="proper norms to compare with subject")
     parser.add_argument('--num', '-n', type=int, default=5,
                         help="the number of output")

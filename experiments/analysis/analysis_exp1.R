@@ -53,18 +53,18 @@ par(mfrow=c(1,1))
 boxplot(cap_scores_mean, names=c('baseline', 'LL caption', 'LH caption', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores", ylim=c(1,4))
 
 
-#origin = cap_scores_mean$cap_origin
-#ll = cap_scores_mean$cap_ll
-#lh = cap_scores_mean$cap_lh
-#hl = cap_scores_mean$cap_hl
-#hh = cap_scores_mean$cap_hh
+origin = cap_scores_mean$cap_origin
+ll = cap_scores_mean$cap_ll
+lh = cap_scores_mean$cap_lh
+hl = cap_scores_mean$cap_hl
+hh = cap_scores_mean$cap_hh
 
 # Two factor analysis of variance
-#all_mean_data <- c(ll, lh, hl, hh)
-#img_sim <- factor(c(rep('画像高', SUBJECT_NUM*2), rep('画像低', SUBJECT_NUM*2)))
-#word_sim <- factor(rep(c(rep('単語高', SUBJECT_NUM), rep('単語低', SUBJECT_NUM)),2))
-#levels <- factor(rep(1:SUBJECT_NUM, 4))
-#summary(aov(all_mean_data~img_sim*word_sim+Error(levels+levels:img_sim+levels:word_sim+levels:img_sim:word_sim)))
+all_mean_data <- c(ll, lh, hl, hh)
+img_sim <- factor(c(rep('画像高', SUBJECT_NUM*2), rep('画像低', SUBJECT_NUM*2)))
+word_sim <- factor(rep(c(rep('単語高', SUBJECT_NUM), rep('単語低', SUBJECT_NUM)),2))
+levels <- factor(rep(1:SUBJECT_NUM, 4))
+summary(aov(all_mean_data~img_sim*word_sim+Error(levels+levels:img_sim+levels:word_sim+levels:img_sim:word_sim)))
 
 
 # here just need to check difference between origin caps and hl captions.
@@ -155,8 +155,7 @@ wilcox.exact(x=lh_all_scores,y=hl_all_scores,paired=T) # there is difference bet
 wilcox.exact(x=lh_all_scores,y=hh_all_scores,paired=T) # No difference
 wilcox.exact(x=hl_all_scores,y=hh_all_scores,paired=T) # No difference
 
-
-# Original captionｔとその他提案手法を含むcaption間では有意な差が見られたため，只のキャプションを提示するよりは，
+j# Original captionｔとその他提案手法を含むcaption間では有意な差が見られたため，只のキャプションを提示するよりは，
 # ユーザーのユーモア受容性が向上すると明らかになった
 
 # その他のキャプションについては，LL caption と LH caption間で5%ｓ水準で有意な差があったため，画像間類似度がユーモアの受容性に関連する
@@ -752,18 +751,237 @@ wilcox.exact(x=SQH_high_and_MSHS_high_hl_all_scores,y=SQH_high_and_MSHS_high_hh_
 
 #画像間類似度はユーモアの受容性に還元していることが判明したため，高画像間類似度のものだけで再検定
 
-3,4,10, 13, 15, 16, 20, 21, 23, 29, 33, 34, 39, 43, 44
+high_img_sim_list = c(3,4,10, 13, 15, 16, 20, 21, 23, 29, 33, 34, 39, 43, 44)
+H_IMG_NUM = length(high_img_sim_list)
 
 humor_scores_high_img_sim_ones = data.frame(data[1:5])
 for(i in SIMS){
   label = paste('cap_', i, sep="")
   score = 0
-  for(j in 1:EXP_NUM){
+  for(j in high_img_sim_list){
     name = paste('exp1_q', j, '_', i, sep="")
     score = score + data[name]
   }
   colnames(score) <- label
-  humor_scores = data.frame(humor_scores, score)
+  humor_scores_high_img_sim_ones = data.frame(humor_scores_high_img_sim_ones, score)
   #transform(humor_scores, label=score)
 }
 
+high_img_sim_cap_scores_sum = humor_scores_high_img_sim_ones[6:10]
+# has to validate normality.
+# 大数の法則により，正規分布になっているはず
+
+high_img_sim_cap_scores_mean = high_img_sim_cap_scores_sum / H_IMG_NUM
+
+
+#mean scores by col
+summary(high_img_sim_cap_scores_mean)
+high_img_sim_each_cap_mean = apply(high_img_sim_cap_scores_mean, MARGIN=2, mean)
+
+#boxplot
+par(mfrow=c(1,1))
+boxplot(high_img_sim_cap_scores_mean, names=c('baseline', 'LL caption', 'LH caption', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores", ylim=c(1,4))
+
+h_origin_caps = data.frame(data[1:3])
+h_ll_caps = data.frame(data[1:3])
+h_lh_caps = data.frame(data[1:3])
+h_hl_caps = data.frame(data[1:3])
+h_hh_caps = data.frame(data[1:3])
+for(i in high_img_sim_list){
+  name = paste('exp1_q', i, '_origin', sep="")
+  h_origin_caps = data.frame(h_origin_caps, data[name])
+  
+  name = paste('exp1_q', i, '_ll', sep="")
+  h_ll_caps = data.frame(h_ll_caps, data[name])
+  
+  name = paste('exp1_q', i, '_lh', sep="")
+  h_lh_caps = data.frame(h_lh_caps, data[name])
+  
+  name = paste('exp1_q', i, '_hl', sep="")
+  h_hl_caps = data.frame(h_hl_caps, data[name])
+  
+  name = paste('exp1_q', i, '_hh', sep="")
+  h_hh_caps = data.frame(h_hh_caps, data[name])
+}
+
+
+# calculate frequency of each similarities
+h_origin_count = c()
+h_ll_count = c()
+h_lh_count = c()
+h_hl_count = c()
+h_hh_count = c()
+for(i in 1:SUBJECT_NUM){
+  h_origin_count = append(h_origin_count, as.numeric(h_origin_caps[i, 4:18]))
+  h_ll_count = append(h_ll_count, as.numeric(h_ll_caps[i, 4:18]))
+  h_lh_count = append(h_lh_count, as.numeric(h_lh_caps[i, 4:18]))
+  h_hl_count = append(h_hl_count, as.numeric(h_hl_caps[i, 4:18]))
+  h_hh_count = append(h_hh_count, as.numeric(h_hh_caps[i, 1:18]))
+}
+h_origin_freq = table(h_origin_count)
+h_ll_freq = table(h_ll_count)
+h_lh_freq = table(h_lh_count)
+h_hl_freq = table(h_hl_count)
+h_hh_freq = table(h_hh_count)
+
+
+# create each freq barplot
+par(mfrow=c(3,2))
+#par(mfrow=c(1,2))
+barplot(h_origin_freq, main="Baseline", xlab="Scores(Baseline)" , ylab="Frequency", ylim=c(0,800))
+barplot(h_ll_freq, main="LL captions", xlab="Scores(LL Captions)" , ylab="Frequency", ylim=c(0,800))
+barplot(h_lh_freq, main="LH captions", xlab="Scores(LH Captions)" , ylab="Frequency", ylim=c(0,800))
+barplot(h_hl_freq, main="HL captions", xlab="Scores(Proposed method)" , ylab="Frequency", ylim=c(0,800))
+barplot(h_hh_freq, main="HH captions", xlab="Scores(HH Captions)" , ylab="Frequency", ylim=c(0,800))
+
+
+#create list to collect each sims scores for all subjects.
+
+h_origin_all_scores = c()
+h_ll_all_scores = c()
+h_lh_all_scores = c()
+h_hl_all_scores = c()
+h_hh_all_scores = c()
+for(i in 4:length(h_origin_caps)){
+  h_origin_all_scores = c(h_origin_all_scores, h_origin_caps[,i])
+  h_ll_all_scores = c(h_ll_all_scores, h_ll_caps[,i])
+  h_lh_all_scores = c(h_lh_all_scores, h_lh_caps[,i])
+  h_hl_all_scores = c(h_hl_all_scores, h_hl_caps[,i])
+  h_hh_all_scores = c(h_hh_all_scores, h_hh_caps[,i])
+}
+
+
+
+# calculate wilcox.exact by above data
+wilcox.exact(x=h_origin_all_scores,y=h_ll_all_scores,paired=T)　# there is difference
+wilcox.exact(x=h_origin_all_scores,y=h_lh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=h_origin_all_scores,y=h_hl_all_scores,paired=T)　# there is difference
+wilcox.exact(x=h_origin_all_scores,y=h_hh_all_scores,paired=T)　# there is difference
+wilcox.exact(x=h_ll_all_scores,y=h_lh_all_scores,paired=T) # No difference
+wilcox.exact(x=h_ll_all_scores,y=h_hl_all_scores,paired=T) # there is difference between ll caps and hl caps p < 0.01
+wilcox.exact(x=h_ll_all_scores,y=h_hh_all_scores,paired=T) # No difference
+wilcox.exact(x=h_lh_all_scores,y=h_hl_all_scores,paired=T) # there is difference between lh caps and hl caps p < 0.01
+wilcox.exact(x=h_lh_all_scores,y=h_hh_all_scores,paired=T) # No difference
+wilcox.exact(x=h_hl_all_scores,y=h_hh_all_scores,paired=T) # No difference
+
+
+
+
+
+
+
+
+
+
+# plot for each subject scores based on sim
+library(scatterplot3d)
+par(mfrow=c(1,1))
+
+ll_caps_word_sim = c(images['ll_word_sim'][,1])
+lh_caps_word_sim = c(images['lh_word_sim'][,1])
+hl_caps_word_sim = c(images['hl_word_sim'][,1])
+hh_caps_word_sim = c(images['hh_word_sim'][,1])
+
+all_img_sims = c(ll_caps_word_sim, lh_caps_word_sim, hl_caps_word_sim, hh_caps_word_sim)
+
+ll_caps_img_sim = c(images['ll_img_sim'][,1])
+lh_caps_img_sim = c(images['lh_img_sim'][,1])
+hl_caps_img_sim = c(images['hl_img_sim'][,1])
+hh_caps_img_sim = c(images['hh_img_sim'][,1])
+
+all_word_sims = c(ll_caps_img_sim, lh_caps_img_sim, hl_caps_img_sim, hh_caps_img_sim)
+
+
+# origin_caps
+# ll_caps
+# lh_caps
+# hl_caps
+# hh_caps
+
+subject1_scores = c(ll_caps[1, 4:53], lh_caps[1, 4:53], hl_caps[1, 4:53], hh_caps[1, 4:53])
+subject2_scores = c(ll_caps[2, 4:53], lh_caps[2, 4:53], hl_caps[2, 4:53], hh_caps[2, 4:53])
+subject3_scores = c(ll_caps[3, 4:53], lh_caps[3, 4:53], hl_caps[3, 4:53], hh_caps[3, 4:53])
+subject4_scores = c(ll_caps[4, 4:53], lh_caps[4, 4:53], hl_caps[4, 4:53], hh_caps[4, 4:53])
+subject5_scores = c(ll_caps[5, 4:53], lh_caps[5, 4:53], hl_caps[5, 4:53], hh_caps[5, 4:53])
+subject6_scores = c(ll_caps[6, 4:53], lh_caps[6, 4:53], hl_caps[6, 4:53], hh_caps[6, 4:53])
+subject7_scores = c(ll_caps[7, 4:53], lh_caps[7, 4:53], hl_caps[7, 4:53], hh_caps[7, 4:53])
+subject8_scores = c(ll_caps[8, 4:53], lh_caps[8, 4:53], hl_caps[8, 4:53], hh_caps[8, 4:53])
+subject9_scores = c(ll_caps[9, 4:53], lh_caps[9, 4:53], hl_caps[9, 4:53], hh_caps[9, 4:53])
+subject10_scores = c(ll_caps[10, 4:53], lh_caps[10, 4:53], hl_caps[10, 4:53], hh_caps[10, 4:53])
+subject11_scores = c(ll_caps[11, 4:53], lh_caps[11, 4:53], hl_caps[11, 4:53], hh_caps[11, 4:53])
+subject12_scores = c(ll_caps[12, 4:53], lh_caps[12, 4:53], hl_caps[12, 4:53], hh_caps[12, 4:53])
+subject13_scores = c(ll_caps[13, 4:53], lh_caps[13, 4:53], hl_caps[13, 4:53], hh_caps[13, 4:53])
+subject14_scores = c(ll_caps[14, 4:53], lh_caps[14, 4:53], hl_caps[14, 4:53], hh_caps[14, 4:53])
+subject15_scores = c(ll_caps[15, 4:53], lh_caps[15, 4:53], hl_caps[15, 4:53], hh_caps[15, 4:53])
+subject16_scores = c(ll_caps[16, 4:53], lh_caps[16, 4:53], hl_caps[16, 4:53], hh_caps[16, 4:53])
+subject17_scores = c(ll_caps[17, 4:53], lh_caps[17, 4:53], hl_caps[17, 4:53], hh_caps[17, 4:53])
+subject18_scores = c(ll_caps[18, 4:53], lh_caps[18, 4:53], hl_caps[18, 4:53], hh_caps[18, 4:53])
+subject19_scores = c(ll_caps[19, 4:53], lh_caps[19, 4:53], hl_caps[19, 4:53], hh_caps[19, 4:53])
+subject20_scores = c(ll_caps[20, 4:53], lh_caps[20, 4:53], hl_caps[20, 4:53], hh_caps[20, 4:53])
+
+
+scatterplot3d(ll_caps[1, 4:53], ll_caps_word_sim, ll_caps_img_sim)
+scatterplot3d(ll_caps[1, 4:53], lh_caps_word_sim, lh_caps_img_sim)
+scatterplot3d(ll_caps[1, 4:53], hl_caps_word_sim, hl_caps_img_sim)
+scatterplot3d(ll_caps[1, 4:53], hh_caps_word_sim, hh_caps_img_sim)
+
+scatterplot3d(subject1_scores ~ all_img_sims *all_word_sims)
+
+
+scatterplot3d(ll_caps[2, 4:53], ll_caps_word_sim, ll_caps_img_sim)
+scatterplot3d(ll_caps[2, 4:53], lh_caps_word_sim, lh_caps_img_sim)
+scatterplot3d(ll_caps[2, 4:53], hl_caps_word_sim, hl_caps_img_sim)
+scatterplot3d(ll_caps[2, 4:53], hh_caps_word_sim, hh_caps_img_sim)
+
+scatterplot3d(subject2_scores ~ all_img_sims *all_word_sims)
+
+
+scatterplot3d(subject3_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject4_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject5_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject6_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject7_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject8_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject9_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject10_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject11_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject12_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject13_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject14_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject15_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject16_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject17_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject18_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject19_scores ~ all_img_sims *all_word_sims)
+scatterplot3d(subject20_scores ~ all_img_sims *all_word_sims)
+
+
+plot(ll_caps_img_sim ,ll_caps[1, 4:53], xlim=c(0,0.00001), ylim=c(1,5), col=2)
+par(new=T) 
+plot(lh_caps_img_sim ,lh_caps[1, 4:53], xlim=c(0,0.00001), ylim=c(1,5), col=3)
+par(new=T) 
+plot(hl_caps_img_sim ,hl_caps[1, 4:53], xlim=c(0,0.00001), ylim=c(1,5), col=4)
+par(new=T) 
+plot(hh_caps_img_sim ,hh_caps[1, 4:53], xlim=c(0,0.00001), ylim=c(1,5), col=6)
+
+plot.new()
+
+plot(all_img_sims, subject2_scores)
+plot(all_img_sims, subject3_scores)
+plot(all_img_sims, subject4_scores)
+plot(all_img_sims, subject5_scores)
+plot(all_img_sims, subject6_scores)
+plot(all_img_sims, subject7_scores)
+plot(all_img_sims, subject8_scores)
+plot(all_img_sims, subject9_scores)
+plot(all_img_sims, subject10_scores)
+plot(all_img_sims, subject11_scores)
+plot(all_img_sims, subject12_scores)
+plot(all_img_sims, subject13_scores)
+plot(all_img_sims, subject14_scores)
+plot(all_img_sims, subject15_scores)
+plot(all_img_sims, subject16_scores)
+plot(all_img_sims, subject17_scores)
+plot(all_img_sims, subject18_scores)
+plot(all_img_sims, subject19_scores)
+plot(all_img_sims, subject20_scores)

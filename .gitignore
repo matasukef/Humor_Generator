@@ -133,4 +133,6 @@ experiments/experiment1/static/result/
 experiments/experiments_tmp/static/images/
 experiments/experiments_tmp/static/data/
 experiments/experiments_tmp/static/result/
-
+experiments/experiment2/static/images/
+experiments/experiment2/static/data/
+experiments/experiment2/static/result/

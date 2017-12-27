@@ -4,7 +4,7 @@ var ctx = canvas.getContext('2d');
 var img = new Image();
 var isInit = false;
 
-var sim_list = ['origin', 'll','lh','hl','hh'];
+var sim_list = ['origin','hl','hh'];
 var num_trial = num_exp * sim_list.length;
 
 var answer_list = {}
@@ -136,7 +136,7 @@ var get_all_result = function(){
             
             result_table[result_counter].push(get_result('exp1_q1', '#caption'));
             
-            if(question_counter >= 5){
+            if(question_counter >= 3){
                 /*move to next image*/
                 result_counter += 1;
                 
@@ -156,7 +156,7 @@ var get_all_result = function(){
 
             }
 
-            if(question_counter < 5){
+            if(question_counter < 3){
                 
                 let next_cap = 'cap_' + question_counter;
                 $('#caption').text(caption_with_table['randamized_captions'][next_cap][result_counter]);
@@ -167,7 +167,7 @@ var get_all_result = function(){
 
             
             /* progress counter */
-            progress = question_counter + ((result_counter+1) - 1) * 5;
+            progress = question_counter + ((result_counter+1) - 1) * 3;
             ratio = ( progress / num_trial ) * 100;
             $('.progress-bar').css('width', ratio + '%');
             $('.progress-bar').text(progress + '/' + num_trial);

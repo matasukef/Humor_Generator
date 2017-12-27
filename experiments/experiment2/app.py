@@ -14,19 +14,17 @@ from WEB_ENV import (
 
 
 def get_data_exp1(data_path, image_dir, num):
-    csv_data = pd.read_csv(data_path)
-    data = csv_data.sample(num)
+    data = pd.read_csv(data_path)
+    #csv_data = pd.read_csv(data_path)
+    #data = csv_data.sample(num)
 
     images = [os.path.join(image_dir, image.strip())
               .split('/', 1)[1] for image in data.iloc[:, 1]]
     cap_origin = [cap for cap in data.iloc[:, 3]]
-    cap_ll = [cap for cap in data.iloc[:, 4]]
-    cap_lh = [cap for cap in data.iloc[:, 5]]
     cap_hl = [cap for cap in data.iloc[:, 6]]
     cap_hh = [cap for cap in data.iloc[:, 7]]
 
     result = {'images': images, 'cap_origin': cap_origin,
-              'cap_ll': cap_ll, 'cap_lh': cap_lh,
               'cap_hl': cap_hl, 'cap_hh': cap_hh
              }
 
@@ -49,8 +47,6 @@ def make_save_file():
         exp1 = header
         for i in range(1, EXP1_NUM + 1):
             exp1 += 'exp1_q' + str(i) + '_origin,'
-            exp1 += 'exp1_q' + str(i) + '_ll,'
-            exp1 += 'exp1_q' + str(i) + '_lh,'
             exp1 += 'exp1_q' + str(i) + '_hl,'
             exp1 += 'exp1_q' + str(i) + '_hh,'
 
@@ -152,7 +148,7 @@ def experiment1_content():
 
     result = get_data_exp1(EXP1_DATA_PATH, IMG_DIR_PATH, EXP1_NUM)
 
-    return render_template('experiment1.html', images=result['images'], cap_origin=result['cap_origin'], cap_ll=result['cap_ll'], cap_lh=result['cap_lh'], cap_hl=result['cap_hl'], cap_hh=result['cap_hh'])
+    return render_template('experiment1.html', images=result['images'], cap_origin=result['cap_origin'], cap_hl=result['cap_hl'], cap_hh=result['cap_hh'])
 
 
 if __name__ == '__main__':
