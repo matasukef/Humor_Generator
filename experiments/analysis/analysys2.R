@@ -112,7 +112,7 @@ hh_freq = table(hh_count)
 par(mfrow=c(2,2))
   #par(mfrow=c(1,2))
 barplot(origin_freq, main="Original", xlab="Scores(Original)" , ylab="Frequency", ylim=c(0,500))
-barplot(hl_freq, main="HL captions", xlab="Scores(Proposed method)" , ylab="Frequency", ylim=c(0,500))
+barplot(hl_freq, main="HL captions", xlab="Scores(HL Captions)" , ylab="Frequency", ylim=c(0,500))
 barplot(hh_freq, main="HH captions", xlab="Scores(HH Captions)" , ylab="Frequency", ylim=c(0,500))
 
 #friedman test and Wilcoxon signed rank test
