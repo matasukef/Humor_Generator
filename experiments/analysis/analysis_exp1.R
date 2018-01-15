@@ -1,4 +1,5 @@
 setwd('~/../../../media/matasuke/Ubuntu01/Projects/Humor_Generator/experiments/analysis/data/exp1_with_original_caps_and_animals/')
+
 exp1 <- read.csv('exp1_result.csv')
 pre_survey <- read.csv('pre_survey_result.csv')
 
@@ -50,7 +51,7 @@ each_cap_mean = apply(cap_scores_mean, MARGIN=2, mean)
 
 #boxplot
 par(mfrow=c(1,1))
-boxplot(cap_scores_mean, names=c('baseline', 'LL caption', 'LH caption', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores", ylim=c(1,4))
+boxplot(cap_scores_mean, names=c('Original', 'LL caption', 'LH caption', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores", ylim=c(1,5))
 
 
 origin = cap_scores_mean$cap_origin
@@ -115,10 +116,10 @@ hh_freq = table(hh_count)
 # create each freq barplot
 par(mfrow=c(3,2))
 #par(mfrow=c(1,2))
-barplot(origin_freq, main="Baseline", xlab="Scores(Baseline)" , ylab="Frequency", ylim=c(0,800))
+barplot(origin_freq, main="Original", xlab="Scores(Original)" , ylab="Frequency", ylim=c(0,800))
 barplot(ll_freq, main="LL captions", xlab="Scores(LL Captions)" , ylab="Frequency", ylim=c(0,800))
 barplot(lh_freq, main="LH captions", xlab="Scores(LH Captions)" , ylab="Frequency", ylim=c(0,800))
-barplot(hl_freq, main="HL captions", xlab="Scores(Proposed method)" , ylab="Frequency", ylim=c(0,800))
+barplot(hl_freq, main="HL captions", xlab="Scores(HL Captions)" , ylab="Frequency", ylim=c(0,800))
 barplot(hh_freq, main="HH captions", xlab="Scores(HH Captions)" , ylab="Frequency", ylim=c(0,800))
 
 #friedman test and Wilcoxon signed rank test
@@ -142,8 +143,22 @@ for(i in 4:length(origin_caps)){
 }
 
 
+friedman.test(origin_all_scores, ll_all_scores, lh_all_scores, hl_all_scores, hh_all_scores)
 
 # calculate wilcox.exact by above data
+wilcox.exact(x=ll_all_scores, y=origin_all_scores, paired=T, alternative = "greater")
+wilcox.exact(x=lh_all_scores, y=origin_all_scores, paired=T, alternative = "greater")
+wilcox.exact(x=hl_all_scores, y=origin_all_scores, paired=T, alternative = "greater")
+wilcox.exact(x=hh_all_scores, y=origin_all_scores, paired=T, alternative = "greater")
+wilcox.exact(x=hl_all_scores, y=ll_all_scores, paired = T, alternative = "greater")
+wilcox.exact(x=hl_all_scores, y=lh_all_scores, paired=T, alternative = "greater")
+wilcox.exact(x=hh_all_scores, y=ll_all_scores, paired=T, alternative = "greater")
+wilcox.exact(x=hh_all_scores, y=lh_all_scores, paired=T, alternative = "greater")
+wilcox.exact(x=hh_all_scores, y=hl_all_scores, paired=T, alternative = "greater")
+wilcox.exact(x=hl_all_scores, y=hh_all_scores, paired=T, alternative = "greater")
+wilcox.exact(x=lh_all_scores, y=ll_all_scores, paired=T, alternative = "greater")
+wilcox.exact(x=ll_all_scores, y=lh_all_scores, paired=T, alternative = "greater")
+
 wilcox.exact(x=origin_all_scores,y=ll_all_scores,paired=T)　# there is difference
 wilcox.exact(x=origin_all_scores,y=lh_all_scores,paired=T)　# there is difference
 wilcox.exact(x=origin_all_scores,y=hl_all_scores,paired=T)　# there is difference
@@ -155,7 +170,7 @@ wilcox.exact(x=lh_all_scores,y=hl_all_scores,paired=T) # there is difference bet
 wilcox.exact(x=lh_all_scores,y=hh_all_scores,paired=T) # No difference
 wilcox.exact(x=hl_all_scores,y=hh_all_scores,paired=T) # No difference
 
-j# Original captionｔとその他提案手法を含むcaption間では有意な差が見られたため，只のキャプションを提示するよりは，
+# Original captionｔとその他提案手法を含むcaption間では有意な差が見られたため，只のキャプションを提示するよりは，
 # ユーザーのユーモア受容性が向上すると明らかになった
 
 # その他のキャプションについては，LL caption と LH caption間で5%ｓ水準で有意な差があったため，画像間類似度がユーモアの受容性に関連する

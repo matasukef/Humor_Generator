@@ -1,6 +1,9 @@
-setwd('~/../../../media/matasuke/Ubuntu01/Projects/Humor_Generator/experiments/analysis/data/exp2_1/')
-exp1 <- read.csv('exp1_result.csv')
+setwd('~/../../../media/matasuke/Ubuntu01/Projects/Humor_Generator/experiments/analysis/data')
+exp1 <- read.csv('exp2_result.csv')
 pre_survey <- read.csv('pre_survey_result.csv')
+#exp1 <- read.csv('exp2_1/exp1_result.csv')
+#pre_survey <- read.csv('exp2_1/pre_survey_result.csv')
+
 
 proposed_data <- read.csv('experiment1.csv')
 images <- proposed_data[c(2, 9:20)]
@@ -15,8 +18,12 @@ data <- merge(pre_survey_scores, exp1, by.x=c('age', 'name', 'sex'))
 #remove data which age is more than 30.
 data = subset(data, data$age < 30)
 
+#& data$name != 'qd6523bdd7b4dc
+#data = subset(data, data$name != "なべぶた奉行" & data$name != '田中亮平' & data$name != 'lantac8')
+#data = subset(data, data$name != "なべぶた奉行" & data$name != '田中亮平' & data$name != 'blackk' & data$name != 'heriumu' & data&name != 'karin0726')
 # row 6 canavo and 24 REMINDER62 are seems to not to be used
 #because her score distribution is not goold. scores for original caption is highter than other caps.
+data = subset(data, data$name != 'huwatoro' & data$name != 'a6kn2iwz1' & data$name != 'blackk' & data$name != 'rika314v')
 
 EXP_NUM = 50
 SUBJECT_NUM=length(data[,1])
@@ -42,21 +49,31 @@ cap_scores_sum = humor_scores[6:8]
 
 cap_scores_mean = cap_scores_sum / EXP_NUM
 
-
+cap_scores_mean
 #mean scores by col
 summary(cap_scores_mean)
 each_cap_mean = apply(cap_scores_mean, MARGIN=2, mean)
 
 #boxplot
 par(mfrow=c(1,1))
-boxplot(cap_scores_mean, names=c('baseline', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores", ylim=c(1,5))
+boxplot(cap_scores_mean, names=c('Original', 'HL caption', 'HH caption'), xlab="Captions", ylab="mean scores", ylim=c(1,5))
 
 
 origin = cap_scores_mean$cap_origin
 hl = cap_scores_mean$cap_hl
 hh = cap_scores_mean$cap_hh
 
-t.test(hl, hh, paired = TRUE)
+# 一要因分散分析
+all_mean_data <- c(origin, hl, hh)
+img_sim <- factor(c(rep('None', SUBJECT_NUM), rep('画像高', SUBJECT_NUM), rep('画像低', SUBJECT_NUM)))
+levels <- factor(rep(1:SUBJECT_NUM, 3))
+summary(aov(all_mean_data~img_sim+levels))
+summary(aov(all_mean_data~img_sim*word_sim+Error(levels+levels:img_sim+levels:word_sim+levels:img_sim:word_sim)))
+
+
+t.test(origin, hl, paired=TRUE, p.adjust.methods="bon")
+t.test(origin, hh, paired=TRUE, p.adjust.methods="bon")
+t.test(hl, hh, paired = TRUE, p.adjust.methods="bon")
 
 # Two factor analysis of variance
 
@@ -93,10 +110,10 @@ hh_freq = table(hh_count)
 
 # create each freq barplot
 par(mfrow=c(2,2))
-#par(mfrow=c(1,2))
-barplot(origin_freq, main="Baseline", xlab="Scores(Baseline)" , ylab="Frequency", ylim=c(0,800))
-barplot(hl_freq, main="HL captions", xlab="Scores(Proposed method)" , ylab="Frequency", ylim=c(0,800))
-barplot(hh_freq, main="HH captions", xlab="Scores(HH Captions)" , ylab="Frequency", ylim=c(0,800))
+  #par(mfrow=c(1,2))
+barplot(origin_freq, main="Original", xlab="Scores(Original)" , ylab="Frequency", ylim=c(0,500))
+barplot(hl_freq, main="HL captions", xlab="Scores(Proposed method)" , ylab="Frequency", ylim=c(0,500))
+barplot(hh_freq, main="HH captions", xlab="Scores(HH Captions)" , ylab="Frequency", ylim=c(0,500))
 
 #friedman test and Wilcoxon signed rank test
 #install.packages("exactRankTests", repos="http://cran.ism.ac.jp/")
