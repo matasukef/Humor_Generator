@@ -17,7 +17,7 @@ html5lib==0.9999999
 idna==2.6
 itsdangerous==0.24
 Janome===0.3.6-dev1.neolog
-Jinja2==2.10
+Jinja2==2.11.3
 Markdown==2.6.9
 MarkupSafe==1.0
 mecab-python3==0.7
